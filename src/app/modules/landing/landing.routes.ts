@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LandingHomeComponent } from './home/home.component';
 import { productsRoutes } from './products/products.routes';
 
 /**
@@ -12,9 +13,7 @@ export const landingRoutes: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        loadComponent: () => {
-            return import('./home/home.component').then(m => m.LandingHomeComponent);
-        },
+        component: LandingHomeComponent,
         data: {
             layout: 'empty'
         }

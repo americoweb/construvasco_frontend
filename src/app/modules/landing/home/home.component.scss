@@ -1,0 +1,35 @@
+/* Scoped shimmer for landing home (ViewEncapsulation.None — keep under .landing-home) */
+@keyframes landing-home-shimmer {
+    0% {
+        background-position: 100% 0;
+    }
+    100% {
+        background-position: -100% 0;
+    }
+}
+
+.landing-home .home-shimmer {
+    background: linear-gradient(
+        110deg,
+        rgb(226 232 240) 0%,
+        rgb(241 245 249) 45%,
+        rgb(248 250 252) 50%,
+        rgb(241 245 249) 55%,
+        rgb(226 232 240) 100%
+    );
+    background-size: 200% 100%;
+    animation: landing-home-shimmer 1.25s ease-in-out infinite;
+}
+
+.landing-home .home-shimmer-soft {
+    background: linear-gradient(
+        110deg,
+        rgb(224 231 255 / 0.5) 0%,
+        rgb(243 232 255 / 0.6) 45%,
+        rgb(255 255 255 / 0.85) 50%,
+        rgb(243 232 255 / 0.6) 55%,
+        rgb(224 231 255 / 0.5) 100%
+    );
+    background-size: 200% 100%;
+    animation: landing-home-shimmer 1.25s ease-in-out infinite;
+}

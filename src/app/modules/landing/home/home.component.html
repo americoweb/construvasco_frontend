@@ -1,4 +1,4 @@
-<div class="min-h-screen flex flex-col w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+<div class="landing-home min-h-screen flex flex-col w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
   <app-landing-header [cartItemCount]="cartItemCount" [orderHistoryCount]="0"></app-landing-header>
   <main class="w-full flex-grow">
     <!-- Hero Section - Full Width -->
@@ -69,7 +69,18 @@
     <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
       <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black text-center mb-6 sm:mb-8">O Que Precisa?</h2>
       
-      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-2">
+      <!-- Categories shimmer -->
+      <div *ngIf="isLoadingCategories" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-2" aria-hidden="true">
+        <div *ngFor="let _ of sectionSkeletonSlots" class="rounded-lg sm:rounded-xl border border-slate-200/80 bg-white/80 p-2 sm:p-4 lg:p-6 h-full flex flex-col overflow-hidden">
+          <div class="w-full aspect-square mb-1 sm:mb-1.5 rounded-md home-shimmer"></div>
+          <div class="flex-grow flex flex-col justify-center gap-2 pt-1">
+            <div class="h-3 sm:h-3.5 rounded-md home-shimmer w-4/5 mx-auto"></div>
+            <div class="h-2 sm:h-2.5 rounded-md home-shimmer w-1/2 mx-auto"></div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoadingCategories" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-2">
         <div 
           *ngFor="let category of categories" 
           (click)="navigateToCategory(category)"
@@ -124,7 +135,22 @@
           <p class="text-sm sm:text-base text-gray-600">Escolha de milhares de empresas</p>
         </div>
         
-        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+        <!-- Featured products shimmer -->
+        <div *ngIf="isLoadingFeatured" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6" aria-hidden="true">
+          <div *ngFor="let _ of sectionSkeletonSlots" class="rounded-xl border border-indigo-100/80 bg-white/90 overflow-hidden shadow-sm">
+            <div class="h-40 sm:h-56 lg:h-64 w-full home-shimmer-soft"></div>
+            <div class="p-3 sm:p-4 lg:p-6 space-y-3">
+              <div class="h-4 sm:h-5 rounded-md home-shimmer w-full"></div>
+              <div class="h-4 sm:h-5 rounded-md home-shimmer w-5/6"></div>
+              <div class="flex flex-col sm:flex-row justify-between gap-3 mt-2 sm:mt-4">
+                <div class="h-6 sm:h-8 rounded-lg home-shimmer w-24 sm:w-32"></div>
+                <div class="h-10 sm:h-11 rounded-lg home-shimmer w-full sm:w-28"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="!isLoadingFeatured" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
           <div
             *ngFor="let product of featuredProducts; let i = index"
             (click)="onSelectProduct(product)"
@@ -192,7 +218,28 @@
     <div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
       <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black text-center mb-8 sm:mb-12">O Que Dizem Nossos Clientes</h2>
       
-      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6 xl:gap-8">
+      <!-- Testimonials shimmer -->
+      <div *ngIf="isLoadingTestimonials" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6 xl:gap-8" aria-hidden="true">
+        <div *ngFor="let _ of sectionSkeletonSlots" class="bg-white rounded-xl shadow-sm border border-slate-100 p-3 sm:p-4 lg:p-6">
+          <div class="flex items-center mb-3 sm:mb-4">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full home-shimmer flex-shrink-0 mr-3 sm:mr-4"></div>
+            <div class="min-w-0 flex-1 space-y-2">
+              <div class="h-4 rounded-md home-shimmer w-3/5"></div>
+              <div class="h-3 rounded-md home-shimmer w-4/5"></div>
+            </div>
+          </div>
+          <div class="flex gap-1 mb-2">
+            <div *ngFor="let __ of [1,2,3,4,5]" class="w-4 h-4 sm:w-5 sm:h-5 rounded home-shimmer"></div>
+          </div>
+          <div class="space-y-2 pt-1">
+            <div class="h-3 rounded-md home-shimmer w-full"></div>
+            <div class="h-3 rounded-md home-shimmer w-full"></div>
+            <div class="h-3 rounded-md home-shimmer w-4/5"></div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isLoadingTestimonials" class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6 xl:gap-8">
         <div 
           *ngFor="let testimonial of testimonials" 
           class="bg-white rounded-xl shadow-sm hover:shadow-md p-3 sm:p-4 lg:p-6"

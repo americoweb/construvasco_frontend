@@ -8,12 +8,15 @@ import { CartService } from '../../../core/services/cart.service';
 import { ConfigService } from '../../../core/services/config.service';
 import { LandingHeaderComponent } from '../../../shared/components/layout/landing-header/landing-header.component';
 import { LandingFooterComponent } from '../../../shared/components/layout/landing-footer/landing-footer.component';
+import { FuseSplashScreenService } from '@fuse/services/splash-screen';
+import { FuseLoadingService } from '@fuse/services/loading';
 
 declare var YT: any;
 
 @Component({
     selector: 'landing-home',
     templateUrl: './home.component.html',
+    styleUrls: ['./home.component.scss'],
     encapsulation: ViewEncapsulation.None,
     standalone: true,
     imports: [
@@ -86,15 +89,22 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     private ytPlayer: any;
     private checkInterval: any;
 
+    /** Placeholder slots for category / product / testimonial skeleton rows */
+    readonly sectionSkeletonSlots = [0, 1, 2, 3, 4, 5];
+
     constructor(
         private homeService: HomeService,
         private router: Router,
         private cartService: CartService,
         private configService: ConfigService,
-        private sanitizer: DomSanitizer
+        private sanitizer: DomSanitizer,
+        private fuseSplashScreen: FuseSplashScreenService,
+        private fuseLoading: FuseLoadingService
     ) {}
 
     ngOnInit(): void {
+        this.fuseSplashScreen.hide();
+        this.fuseLoading.setAutoMode(false);
         this.loadProducts();
         this.loadFeaturedProducts();
         this.loadCategories();
@@ -128,6 +138,7 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        this.fuseLoading.setAutoMode(true);
         if (this.checkInterval) {
             clearInterval(this.checkInterval);
         }
