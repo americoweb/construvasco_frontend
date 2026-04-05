@@ -1,0 +1,75 @@
+<div class="pagination-container flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white border-t border-gray-200">
+  
+  <!-- Info and Page Size -->
+  <div class="flex flex-col sm:flex-row items-center gap-4">
+    <!-- Items Info -->
+    <div *ngIf="showInfo" class="text-sm text-gray-700">
+      Showing {{ startItem }} to {{ endItem }} of {{ pagination.total }} results
+    </div>
+
+    <!-- Page Size Selector -->
+    <div *ngIf="showPageSize" class="flex items-center gap-2">
+      <label class="text-sm text-gray-700">Show:</label>
+      <mat-select 
+        [value]="pagination.per_page"
+        (selectionChange)="onPageSizeChange($event.value)"
+        class="text-sm">
+        <mat-option *ngFor="let size of pageSizeOptions" [value]="size">
+          {{ size }}
+        </mat-option>
+      </mat-select>
+      <span class="text-sm text-gray-700">per page</span>
+    </div>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="flex items-center gap-1" *ngIf="pagination.last_page > 1">
+    
+    <!-- First Page -->
+    <button mat-icon-button
+            [disabled]="pagination.current_page === 1"
+            (click)="goToFirstPage()"
+            class="text-gray-500 hover:text-gray-700">
+      <mat-icon>first_page</mat-icon>
+    </button>
+
+    <!-- Previous Page -->
+    <button mat-icon-button
+            [disabled]="pagination.current_page === 1"
+            (click)="goToPreviousPage()"
+            class="text-gray-500 hover:text-gray-700">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <!-- Ellipsis Before -->
+    <span *ngIf="showEllipsisBefore" class="px-2 text-gray-500">...</span>
+
+    <!-- Page Numbers -->
+    <button *ngFor="let page of visiblePages"
+            mat-button
+            [class]="page === pagination.current_page ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'"
+            (click)="goToPage(page)"
+            class="min-w-10 h-10">
+      {{ page }}
+    </button>
+
+    <!-- Ellipsis After -->
+    <span *ngIf="showEllipsisAfter" class="px-2 text-gray-500">...</span>
+
+    <!-- Next Page -->
+    <button mat-icon-button
+            [disabled]="pagination.current_page === pagination.last_page"
+            (click)="goToNextPage()"
+            class="text-gray-500 hover:text-gray-700">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <!-- Last Page -->
+    <button mat-icon-button
+            [disabled]="pagination.current_page === pagination.last_page"
+            (click)="goToLastPage()"
+            class="text-gray-500 hover:text-gray-700">
+      <mat-icon>last_page</mat-icon>
+    </button>
+  </div>
+</div>

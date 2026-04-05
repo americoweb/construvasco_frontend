@@ -1,0 +1,877 @@
+<div class="min-h-screen flex flex-col w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <app-landing-header [cartItemCount]="cartItemCount" [orderHistoryCount]="0"></app-landing-header>
+  <main class="w-full flex-grow">
+    <!-- Hero Section - Full Width -->
+    <div class="relative w-full overflow-hidden min-h-[500px] sm:min-h-[600px] flex items-center justify-center">
+      <!-- Video Background -->
+      <div class="absolute inset-0 w-full h-full">
+        <div id="youtube-player" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] min-w-full min-h-full"></div>
+        <!-- Overlay for better text readability -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50"></div>
+      </div>
+      <!-- Content -->
+      <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+        <h1 class="text-4xl sm:text-6xl font-black mb-4 text-white drop-shadow-2xl">
+          De vida a tudo que precisa
+        </h1>
+        <p class="text-xl sm:text-2xl text-white font-medium mb-8 drop-shadow-lg">
+          e receba em sua porta!!!
+        </p>
+        <button
+          (click)="navigateToProducts()"
+          class="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 sm:py-2 sm:px-8 rounded-xl shadow-2xl hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 text-base sm:text-lg min-h-[44px] sm:min-h-0"
+        >
+          Ver Produtos
+        </button>
+        <div class="mt-4 flex items-center justify-center gap-4">
+          <span class="text-white text-sm">ou</span>
+          <a 
+            [href]="getWhatsAppLink('hero')"
+            target="_blank"
+            class="text-white font-semibold underline hover:text-green-300 flex items-center gap-1 transition-all"
+          >
+            Falar Directamente no WhatsApp
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Social Proof Banner -->
+    <div class="bg-white border-y-2 border-gray-100 py-4 sm:py-6">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 text-center">
+          <div>
+            <div class="text-3xl font-black text-blue-600">2,000+</div>
+            <div class="text-sm text-gray-600">Clientes Satisfeitos</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-green-600">48h</div>
+            <div class="text-sm text-gray-600">Entrega Rápida</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-purple-600">500+</div>
+            <div class="text-sm text-gray-600">Empresas Confiam</div>
+          </div>
+          <div>
+            <div class="text-3xl font-black text-pink-600">100%</div>
+            <div class="text-sm text-gray-600">Garantia Qualidade</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full mx-auto px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+
+    <!-- Category Navigation -->
+    <div class="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
+      <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black text-center mb-6 sm:mb-8">O Que Precisa?</h2>
+      
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6 lg:gap-2">
+        <div 
+          *ngFor="let category of categories" 
+          (click)="navigateToCategory(category)"
+          class="group cursor-pointer"
+        >
+          <div class="bg-white rounded-lg sm:rounded-xl shadow-sm hover:shadow-md transition-all border border-transparent hover:border-blue-500 h-full flex flex-col overflow-hidden p-2 sm:p-4 lg:p-6 cursor-pointer min-h-[44px] sm:min-h-0">
+            <!-- Category Image/Icon -->
+            <div class="w-full aspect-square mb-1 sm:mb-1.5 bg-gradient-to-br from-blue-50 to-purple-50 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+              <!-- Show image if available and hasn't failed to load -->
+              <img 
+                *ngIf="category.image_url && !hasCategoryImageFailed(category.id)" 
+                [src]="getCategoryImageUrl(category.image_url)" 
+                [alt]="category.name"
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                loading="lazy"
+                (error)="onCategoryImageError(category.id)"
+              />
+              <!-- Fallback to icon if no image or image failed to load -->
+              <div 
+                *ngIf="!category.image_url || hasCategoryImageFailed(category.id)"
+                class="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md flex items-center justify-center"
+                [innerHTML]="getCategoryIconSVG(category)"
+              ></div>
+            </div>
+            <div class="text-center flex-grow flex flex-col justify-center">
+              <div class="font-semibold text-gray-900 mb-0.5 text-[10px] sm:text-xs leading-tight">{{ category.name }}</div>
+              <div class="text-[9px] sm:text-[10px] text-gray-500">{{ getCategoryPrice(category) }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- View All Products Link -->
+      <div class="text-center mt-6 sm:mt-8">
+        <button
+          (click)="navigateToProducts()"
+          class="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-all py-3 px-4 sm:py-2 sm:px-4 min-h-[44px] sm:min-h-0"
+        >
+          <span>Ver Todos os Produtos</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Featured Products Section -->
+    <div class="bg-gradient-to-br from-blue-50 to-purple-50 py-8 sm:py-12 lg:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8 sm:mb-10">
+          <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black mb-2">Mais Populares</h2>
+          <p class="text-sm sm:text-base text-gray-600">Escolha de milhares de empresas</p>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+          <div
+            *ngFor="let product of featuredProducts; let i = index"
+            (click)="onSelectProduct(product)"
+            class="group cursor-pointer bg-white rounded-xl shadow-sm hover:shadow-md overflow-hidden transform hover:-translate-y-2 transition-all duration-300 border-2 border-transparent hover:border-blue-300 relative"
+          >
+            <div class="relative">
+              <div *ngIf="i < 3" class="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-[10px] sm:text-xs font-black px-2 py-0.5 sm:px-3 sm:py-1 rounded-full shadow-lg">
+                Mais Vendido
+              </div>
+              <img 
+                class="h-40 sm:h-56 lg:h-64 w-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                [src]="product.image_url || 'https://via.placeholder.com/400x300'" 
+                [alt]="product.name" 
+              />
+            </div>
+            <div class="p-3 sm:p-4 lg:p-6">
+              <h3 class="text-sm sm:text-base lg:text-xl font-black text-gray-900 mb-1 sm:mb-2 line-clamp-2">{{ product.name }}</h3>
+              <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 mt-2 sm:mt-4">
+                <div>
+                  <span class="font-black text-base sm:text-lg lg:text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    {{ product.price ? (product.price.toFixed(2) + ' MT') : 'Sob Consulta' }}
+                  </span>
+                </div>
+                <button class="w-full sm:w-auto bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold py-2 px-3 sm:py-2 sm:px-6 rounded-lg sm:rounded-xl hover:shadow-lg transition-all transform hover:scale-105 min-h-[44px] text-xs sm:text-sm lg:text-base">
+                  Pedir Agora
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- View All Products Link -->
+      <div class="text-center mt-8 sm:mt-10">
+        <button
+          (click)="navigateToProducts()"
+          class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 min-h-[44px] sm:min-h-0 text-base sm:text-lg"
+        >
+          <span>Ver Todos os Produtos</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Not Found WhatsApp CTA -->
+      <div class="text-center mt-6 sm:mt-8 p-4 sm:p-6 bg-green-50 rounded-xl sm:rounded-2xl border-2 border-green-200 max-w-2xl mx-auto">
+        <p class="text-sm sm:text-base text-gray-700 mb-4">
+          <strong>Não encontrou o que precisa?</strong>
+        </p>
+        <a 
+          [href]="getWhatsAppLink('notFound')"
+          target="_blank"
+          class="inline-flex items-center gap-2 bg-green-500 text-white font-bold py-3 px-6 rounded-xl hover:bg-green-600 transition-all min-h-[44px] sm:min-h-0"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          Contacte-nos no WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- Testimonials Section -->
+    <div class="max-w-6xl mx-auto px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16">
+      <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black text-center mb-8 sm:mb-12">O Que Dizem Nossos Clientes</h2>
+      
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6 xl:gap-8">
+        <div 
+          *ngFor="let testimonial of testimonials" 
+          class="bg-white rounded-xl shadow-sm hover:shadow-md p-3 sm:p-4 lg:p-6"
+        >
+          <div class="flex items-center mb-3 sm:mb-4">
+            <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-lg sm:text-2xl font-black mr-3 sm:mr-4 flex-shrink-0">
+              {{ testimonial.client_name ? testimonial.client_name.charAt(0) : '?' }}
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="font-bold text-sm sm:text-base">{{ testimonial.client_name || 'Cliente' }}</div>
+              <div class="text-xs sm:text-sm text-gray-600 line-clamp-1" *ngIf="testimonial.client_company">
+                {{ testimonial.client_position }}, {{ testimonial.client_company }}
+              </div>
+            </div>
+          </div>
+          <div class="flex mb-2">
+            <span *ngFor="let i of [1,2,3,4,5]" class="text-yellow-400">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current" viewBox="0 0 20 20">
+                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z"/>
+              </svg>
+            </span>
+          </div>
+          <p class="text-gray-700 italic text-xs sm:text-sm line-clamp-3">"{{ testimonial.comment }}"</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="bg-white py-8 sm:py-12 lg:py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black text-center mb-8 sm:mb-12">Simples. Rápido. Profissional.</h2>
+        
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-6 lg:gap-8">
+          <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-black">
+              1
+            </div>
+            <h3 class="text-xl font-bold mb-2">Escolha</h3>
+            <p class="text-gray-600">Selecione o produto que precisa</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-black">
+              2
+            </div>
+            <h3 class="text-xl font-bold mb-2">Personalize</h3>
+            <p class="text-gray-600">Envie seu logo ou design</p>
+          </div>
+          
+          <div class="text-center">
+            <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center text-white text-2xl font-black">
+              3
+            </div>
+            <h3 class="text-xl font-bold mb-2">Receba</h3>
+            <p class="text-gray-600">Entregamos na sua porta</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portfolio/Work Examples Section -->
+    <div class="bg-gradient-to-br from-slate-50 to-blue-50 py-8 sm:py-12 lg:py-16">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black text-center mb-8 sm:mb-12">Trabalhos Recentes</h2>
+        
+        <!-- Image Carousel -->
+        <div class="relative overflow-hidden rounded-xl sm:rounded-2xl lg:rounded-3xl">
+          <div class="flex transition-transform duration-700 ease-in-out gap-4 sm:gap-6 lg:gap-8" [style.transform]="'translateX(-' + (currentSlide * 100 / getVisibleImagesCount()) + '%)'">
+            <div 
+              *ngFor="let image of portfolioImages; let i = index"
+              class="flex-shrink-0 w-[calc((100%-1rem)/2)] sm:w-[calc((100%-3rem)/3)] lg:w-[calc((100%-6rem)/4)]"
+            >
+              <div class="h-full">
+                <div class="relative overflow-hidden rounded-xl shadow-sm hover:shadow-md bg-white p-2 sm:p-2 lg:p-2 transform hover:scale-105 transition-transform duration-300 cursor-pointer">
+                  <img 
+                    [src]="image" 
+                    [alt]="'Trabalho ' + (i + 1)"
+                    class="w-full h-auto max-h-[45vh] sm:max-h-[50vh] lg:max-h-[55vh] object-contain rounded-lg"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Navigation Arrows -->
+          <button 
+            *ngIf="portfolioImages.length > 1"
+            (click)="previousSlide()"
+            class="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white text-gray-800 rounded-full p-3 sm:p-2 lg:p-3 shadow-xl hover:shadow-2xl transition-all z-10 group backdrop-blur-sm border border-gray-200 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+            aria-label="Imagem anterior"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          
+          <button 
+            *ngIf="portfolioImages.length > 1"
+            (click)="nextSlide()"
+            class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 bg-white/95 hover:bg-white text-gray-800 rounded-full p-3 sm:p-2 lg:p-3 shadow-xl hover:shadow-2xl transition-all z-10 group backdrop-blur-sm border border-gray-200 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+            aria-label="Próxima imagem"
+          >
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+            </svg>
+          </button>
+          
+          <!-- Dots Indicator -->
+          <div *ngIf="portfolioImages.length > getVisibleImagesCount()" class="flex justify-center gap-2 mt-6 sm:mt-8">
+            <button
+              *ngFor="let image of portfolioImages; let i = index"
+              (click)="goToSlide(i)"
+              class="h-2 sm:h-3 rounded-full transition-all duration-300"
+              [class.bg-blue-600]="i >= currentSlide && i < currentSlide + getVisibleImagesCount()"
+              [class.bg-gray-300]="!(i >= currentSlide && i < currentSlide + getVisibleImagesCount())"
+              [class.w-3]="true"
+              [aria-label]="'Ir para imagem ' + (i + 1)"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Feature - Collapsible -->
+    <div id="ai-suggestion-section" class="max-w-4xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl sm:rounded-2xl lg:rounded-3xl p-6 sm:p-8 text-white text-center">
+        <h3 class="text-xl sm:text-2xl font-black mb-3">🤖 Não Sabe o Que Precisa?</h3>
+        <p class="text-sm sm:text-base mb-6">Nossa IA pode sugerir o produto perfeito para seu objetivo</p>
+        <button 
+          (click)="showAIModal = !showAIModal"
+          class="bg-white text-blue-600 font-bold py-3 px-6 sm:px-8 rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105 min-h-[44px] sm:min-h-0"
+        >
+          Experimentar IA
+        </button>
+      </div>
+
+      <!-- Collapsible AI Form -->
+      <div *ngIf="showAIModal" class="mt-6 sm:mt-8 bg-white p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-sm hover:shadow-md border border-gray-100">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-2">
+            Desbloqueie seu potencial criativo com IA
+          </h2>
+          <p class="text-base text-gray-600">🎯 Tem um objetivo? Forneça o seu logótipo e a IA sugerirá o produto perfeito para o seu orçamento.</p>
+          <button 
+            (click)="closeAIModal()"
+            class="mt-4 text-gray-500 hover:text-gray-700 text-sm"
+          >
+            Fechar
+          </button>
+        </div>
+        
+        <form *ngIf="!suggestions" (ngSubmit)="handleGetSuggestion($event)" class="max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 items-start">
+            <div class="space-y-4 sm:space-y-6">
+                <!-- Goal Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3">
+                        <span class="flex items-center gap-2">
+                          <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
+                          Qual é o seu objetivo?
+                        </span>
+                    </label>
+                    <select
+                        [(ngModel)]="goal"
+                        name="goal"
+                        (change)="onGoalSelect(goal)"
+                        class="block w-full border-2 border-gray-200 rounded-lg p-3 sm:p-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white min-h-[44px] sm:min-h-0"
+                        [disabled]="isLoading"
+                    >
+                        <option value="">Selecione um objetivo</option>
+                        <option *ngFor="let g of commonGoals" [value]="g">{{ g }}</option>
+                    </select>
+                    <input
+                        *ngIf="showCustomGoal"
+                        type="text"
+                        [(ngModel)]="customGoal"
+                        name="customGoal"
+                        class="mt-3 block w-full border-2 border-blue-300 rounded-lg p-3 sm:p-2.5 text-base focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all min-h-[44px] sm:min-h-0"
+                        placeholder="Descreva seu objetivo personalizado..."
+                        [disabled]="isLoading"
+                    />
+                </div>
+                
+                <!-- Budget Selection -->
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-3">
+                        <span class="flex items-center gap-2">
+                          <span class="w-2 h-2 bg-purple-500 rounded-full"></span>
+                          Orçamento
+                        </span>
+                    </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button
+                            *ngFor="let range of budgetRanges"
+                            type="button"
+                            (click)="onBudgetSelect(range.value)"
+                            [class.bg-gradient-to-r]="budget === range.value.toString() || (range.value === 'custom' && showCustomBudget)"
+                            [class.from-blue-600]="budget === range.value.toString() || (range.value === 'custom' && showCustomBudget)"
+                            [class.to-purple-600]="budget === range.value.toString() || (range.value === 'custom' && showCustomBudget)"
+                            [class.text-white]="budget === range.value.toString() || (range.value === 'custom' && showCustomBudget)"
+                            [class.bg-gray-100]="budget !== range.value.toString() && !(range.value === 'custom' && showCustomBudget)"
+                            [class.text-gray-700]="budget !== range.value.toString() && !(range.value === 'custom' && showCustomBudget)"
+                            [class.hover:bg-gray-200]="budget !== range.value.toString() && !(range.value === 'custom' && showCustomBudget)"
+                            class="py-3 px-4 sm:py-2 sm:px-4 rounded-lg font-semibold transition-all text-sm min-h-[44px] sm:min-h-[48px] border-2"
+                            [class.border-blue-500]="budget === range.value.toString() || (range.value === 'custom' && showCustomBudget)"
+                            [class.border-transparent]="budget !== range.value.toString() && !(range.value === 'custom' && showCustomBudget)"
+                            [disabled]="isLoading"
+                        >
+                            {{ range.label }}
+                        </button>
+                    </div>
+                    <div *ngIf="showCustomBudget" class="mt-3 relative">
+                        <input
+                            type="number"
+                            [(ngModel)]="customBudget"
+                            name="customBudget"
+                            class="block w-full border-2 border-purple-300 rounded-lg p-3 sm:p-2.5 text-base pr-14 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all min-h-[44px] sm:min-h-0"
+                            placeholder="Digite o valor"
+                            [disabled]="isLoading"
+                        />
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                            <span class="text-gray-600 font-medium">MT</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-3">
+                    <span class="flex items-center gap-2">
+                      <span class="w-2 h-2 bg-pink-500 rounded-full"></span>
+                      Seu Logotipo (Opcional)
+                    </span>
+                </label>
+                <div *ngIf="logoPreview" class="relative group">
+                    <div class="bg-white rounded-lg border-2 border-gray-200 p-4 shadow-sm">
+                      <img [src]="logoPreview" alt="Logo Preview" class="w-full h-32 sm:h-40 object-contain"/>
+                      <button 
+                          type="button"
+                          (click)="removeLogo()" 
+                          class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 sm:p-1.5 hover:bg-red-600 transition-colors shadow-lg hover:scale-110 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                      >
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                      </button>
+                    </div>
+                </div>
+                <label 
+                    *ngIf="!logoPreview"
+                    class="flex flex-col items-center justify-center w-full h-32 sm:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-pink-400 bg-gray-50 hover:bg-gray-100 group min-h-[44px]"
+                >
+                    <span class="flex flex-col items-center space-y-3">
+                       <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                         </svg>
+                       </div>
+                       <span class="text-sm font-bold text-gray-700">Carregar Logotipo</span>
+                       <span class="text-xs text-gray-500">PNG, JPEG ou WebP</span>
+                    </span>
+                    <input 
+                        type="file" 
+                        id="logo-upload" 
+                        accept="image/png, image/jpeg, image/webp" 
+                        class="hidden" 
+                        (change)="handleLogoFileChange($event)" 
+                        [disabled]="isLoading" 
+                    />
+                </label>
+            </div>
+        </div>
+        <button 
+            type="submit" 
+            [disabled]="isLoading" 
+            class="mt-6 w-full text-white font-bold py-3 px-6 sm:py-4 sm:px-6 rounded-lg shadow-lg transition-all bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 disabled:cursor-not-allowed min-h-[44px] sm:min-h-0"
+        >
+            <span *ngIf="!isLoading">💡 Obter Sugestão Personalizada</span>
+            <span *ngIf="isLoading" class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Sugerindo...
+            </span>
+        </button>
+    </form>
+
+     <div *ngIf="isLoading && !suggestions" class="mt-6 text-center py-8">
+         <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-3"></div>
+         <p class="text-gray-600">A IA está a pensar e a criar mockups...</p>
+     </div>
+     <div *ngIf="error" class="mt-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 rounded-xl text-center">
+       <p class="text-red-700 font-semibold">{{ error }}</p>
+     </div>
+     
+        <div *ngIf="suggestions" class="mt-6 sm:mt-8 p-4 sm:p-6 lg:p-8 bg-gradient-to-br from-indigo-50/80 via-purple-50/80 to-pink-50/80 backdrop-blur-sm rounded-xl sm:rounded-2xl lg:rounded-3xl border-2 border-white/50 shadow-sm hover:shadow-md relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-400/30 to-purple-500/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+          <div class="relative z-10">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 sm:mb-8">
+                <div>
+                  <h4 class="text-2xl sm:text-3xl font-black text-gray-900 mb-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Nossas Sugestões para Você!
+                  </h4>
+                  <p class="text-sm sm:text-base text-gray-600">Produtos personalizados baseados no seu objetivo</p>
+                </div>
+                <button 
+                    (click)="clearSuggestion()" 
+                    class="mt-4 sm:mt-0 bg-white/80 backdrop-blur-sm text-gray-800 font-bold py-3 px-6 rounded-xl hover:bg-white border-2 border-gray-200 hover:border-gray-300 transition-all shadow-lg hover:scale-105 min-h-[44px] sm:min-h-0"
+                >
+                    Tentar Novamente
+                </button>
+            </div>
+
+            <div class="space-y-6 sm:space-y-8 lg:space-y-10">
+                <div *ngFor="let suggestion of suggestions.data.suggestions; let i = index" class="bg-white/90 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-sm hover:shadow-md border-2 border-white/50 relative overflow-hidden group">
+                  <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+                  <h5 class="text-2xl sm:text-3xl font-black text-gray-900 mb-4 sm:mb-6 mt-2">{{ suggestion.title }}</h5>
+                  <div [class]="'grid grid-cols-1 gap-4 ' + (suggestion.products.length > 1 ? 'sm:grid-cols-2 lg:grid-cols-3 sm:gap-6' : '')">
+                      <div *ngFor="let p of suggestion.products; let pIndex = index" class="bg-gradient-to-br from-white to-gray-50 rounded-xl overflow-hidden flex flex-col border-2 border-gray-100 group hover:border-blue-300 transition-all shadow-sm hover:shadow-md transform hover:-translate-y-1">
+                          <div class="relative overflow-hidden">
+                              <img [src]="p.mockup_url" [alt]="'Mockup of ' + p.name" class="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500" />
+                              <div class="absolute top-3 right-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs font-black px-3 py-1 rounded-full shadow-lg">
+                                Sugerido
+                              </div>
+                          </div>
+                          <div class="p-4 sm:p-5 flex-grow flex flex-col">
+                              <h6 class="font-black text-xl text-gray-900 mb-2">{{ p.name }}</h6>
+                              <p class="text-sm text-gray-600 flex-grow mt-1 italic leading-relaxed">"{{ p.design_prompt }}"</p>
+                              <div class="mt-5 flex justify-between items-center pt-4 border-t border-gray-200">
+                                  <div>
+                                    <span class="font-black text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">{{ (p.price || 0).toFixed(2) }} MT</span>
+                                  </div>
+                                  <button 
+                                      (click)="handleCustomizeSuggestedProduct(p)" 
+                                      class="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-black py-3 px-4 sm:px-5 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 min-h-[44px] sm:min-h-0"
+                                  >
+                                      Personalizar
+                                  </button>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+                  <div class="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t-2 border-gray-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-gradient-to-r from-blue-50/50 to-purple-50/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-4 rounded-xl sm:rounded-2xl">
+                      <div>
+                          <p class="font-bold text-xs sm:text-sm text-gray-600 uppercase tracking-wide mb-1">Total Estimado</p>
+                          <p class="text-3xl sm:text-4xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">{{ suggestion.estimated_total.toFixed(2) }} MT</p>
+                      </div>
+                      <button 
+                          class="w-full sm:w-auto bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-black py-3 px-6 sm:py-4 sm:px-8 rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 disabled:bg-gray-300 disabled:cursor-not-allowed transform hover:scale-105 min-h-[44px] sm:min-h-0"
+                          [disabled]="suggestion.type === 'bundle'"
+                      >
+                          {{ suggestion.cta }}
+                      </button>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- Final CTA Section -->
+    <div class="bg-gradient-to-r from-green-500 to-emerald-600 py-8 sm:py-12 lg:py-16">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        <h2 class="text-2xl sm:text-3xl lg:text-3xl font-black mb-4">Pronto Para Começar?</h2>
+        <p class="text-lg sm:text-xl mb-6 sm:mb-8">Contacte-nos agora via WhatsApp</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            [href]="getWhatsAppLink('hero')"
+            target="_blank"
+            class="bg-white text-green-600 font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-gray-100 inline-flex items-center justify-center gap-2 transition-all transform hover:scale-105 min-h-[44px] sm:min-h-0"
+          >
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            Falar no WhatsApp
+          </a>
+          <button 
+            (click)="scrollToStart()"
+            class="bg-transparent border-2 border-white text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-xl hover:bg-white/10 transition-all transform hover:scale-105 min-h-[44px] sm:min-h-0"
+          >
+            Ver Catálogo
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Floating Help Button (Desktop) - Minimal, Expandable -->
+  <div class="fixed bottom-6 right-6 z-50 hidden md:block">
+    <!-- Expanded Menu -->
+    <div 
+      *ngIf="showHelpMenu"
+      class="absolute bottom-16 right-0 mb-2 flex flex-col gap-2 animate-slide-up"
+    >
+      <!-- WhatsApp Option -->
+      <a 
+        [href]="getWhatsAppLink('help')"
+        target="_blank"
+        (click)="showHelpMenu = false"
+        class="bg-green-500 text-white rounded-full px-4 py-3 shadow-lg hover:bg-green-600 transition-all flex items-center gap-3 min-w-[180px]"
+      >
+        <svg class="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span class="font-semibold text-sm">WhatsApp</span>
+      </a>
+      
+      <!-- AI Assistant Option -->
+      <button 
+        (click)="openAIAssistant(); showHelpMenu = false"
+        class="bg-purple-600 text-white rounded-full px-4 py-3 shadow-lg hover:bg-purple-700 transition-all flex items-center gap-3 min-w-[180px]"
+      >
+        <span class="text-xl flex-shrink-0">🤖</span>
+        <span class="font-semibold text-sm">Assistente IA</span>
+      </button>
+    </div>
+    
+    <!-- Main Help Button -->
+    <button 
+      (click)="toggleHelpMenu()"
+      class="bg-blue-600 text-white rounded-full px-4 py-2 shadow-md hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
+      [class.bg-blue-700]="showHelpMenu"
+    >
+      <svg *ngIf="!showHelpMenu" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+      </svg>
+      <span class="font-semibold text-sm">{{ showHelpMenu ? 'Fechar' : 'Ajuda' }}</span>
+      <svg *ngIf="!showHelpMenu" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+      </svg>
+      <svg *ngIf="showHelpMenu" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+      </svg>
+    </button>
+  </div>
+  
+  <!-- Click outside to close help menu -->
+  <div 
+    *ngIf="showHelpMenu"
+    class="fixed inset-0 z-40"
+    (click)="showHelpMenu = false"
+  ></div>
+  
+  <!-- Mobile Sticky Bottom Bar - Minimal -->
+  <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-40 pb-safe">
+    <div class="flex items-center justify-around py-3">
+      <a 
+        [href]="getWhatsAppLink('help')"
+        target="_blank"
+        class="flex-1 flex flex-col items-center justify-center py-2 text-green-600 hover:text-green-700 active:scale-95 transition-all min-h-[44px]"
+      >
+        <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+        </svg>
+        <span class="text-xs font-medium">WhatsApp</span>
+      </a>
+      <button 
+        (click)="openAIAssistant()"
+        class="flex-1 flex flex-col items-center justify-center py-2 text-purple-600 hover:text-purple-700 active:scale-95 transition-all min-h-[44px]"
+      >
+        <span class="text-2xl mb-1">🤖</span>
+        <span class="text-xs font-medium">IA</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Add padding for mobile bottom bar -->
+  <div class="md:hidden h-16"></div>
+  
+  <!-- WhatsApp Prompt (Slide-in) -->
+  <div 
+    *ngIf="showWhatsAppPrompt" 
+    class="fixed bottom-24 right-6 bg-white rounded-2xl shadow-2xl p-6 max-w-sm border-2 border-green-200 z-40"
+  >
+    <button (click)="showWhatsAppPrompt = false" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+    <div class="flex items-start gap-3">
+      <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 text-white text-xl">
+        👤
+      </div>
+      <div>
+        <p class="font-bold text-gray-900 mb-1">Olá! 👋</p>
+        <p class="text-sm text-gray-600 mb-3">
+          Precisa de ajuda? Estamos aqui para responder qualquer dúvida!
+        </p>
+        <a 
+          [href]="getWhatsAppLink('help')"
+          target="_blank"
+          class="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 inline-flex items-center gap-2 text-sm transition-all"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          Falar Agora
+        </a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- AI Assistant Slide-over Panel -->
+  <div 
+    *ngIf="showAIAssistant" 
+    class="fixed inset-0 z-50 overflow-hidden"
+    (click)="closeAIAssistant()"
+  >
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+    <div 
+      (click)="$event.stopPropagation()"
+      class="absolute right-0 top-0 h-full w-full max-w-lg bg-white shadow-2xl transform transition-transform"
+    >
+      <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6 text-white">
+        <div class="flex justify-between items-center">
+          <div>
+            <h3 class="text-2xl font-black">🤖 Assistente IA</h3>
+            <p class="text-sm opacity-90">Vamos encontrar o produto perfeito</p>
+          </div>
+          <button (click)="closeAIAssistant()" class="text-white hover:bg-white/20 rounded-full p-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-y-auto h-[calc(100%-200px)]">
+        <!-- Step 1: Quick Goal -->
+        <div *ngIf="aiStep === 1" class="text-center">
+          <h3 class="text-3xl font-black mb-6">O Que Precisa?</h3>
+          <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            <button 
+              *ngFor="let goal of quickGoals"
+              (click)="selectQuickGoal(goal)"
+              class="p-6 rounded-2xl border-2 hover:border-purple-600 hover:bg-purple-50 transition-all text-center"
+              [class.border-purple-600]="goal.value === goal"
+              [class.bg-purple-50]="goal.value === goal"
+            >
+              <div class="text-4xl mb-2">{{ goal.icon }}</div>
+              <div class="font-bold">{{ goal.label }}</div>
+            </button>
+          </div>
+          <input
+            *ngIf="showCustomGoal"
+            type="text"
+            [(ngModel)]="customGoal"
+            name="customGoal"
+            class="mt-4 block w-full border-2 border-purple-300 rounded-lg p-3 text-base focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+            placeholder="Descreva seu objetivo..."
+          />
+        </div>
+        
+        <!-- Step 2: Budget (Visual) -->
+        <div *ngIf="aiStep === 2" class="text-center">
+          <h3 class="text-3xl font-black mb-6">Qual é o Seu Orçamento?</h3>
+          <div class="grid grid-cols-1 gap-4 max-w-md mx-auto">
+            <button 
+              *ngFor="let budget of simpleBudgets"
+              (click)="selectBudget(budget)"
+              class="p-6 rounded-2xl border-2 hover:border-purple-600 hover:bg-purple-50 transition-all text-left flex justify-between items-center"
+              [class.border-purple-600]="budget.value.toString() === budget"
+              [class.bg-purple-50]="budget.value.toString() === budget"
+            >
+              <div>
+                <div class="font-bold text-xl">{{ budget.label }}</div>
+                <div class="text-sm text-gray-600">{{ budget.range }}</div>
+                <div class="text-xs text-gray-500 mt-1">{{ budget.description }}</div>
+              </div>
+              <div class="text-3xl">{{ budget.icon }}</div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- Step 3: Logo (Optional - Skip-able) -->
+        <div *ngIf="aiStep === 3" class="text-center">
+          <h3 class="text-3xl font-black mb-4">Tem Logo?</h3>
+          <p class="text-gray-600 mb-8">(Opcional - pode adicionar depois)</p>
+          <div class="grid grid-cols-2 gap-4 max-w-md mx-auto">
+            <button 
+              (click)="uploadLogo()"
+              class="p-8 rounded-2xl border-2 border-dashed hover:border-purple-600 hover:bg-purple-50 transition-all"
+            >
+              <div class="text-5xl mb-3">📤</div>
+              <div class="font-bold">Sim, Carregar</div>
+            </button>
+            <button 
+              (click)="skipLogo()"
+              class="p-8 rounded-2xl border-2 hover:border-gray-400 hover:bg-gray-50 transition-all"
+            >
+              <div class="text-5xl mb-3">⏭️</div>
+              <div class="font-bold">Não Agora</div>
+            </button>
+          </div>
+          <div *ngIf="logoPreview" class="mt-4">
+            <img [src]="logoPreview" alt="Logo" class="max-w-xs mx-auto rounded-lg" />
+            <button (click)="removeLogo()" class="mt-2 text-red-600 text-sm">Remover</button>
+          </div>
+        </div>
+        
+        <!-- Step 4: Loading/Results -->
+        <div *ngIf="aiStep === 4 && isLoading" class="text-center py-12">
+          <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-purple-600 mx-auto mb-4"></div>
+          <p class="text-xl font-bold">A IA está a pensar...</p>
+          <p class="text-gray-600">Criando mockups personalizados</p>
+        </div>
+        
+        <div *ngIf="aiStep === 4 && !isLoading && suggestions" class="space-y-6">
+          <h4 class="text-2xl font-black mb-4">Nossas Sugestões</h4>
+          <div *ngFor="let suggestion of suggestions.data.suggestions" class="bg-gray-50 rounded-xl p-6">
+            <h5 class="text-xl font-bold mb-4">{{ suggestion.title }}</h5>
+            <div class="grid grid-cols-1 gap-4">
+              <div *ngFor="let p of suggestion.products" class="bg-white rounded-lg p-4 border-2 border-gray-200">
+                <img [src]="p.mockup_url" [alt]="p.name" class="w-full h-48 object-cover rounded-lg mb-3" />
+                <h6 class="font-bold text-lg mb-2">{{ p.name }}</h6>
+                <p class="text-sm text-gray-600 mb-3 italic">"{{ p.design_prompt }}"</p>
+                <div class="flex justify-between items-center">
+                  <span class="font-black text-xl text-purple-600">{{ (p.price || 0).toFixed(2) }} MT</span>
+                  <button 
+                    (click)="handleCustomizeSuggestedProduct(p)"
+                    class="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700"
+                  >
+                    Personalizar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- WhatsApp Fallback -->
+        <div class="mt-6 p-4 bg-green-50 rounded-xl border border-green-200">
+          <p class="text-sm text-gray-700 mb-3 text-center">
+            Prefere falar com uma pessoa?
+          </p>
+          <a 
+            [href]="getWhatsAppLink('human')"
+            target="_blank"
+            class="w-full bg-green-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 transition-all"
+          >
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            Falar com Nossa Equipa
+          </a>
+        </div>
+      </div>
+      
+      <div class="absolute bottom-0 left-0 right-0 bg-gray-50 p-6 border-t">
+        <div class="flex gap-2 justify-center mb-4">
+          <div 
+            *ngFor="let step of [1,2,3,4]" 
+            class="h-2 w-12 rounded-full transition-all"
+            [class.bg-purple-600]="aiStep >= step"
+            [class.bg-gray-300]="aiStep < step"
+          ></div>
+        </div>
+        <div class="flex gap-3">
+          <button 
+            *ngIf="aiStep > 1 && aiStep < 4"
+            (click)="previousAIStep()" 
+            class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300"
+          >
+            Voltar
+          </button>
+          <button 
+            (click)="nextAIStep()" 
+            class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-3 rounded-xl hover:from-purple-700 hover:to-pink-700"
+            [disabled]="(aiStep === 1 && !goal) || (aiStep === 2 && !budget) || (aiStep === 4 && isLoading)"
+          >
+            {{ aiStep < 4 ? 'Próximo' : 'Ver Sugestões' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <app-landing-footer></app-landing-footer>
+</div>

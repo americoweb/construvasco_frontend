@@ -1,0 +1,42 @@
+.checkout-backdrop {
+  backdrop-filter: blur(2px);
+}
+
+.checkout-modal {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// Scrollbar styling
+.checkout-modal ::ng-deep {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.checkout-modal ::ng-deep::-webkit-scrollbar {
+  width: 6px;
+}
+
+.checkout-modal ::ng-deep::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.checkout-modal ::ng-deep::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
+}
+
+.checkout-modal ::ng-deep::-webkit-scrollbar-thumb:hover {
+  background-color: #a0aec0;
+}
+

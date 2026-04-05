@@ -1,0 +1,36 @@
+<div class="confirm-dialog p-6">
+  
+  <!-- Header with Icon -->
+  <div class="flex items-center mb-4">
+    <div class="flex-shrink-0 mr-4">
+      <mat-icon [class]="iconColor" class="text-3xl">{{ iconName }}</mat-icon>
+    </div>
+    <div class="flex-1">
+      <h2 [class]="titleClasses">{{ config.title }}</h2>
+    </div>
+  </div>
+
+  <!-- Message -->
+  <div class="mb-6">
+    <p class="text-gray-700 leading-relaxed">{{ config.message }}</p>
+  </div>
+
+  <!-- Actions -->
+  <div class="flex items-center justify-end space-x-3">
+    <button
+      type="button"
+      mat-button
+      (click)="onCancel()">
+      {{ config.cancelText }}
+    </button>
+    
+    <button
+      type="button"
+      mat-raised-button
+      [color]="confirmButtonColor"
+      (click)="onConfirm()"
+      cdkTrapFocus>
+      {{ config.confirmText }}
+    </button>
+  </div>
+</div>

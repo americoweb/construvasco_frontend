@@ -1,0 +1,14 @@
+.data-filters {
+  .mat-mdc-form-field {
+    width: 100%;
+  }
+
+  .mat-mdc-chip {
+    max-width: 200px;
+    
+    span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}

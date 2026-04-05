@@ -1,0 +1,179 @@
+<div class="max-w-7xl mx-auto p-6 space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Matriz de Permissões</h2>
+      <p class="text-gray-600 mt-1">Gerencie permissões e papéis do sistema</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="state.loading" class="flex justify-center items-center py-12">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    <span class="ml-3 text-gray-600">Carregando matriz de permissões...</span>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="state.error" class="bg-red-50 border border-red-200 rounded-md p-4">
+    <div class="flex">
+      <mat-icon class="text-red-400 mr-3">error</mat-icon>
+      <div>
+        <h3 class="text-sm font-medium text-red-800">Erro</h3>
+        <p class="text-sm text-red-700 mt-1">{{ state.error }}</p>
+        <button 
+          (click)="loadPermissionMatrix()"
+          class="mt-2 text-sm text-red-600 hover:text-red-500 underline">
+          Tentar novamente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Permission Matrix -->
+  <div *ngIf="!state.loading && !state.error && state.matrix" class="space-y-6">
+    
+    <!-- Roles Header -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-medium text-gray-900">Papéis e Permissões</h3>
+        <p class="text-sm text-gray-500 mt-1">
+          Selecione um papel para editar suas permissões. Papéis do sistema não podem ser modificados.
+        </p>
+      </div>
+
+      <!-- Matrix Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <!-- Header Row -->
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-64">
+                Permissões
+              </th>
+              <th *ngFor="let role of roles" 
+                  class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  [class.bg-blue-50]="isRoleSelected(role)"
+                  (click)="selectRole(role)">
+                <div class="flex flex-col items-center space-y-1">
+                  <div class="font-medium text-gray-900">{{ role.display_name }}</div>
+                  <div class="text-xs text-gray-500">{{ getRolePermissionCount(role) }} permissões</div>
+                  <div *ngIf="role.is_system" class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                    Sistema
+                  </div>
+                </div>
+              </th>
+            </tr>
+          </thead>
+
+          <!-- Permission Rows -->
+          <tbody class="bg-white divide-y divide-gray-200">
+            <ng-container *ngFor="let category of categories">
+              <!-- Category Header -->
+              <tr class="bg-gray-50 hover:bg-gray-100">
+                <td class="px-6 py-3">
+                  <button 
+                    (click)="toggleCategory(category)"
+                    class="flex items-center text-sm font-medium text-gray-900 hover:text-gray-700">
+                    <mat-icon class="mr-2 transition-transform" 
+                              [class.rotate-90]="category.expanded">
+                      chevron_right
+                    </mat-icon>
+                    {{ getCategoryDisplayName(category.name) }}
+                    <span class="ml-2 text-xs text-gray-500">({{ category.permissions.length }})</span>
+                  </button>
+                </td>
+                <td *ngFor="let role of roles" class="px-6 py-3 text-center">
+                  <div class="flex justify-center">
+                    <input 
+                      type="checkbox"
+                      [checked]="hasCategoryPermission(role, category.name)"
+                      [disabled]="!canEditRole(role)"
+                      (change)="toggleCategoryPermissions(role, category.name, $event.target.checked)"
+                      class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Individual Permissions -->
+              <ng-container *ngIf="category.expanded">
+                <tr *ngFor="let permission of category.permissions" class="hover:bg-gray-50">
+                  <td class="px-6 py-2 pl-12">
+                    <div class="flex items-center">
+                      <span class="text-sm text-gray-900">{{ getPermissionDisplayName(permission.name) }}</span>
+                      <span class="ml-2 text-xs text-gray-500">{{ permission.name }}</span>
+                    </div>
+                  </td>
+                  <td *ngFor="let role of roles" class="px-6 py-2 text-center">
+                    <div class="flex justify-center">
+                      <input 
+                        type="checkbox"
+                        [checked]="hasPermission(role, permission.name)"
+                        [disabled]="!canEditRole(role)"
+                        (change)="togglePermission(role, permission.name)"
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Role Actions -->
+    <div *ngIf="state.selectedRole" class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 class="text-lg font-medium text-gray-900">
+            Editando: {{ state.selectedRole.display_name }}
+          </h4>
+          <p class="text-sm text-gray-500 mt-1">
+            {{ getRolePermissionCount(state.selectedRole) }} permissões selecionadas
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <app-button 
+            variant="outline" 
+            (onClick)="cancelEdit()"
+            [disabled]="!isRoleModified(state.selectedRole)">
+            Cancelar
+          </app-button>
+          <app-button 
+            variant="primary" 
+            (onClick)="saveRolePermissions(state.selectedRole)"
+            [disabled]="!isRoleModified(state.selectedRole) || !canEditRole(state.selectedRole)">
+            Salvar Alterações
+          </app-button>
+        </div>
+      </div>
+
+      <!-- Modified Permissions Summary -->
+      <div *ngIf="isRoleModified(state.selectedRole)" class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+        <div class="flex items-center">
+          <mat-icon class="text-yellow-600 mr-2">warning</mat-icon>
+          <span class="text-sm text-yellow-800">
+            Alterações não salvas. Clique em "Salvar Alterações" para aplicar as mudanças.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+      <div class="flex">
+        <mat-icon class="text-blue-400 mr-3">info</mat-icon>
+        <div>
+          <h3 class="text-sm font-medium text-blue-800">Como usar a matriz de permissões</h3>
+          <ul class="text-sm text-blue-700 mt-1 space-y-1">
+            <li>• Clique em um papel para selecioná-lo e editar suas permissões</li>
+            <li>• Use as caixas de seleção para adicionar ou remover permissões</li>
+            <li>• Marque a caixa da categoria para selecionar todas as permissões da categoria</li>
+            <li>• Papéis do sistema (marcados em azul) não podem ser modificados</li>
+            <li>• As alterações só são aplicadas após clicar em "Salvar Alterações"</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

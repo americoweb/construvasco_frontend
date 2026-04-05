@@ -1,0 +1,48 @@
+<div 
+  [class]="notificationClasses"
+  [@slideIn]
+  role="alert"
+  [attr.aria-live]="notification.type === 'error' ? 'assertive' : 'polite'"
+  [attr.aria-atomic]="true">
+  
+  <!-- Icon -->
+  <div class="flex-shrink-0 mr-3">
+    <mat-icon [class]="iconColor" class="text-xl">{{ defaultIcon }}</mat-icon>
+  </div>
+
+  <!-- Content -->
+  <div class="flex-1 min-w-0">
+    <!-- Title -->
+    <h3 *ngIf="notification.title" class="text-sm font-semibold mb-1">
+      {{ notification.title }}
+    </h3>
+
+    <!-- Message -->
+    <p class="text-sm">{{ notification.message }}</p>
+
+    <!-- Timestamp -->
+    <p *ngIf="notification.timestamp" class="text-xs opacity-75 mt-1">
+      {{ timeAgo }}
+    </p>
+
+    <!-- Action Button -->
+    <button
+      *ngIf="notification.action"
+      type="button"
+      class="mt-2 text-sm font-medium underline hover:no-underline focus:outline-none"
+      (click)="onActionClick()">
+      {{ notification.action.label }}
+    </button>
+  </div>
+
+  <!-- Dismiss Button -->
+  <button
+    *ngIf="notification.dismissible !== false"
+    type="button"
+    mat-icon-button
+    class="flex-shrink-0 ml-2 -mr-1 -mt-1"
+    (click)="onDismiss()"
+    [attr.aria-label]="'Dismiss notification'">
+    <mat-icon class="text-sm">close</mat-icon>
+  </button>
+</div>

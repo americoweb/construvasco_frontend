@@ -1,0 +1,60 @@
+:host {
+  display: block;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.content-slot:empty {
+  display: none;
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .space-x-3 > * + * {
+    margin-left: 0.5rem;
+  }
+  
+  .space-x-2 > * + * {
+    margin-left: 0.25rem;
+  }
+}
+
+// Focus styles
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+// Hover transitions
+button {
+  transition: all 0.2s ease-in-out;
+}
+
+// View toggle specific styles
+.view-toggle-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.view-toggle-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.view-toggle-button:hover::before {
+  left: 100%;
+}

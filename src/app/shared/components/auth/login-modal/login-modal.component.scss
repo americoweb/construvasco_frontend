@@ -1,0 +1,17 @@
+.login-modal {
+  position: relative;
+  padding: 2rem;
+  max-width: 420px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@media (max-width: 640px) {
+  .login-modal {
+    padding: 1.5rem;
+    max-width: 100%;
+  }
+}
+

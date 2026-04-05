@@ -1,0 +1,126 @@
+<div class="size-management-container space-y-6">
+  <app-card>
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Tamanhos do Produto</h3>
+        <app-button
+          variant="primary"
+          icon="add"
+          (onClick)="addSize()">
+          Adicionar Tamanho
+        </app-button>
+      </div>
+      <app-data-table
+        [data]="sizes"
+        [columns]="columns"
+        [actions]="actions"
+        [loading]="loading"
+        [emptyMessage]="'Nenhum tamanho encontrado'">
+      </app-data-table>
+    </div>
+  </app-card>
+
+  <!-- Size Restrictions Section -->
+  <app-card>
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900">Restrições para Tamanhos Customizados</h3>
+          <p class="text-sm text-gray-500 mt-1">Configure limites para tamanhos personalizados</p>
+        </div>
+        <app-button
+          variant="outline"
+          [icon]="showRestrictionsForm ? 'close' : 'edit'"
+          (onClick)="toggleRestrictionsForm()">
+          {{ showRestrictionsForm ? 'Cancelar' : (restrictions ? 'Editar' : 'Configurar') }}
+        </app-button>
+      </div>
+
+      <div *ngIf="!showRestrictionsForm && restrictions" class="bg-gray-50 rounded-lg p-4">
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div *ngIf="restrictions.min_width_cm || restrictions.max_width_cm">
+            <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Largura</dt>
+            <dd class="text-sm text-gray-900">
+              {{ restrictions.min_width_cm ? restrictions.min_width_cm + 'cm' : 'Sem mínimo' }} - 
+              {{ restrictions.max_width_cm ? restrictions.max_width_cm + 'cm' : 'Sem máximo' }}
+            </dd>
+          </div>
+          <div *ngIf="restrictions.min_height_cm || restrictions.max_height_cm">
+            <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Altura</dt>
+            <dd class="text-sm text-gray-900">
+              {{ restrictions.min_height_cm ? restrictions.min_height_cm + 'cm' : 'Sem mínimo' }} - 
+              {{ restrictions.max_height_cm ? restrictions.max_height_cm + 'cm' : 'Sem máximo' }}
+            </dd>
+          </div>
+          <div *ngIf="restrictions.step_increment_cm">
+            <dt class="text-xs font-medium text-gray-500 uppercase mb-1">Incremento</dt>
+            <dd class="text-sm text-gray-900">{{ restrictions.step_increment_cm }}cm</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div *ngIf="!showRestrictionsForm && !restrictions" class="text-center py-8 text-gray-500">
+        <p>Nenhuma restrição configurada</p>
+        <p class="text-sm mt-2">Configure restrições para limitar tamanhos customizados</p>
+      </div>
+
+      <!-- Restrictions Form (simplified inline form) -->
+      <div *ngIf="showRestrictionsForm" class="mt-4 bg-gray-50 rounded-lg p-4">
+        <form (ngSubmit)="saveRestrictions($event)" #restrictionsForm="ngForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Largura Mínima (cm)</label>
+              <input 
+                type="number" 
+                step="0.1"
+                [(ngModel)]="restrictionsFormData.min_width_cm"
+                name="min_width_cm"
+                class="w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Largura Máxima (cm)</label>
+              <input 
+                type="number" 
+                step="0.1"
+                [(ngModel)]="restrictionsFormData.max_width_cm"
+                name="max_width_cm"
+                class="w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Altura Mínima (cm)</label>
+              <input 
+                type="number" 
+                step="0.1"
+                [(ngModel)]="restrictionsFormData.min_height_cm"
+                name="min_height_cm"
+                class="w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Altura Máxima (cm)</label>
+              <input 
+                type="number" 
+                step="0.1"
+                [(ngModel)]="restrictionsFormData.max_height_cm"
+                name="max_height_cm"
+                class="w-full border border-gray-300 rounded-md px-3 py-2">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Incremento (cm)</label>
+              <input 
+                type="number" 
+                step="0.1"
+                [(ngModel)]="restrictionsFormData.step_increment_cm"
+                name="step_increment_cm"
+                class="w-full border border-gray-300 rounded-md px-3 py-2"
+                placeholder="Ex: 5 para múltiplos de 5cm">
+            </div>
+          </div>
+          <div class="flex justify-end space-x-3 pt-4 border-t">
+            <app-button variant="outline" (onClick)="toggleRestrictionsForm()">Cancelar</app-button>
+            <app-button variant="primary" type="submit">Salvar Restrições</app-button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </app-card>
+</div>

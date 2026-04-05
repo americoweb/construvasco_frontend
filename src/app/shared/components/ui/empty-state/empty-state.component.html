@@ -1,0 +1,19 @@
+<div class="text-center py-12">
+  <!-- Icon -->
+  <mat-icon [class]="'text-gray-400 mb-4 ' + iconSize">{{ icon }}</mat-icon>
+  
+  <!-- Title -->
+  <h3 [class]="'font-semibold text-gray-900 mb-2 ' + titleSize">{{ title }}</h3>
+  
+  <!-- Message -->
+  <p *ngIf="message" class="text-gray-600 mb-6 max-w-sm mx-auto">{{ message }}</p>
+  
+  <!-- Action Button -->
+  <app-button 
+    *ngIf="actionText"
+    variant="primary"
+    [icon]="actionIcon"
+    (onClick)="onActionClick()">
+    {{ actionText }}
+  </app-button>
+</div>

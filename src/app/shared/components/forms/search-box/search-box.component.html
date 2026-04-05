@@ -1,0 +1,28 @@
+<mat-form-field [appearance]="appearance" class="search-box w-full">
+  <input
+    #searchInput
+    matInput
+    type="search"
+    [placeholder]="placeholder"
+    [value]="value"
+    [disabled]="disabled"
+    (input)="onInput($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur()"
+    (keydown)="onKeyDown($event)"
+    autocomplete="off">
+  
+  <!-- Search icon prefix -->
+  <mat-icon matPrefix class="search-icon">search</mat-icon>
+  
+  <!-- Clear button suffix -->
+  <button
+    *ngIf="hasValue && showClearButton && !disabled"
+    mat-icon-button
+    matSuffix
+    type="button"
+    (click)="onClear()"
+    class="clear-button">
+    <mat-icon>close</mat-icon>
+  </button>
+</mat-form-field>

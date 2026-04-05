@@ -1,0 +1,110 @@
+<div class="max-w-4xl mx-auto p-6 space-y-6">
+  <!-- Change Password -->
+  <app-card>
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-6">Alterar Senha</h3>
+      
+      <!-- Dynamic Password Form -->
+      <app-dynamic-form
+        [config]="passwordFormConfig"
+        (formReady)="onPasswordFormReady($event)"
+        (formChange)="onPasswordFormChange($event)">
+      </app-dynamic-form>
+
+      <div class="flex justify-end mt-6 pt-4 border-t border-gray-200">
+        <app-button 
+          variant="primary" 
+          (onClick)="onChangePassword()"
+          [disabled]="!passwordFormValid || isChangingPassword"
+          [loading]="isChangingPassword">
+          {{ isChangingPassword ? 'Alterando...' : 'Alterar Senha' }}
+        </app-button>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Two-Factor Authentication -->
+  <app-card>
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-medium text-gray-900">Autenticação de Dois Fatores</h3>
+          <p class="text-sm text-gray-500 mt-1">
+            Adicione uma camada extra de segurança à sua conta
+          </p>
+        </div>
+        <mat-slide-toggle 
+          [checked]="twoFactorEnabled"
+          (change)="onToggleTwoFactor()">
+        </mat-slide-toggle>
+      </div>
+
+      <div *ngIf="twoFactorEnabled" class="space-y-4 mt-6 pt-4 border-t border-gray-200">
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div class="flex items-start">
+            <mat-icon class="text-blue-600 mt-1 mr-3">info</mat-icon>
+            <div>
+              <h4 class="font-medium text-blue-900">Configure seu aplicativo autenticador</h4>
+              <p class="text-sm text-blue-700 mt-1">
+                Use um aplicativo como Google Authenticator ou Authy para configurar a autenticação de dois fatores.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex space-x-3">
+          <app-button variant="outline" icon="qr_code_scanner">
+            Ver QR Code
+          </app-button>
+          <app-button variant="outline" icon="key">
+            Ver Códigos de Backup
+          </app-button>
+        </div>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Active Sessions -->
+  <app-card>
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Sessões Ativas</h3>
+        <app-button 
+          variant="outline" 
+          (onClick)="onTerminateAllOtherSessions()">
+          Encerrar Outras Sessões
+        </app-button>
+      </div>
+
+      <mat-list>
+        <mat-list-item *ngFor="let session of sessions" class="border-b border-gray-100 last:border-b-0">
+          <div class="flex items-center justify-between w-full py-2">
+            <div class="flex items-center space-x-3">
+              <mat-icon class="text-gray-400">
+                {{ session.device.includes('iPhone') ? 'smartphone' : 'computer' }}
+              </mat-icon>
+              <div>
+                <div class="font-medium text-gray-900">
+                  {{ session.device }}
+                  <span *ngIf="session.current" class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                    Atual
+                  </span>
+                </div>
+                <div class="text-sm text-gray-500">
+                  {{ session.location }} • {{ session.lastActive }}
+                </div>
+              </div>
+            </div>
+            <app-button 
+              *ngIf="!session.current"
+              variant="ghost" 
+              icon="close"
+              size="sm"
+              (onClick)="onTerminateSession(session)">
+            </app-button>
+          </div>
+        </mat-list-item>
+      </mat-list>
+    </div>
+  </app-card>
+</div>

@@ -1,0 +1,56 @@
+<!-- Modal Backdrop -->
+<div 
+  *ngIf="visible"
+  class="modal-backdrop fixed inset-0 z-50 bg-black bg-opacity-50"
+  [@backdropFade]
+  (click)="onBackdropClick($event)">
+  
+  <!-- Modal Container -->
+  <div [class]="containerClasses">
+    
+    <!-- Modal Content -->
+    <div 
+      [class]="modalClasses"
+      [@modalSlide]
+      (click)="onModalClick($event)"
+      role="dialog"
+      [attr.aria-modal]="true"
+      [attr.aria-labelledby]="config.title ? 'modal-title' : null">
+      
+      <!-- Modal Header -->
+      <div 
+        *ngIf="showHeader && (config.title || showCloseButton)"
+        class="modal-header flex items-center justify-between p-6 border-b border-gray-200">
+        
+        <h2 
+          *ngIf="config.title"
+          id="modal-title"
+          class="text-lg font-semibold text-gray-900">
+          {{ config.title }}
+        </h2>
+        
+        <div class="flex-1" *ngIf="!config.title"></div>
+        
+        <button
+          *ngIf="showCloseButton"
+          type="button"
+          mat-icon-button
+          class="text-gray-400 hover:text-gray-600"
+          (click)="onClose()"
+          [attr.aria-label]="'Close modal'">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <ng-content></ng-content>
+      </div>
+
+      <!-- Modal Footer Slot -->
+      <div class="modal-footer" *ngIf="hasFooterContent">
+        <ng-content select="[slot=footer]"></ng-content>
+      </div>
+    </div>
+  </div>
+</div>

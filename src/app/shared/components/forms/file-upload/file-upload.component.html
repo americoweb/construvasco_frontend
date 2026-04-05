@@ -1,0 +1,121 @@
+<div class="file-upload">
+  
+  <!-- Hidden file input -->
+  <input
+    #fileInput
+    type="file"
+    [accept]="accept"
+    [multiple]="multiple"
+    [disabled]="disabled"
+    (change)="onFileSelect($event)"
+    style="display: none;">
+
+  <!-- Drop zone -->
+  <div 
+    *ngIf="dragDrop && canAddMore"
+    class="drop-zone"
+    [class.drag-over]="isDragOver"
+    [class.disabled]="disabled"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="triggerFileSelect()">
+    
+    <div class="drop-zone-content">
+      <mat-icon class="upload-icon">cloud_upload</mat-icon>
+      <p class="upload-text">
+        <span class="font-medium">Click to upload</span>
+        <span *ngIf="dragDrop"> or drag and drop</span>
+      </p>
+      <p class="upload-hint">
+        {{ accept === '*/*' ? 'Any file type' : accept }}
+        (max {{ formatFileSize(maxFileSize) }})
+      </p>
+    </div>
+  </div>
+
+  <!-- Simple upload button (when drag-drop is disabled) -->
+  <button
+    *ngIf="!dragDrop && canAddMore"
+    mat-raised-button
+    color="primary"
+    [disabled]="disabled"
+    (click)="triggerFileSelect()"
+    class="upload-button">
+    <mat-icon>upload</mat-icon>
+    Select Files
+  </button>
+
+  <!-- File list -->
+  <div *ngIf="hasFiles" class="file-list">
+    <div class="file-list-header">
+      <span class="file-count">{{ files.length }} file(s) selected</span>
+      <button
+        mat-button
+        color="warn"
+        (click)="clearAll()"
+        class="clear-button">
+        <mat-icon>clear_all</mat-icon>
+        Clear All
+      </button>
+    </div>
+
+    <div class="files">
+      <div 
+        *ngFor="let uploadedFile of files; let i = index"
+        class="file-item">
+        
+        <!-- File preview/icon -->
+        <div class="file-preview">
+          <img
+            *ngIf="uploadedFile.url && showPreview"
+            [src]="uploadedFile.url"
+            [alt]="uploadedFile.file.name"
+            class="preview-image">
+          <mat-icon
+            *ngIf="!uploadedFile.url || !showPreview"
+            class="file-icon">
+            {{ getFileIcon(uploadedFile.file) }}
+          </mat-icon>
+        </div>
+
+        <!-- File info -->
+        <div class="file-info">
+          <p class="file-name">{{ uploadedFile.file.name }}</p>
+          <p class="file-size">{{ formatFileSize(uploadedFile.file.size) }}</p>
+          
+          <!-- Progress bar (if uploading) -->
+          <mat-progress-bar
+            *ngIf="uploadedFile.progress !== undefined"
+            mode="determinate"
+            [value]="uploadedFile.progress">
+          </mat-progress-bar>
+
+          <!-- Error message -->
+          <p *ngIf="uploadedFile.error" class="error-text">{{ uploadedFile.error }}</p>
+        </div>
+
+        <!-- Remove button -->
+        <button
+          mat-icon-button
+          color="warn"
+          (click)="removeFile(i)"
+          class="remove-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add more button -->
+  <button
+    *ngIf="hasFiles && canAddMore"
+    mat-button
+    color="primary"
+    [disabled]="disabled"
+    (click)="triggerFileSelect()"
+    class="add-more-button">
+    <mat-icon>add</mat-icon>
+    Add More Files
+  </button>
+</div>

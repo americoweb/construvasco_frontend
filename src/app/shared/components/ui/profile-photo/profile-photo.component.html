@@ -1,0 +1,20 @@
+<div class="profile-photo" [style.width.px]="size" [style.height.px]="size">
+  <img
+    *ngIf="avatarUrl"
+    [src]="avatarUrl"
+    [alt]="displayName"
+    [style.width.px]="size"
+    [style.height.px]="size"
+    class="rounded-full object-cover border-2 border-gray-300"
+    (error)="onImageError($event)"
+    loading="lazy">
+  <div
+    *ngIf="!avatarUrl"
+    class="rounded-full border-2 border-gray-300 bg-gray-200 flex items-center justify-center text-gray-600 font-semibold"
+    [style.width.px]="size"
+    [style.height.px]="size"
+    [style.font-size.px]="size * 0.4">
+    {{ initials }}
+  </div>
+</div>
+

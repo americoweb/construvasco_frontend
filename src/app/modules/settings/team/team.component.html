@@ -1,0 +1,233 @@
+<div class="max-w-6xl mx-auto p-6 space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Gerenciar Equipe</h2>
+      <p class="text-gray-600 mt-1">Convide membros e gerencie permissões da equipe</p>
+    </div>
+    <app-button 
+      variant="primary"
+      icon="person_add"
+      (onClick)="onInviteMember()"
+      *ngIf="!showInviteForm">
+      Convidar Membro
+    </app-button>
+  </div>
+
+  <!-- Invite Form -->
+  <app-card *ngIf="showInviteForm">
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Convidar Novo Membro</h3>
+      
+      <!-- Dynamic Invite Form -->
+      <app-dynamic-form
+        [key]="formKey"
+        [config]="inviteFormConfig"
+        [initialData]="{}"
+        (formReady)="onInviteFormReady($event)"
+        (formChange)="onInviteFormChange($event)">
+      </app-dynamic-form>
+
+      <!-- Show detected type -->
+      <div *ngIf="detectedType" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+        <div class="flex items-center">
+          <mat-icon class="text-blue-600 mr-2" style="font-size: 20px; width: 20px; height: 20px;">
+            {{ detectedType === 'email' ? 'email' : 'phone' }}
+          </mat-icon>
+          <span class="text-sm text-blue-800">
+            Tipo detectado: <strong>{{ detectedType === 'email' ? 'Email' : 'WhatsApp' }}</strong>
+          </span>
+        </div>
+      </div>
+
+      <!-- Show validation error -->
+      <div *ngIf="inviteForm && inviteForm.get && inviteForm.get('identifier')?.errors?.['invalidFormat'] && inviteForm.get('identifier')?.touched" 
+           class="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+        <div class="flex items-center">
+          <mat-icon class="text-red-600 mr-2" style="font-size: 16px; width: 16px; height: 16px;">error</mat-icon>
+          <span class="text-sm text-red-800">
+            Formato inválido. Digite um email válido ou número de telefone.
+          </span>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+        <!-- Debug button (remove in production) -->
+        <app-button 
+          variant="outline" 
+          size="sm"
+          (onClick)="debugFormState()"
+          *ngIf="showInviteForm">
+          Debug Form
+        </app-button>
+        
+        <app-button 
+          variant="outline" 
+          (onClick)="onCancelInvite()"
+          [disabled]="isInviting">
+          Cancelar
+        </app-button>
+        <app-button 
+          variant="primary" 
+          (onClick)="onSendInvite()"
+          [disabled]="isInviting">
+          <span *ngIf="isInviting">Enviando...</span>
+          <span *ngIf="!isInviting">Enviar Convite</span>
+        </app-button>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Team Members Table -->
+  <app-card>
+    <div class="p-6 border-b border-gray-200">
+      <h3 class="text-lg font-medium text-gray-900">Membros da Equipe</h3>
+      <p class="text-sm text-gray-500 mt-1">{{ teamMembers.length }} membros</p>
+    </div>
+
+    <!-- Custom table content since we need custom member and status rendering -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Membro</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Função</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Permissões Customizadas</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Último Acesso</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let member of teamMembers" class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <app-avatar
+                  [name]="member.name"
+                  [size]="40"
+                  class="mr-3">
+                </app-avatar>
+                <div>
+                  <div class="text-sm font-medium text-gray-900">{{ member.name }}</div>
+                  <div class="text-sm text-gray-500">{{ member.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ member.role }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-500">
+                <div *ngIf="member.rawCustomPermissions && (member.rawCustomPermissions.granted?.length > 0 || member.rawCustomPermissions.denied?.length > 0)">
+                  <!-- Granted Permissions -->
+                  <div *ngIf="member.rawCustomPermissions.granted?.length > 0">
+                    <div class="text-xs font-medium text-green-600 mb-1">Concedidas:</div>
+                    <div *ngFor="let permission of member.rawCustomPermissions.granted.slice(0, 2)" class="text-xs text-green-700">
+                      {{ permission }}
+                    </div>
+                    <div *ngIf="member.rawCustomPermissions.granted.length > 2" class="text-xs text-gray-400">
+                      +{{ member.rawCustomPermissions.granted.length - 2 }} mais
+                    </div>
+                  </div>
+                  
+                  <!-- Denied Permissions -->
+                  <div *ngIf="member.rawCustomPermissions.denied?.length > 0" class="mt-2">
+                    <div class="text-xs font-medium text-red-600 mb-1">Negadas:</div>
+                    <div *ngFor="let permission of member.rawCustomPermissions.denied.slice(0, 2)" class="text-xs text-red-700">
+                      {{ permission }}
+                    </div>
+                    <div *ngIf="member.rawCustomPermissions.denied.length > 2" class="text-xs text-gray-400">
+                      +{{ member.rawCustomPermissions.denied.length - 2 }} mais
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="!member.rawCustomPermissions || (!member.rawCustomPermissions.granted?.length && !member.rawCustomPermissions.denied?.length)" class="text-xs text-gray-400">
+                  Nenhuma permissão customizada
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <app-badge [variant]="getStatusColor(member.status)">
+                {{ getStatusLabel(member.status) }}
+              </app-badge>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ member.lastActive }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex justify-end space-x-2">
+                <app-button
+                  variant="ghost"
+                  size="sm"
+                  icon="edit"
+                  (onClick)="onEditMember(member)">
+                </app-button>
+                <app-button
+                  variant="ghost"
+                  size="sm"
+                  icon="security"
+                  (onClick)="onManagePermissions(member)">
+                </app-button>
+                <app-button
+                  *ngIf="member.status === 'pending'"
+                  variant="ghost"
+                  size="sm"
+                  icon="send"
+                  (onClick)="onResendInvite(member)">
+                </app-button>
+                <app-button
+                  variant="ghost"
+                  size="sm"
+                  icon="delete"
+                  (onClick)="onRemoveMember(member)">
+                </app-button>
+              </div>
+            </td>
+          </tr>
+          <!-- Invitations -->
+          <tr *ngFor="let invitation of invitations" class="hover:bg-yellow-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center">
+                <app-avatar
+                  [name]="invitation.identifier"
+                  [size]="40"
+                  class="mr-3">
+                </app-avatar>
+                <div>
+                  <div class="text-sm font-medium text-gray-900">{{ invitation.identifier }}</div>
+                  <div class="text-xs text-gray-500">Convite ({{ invitation.type }})</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-900">{{ invitation.role }}</div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-500">
+                <span class="text-xs text-gray-400">N/A</span>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <app-badge variant="warning">
+                Pendente
+              </app-badge>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              --
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <div class="flex justify-end space-x-2">
+                <app-button
+                  variant="ghost"
+                  size="sm"
+                  icon="delete"
+                  (onClick)="onCancelInvitation(invitation)">
+                </app-button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </app-card>
+</div>

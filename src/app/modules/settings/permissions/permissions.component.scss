@@ -1,0 +1,165 @@
+// Permission Matrix Component Styles
+
+.permission-matrix {
+  .role-header {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: #f9fafb;
+    }
+    
+    &.selected {
+      background-color: #eff6ff;
+    }
+  }
+  
+  .category-row {
+    background-color: #f9fafb;
+    
+    &:hover {
+      background-color: #f3f4f6;
+    }
+  }
+  
+  .permission-row {
+    &:hover {
+      background-color: #f9fafb;
+    }
+  }
+  
+  .checkbox-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .permission-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .system-role-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    background-color: #dbeafe;
+    color: #2563eb;
+  }
+  
+  .category-toggle {
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    color: #111827;
+    
+    &:hover {
+      color: #374151;
+    }
+    
+    mat-icon {
+      transition: transform 0.2s ease;
+      
+      &.expanded {
+        transform: rotate(90deg);
+      }
+    }
+  }
+  
+  .permission-count {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-left: 0.5rem;
+  }
+  
+  .role-permission-count {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  .role-actions {
+    background-color: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+  
+  .modified-warning {
+    background-color: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 0.375rem;
+    padding: 1rem;
+  }
+  
+  .instructions {
+    background-color: #eff6ff;
+    border: 1px solid #3b82f6;
+    border-radius: 0.375rem;
+    padding: 1rem;
+  }
+  
+  // Responsive table
+  .table-container {
+    overflow-x: auto;
+    
+    @media (max-width: 768px) {
+      .permission-matrix-table {
+        min-width: 800px;
+      }
+    }
+  }
+  
+  // Loading animation
+  .loading-spinner {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  // Checkbox styles
+  input[type="checkbox"] {
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    &:not(:disabled) {
+      cursor: pointer;
+    }
+  }
+  
+  // Role selection styles
+  .role-column {
+    transition: background-color 0.2s ease;
+    
+    &:hover {
+      background-color: #f9fafb;
+    }
+    
+    &.selected {
+      background-color: #eff6ff;
+    }
+  }
+  
+  // Category expansion animation
+  .category-content {
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  
+  // Permission description tooltip
+  .permission-description {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-left: 0.5rem;
+  }
+} 

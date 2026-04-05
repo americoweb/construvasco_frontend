@@ -1,0 +1,33 @@
+<div class="tag-form-container">
+  <app-page-header
+    [title]="isEditMode ? 'Editar Tag' : 'Nova Tag'"
+    [breadcrumbs]="breadcrumbs">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6">
+    <app-card>
+      <app-dynamic-form
+        [config]="formConfig"
+        [initialData]="initialData"
+        [loading]="isLoading"
+        (formReady)="onFormReady($event)"
+        (formChange)="onFormChange($event)">
+      </app-dynamic-form>
+
+      <div class="flex justify-end gap-4 mt-6">
+        <app-button
+          variant="secondary"
+          (click)="onCancel()">
+          Cancelar
+        </app-button>
+        <app-button
+          variant="primary"
+          [loading]="isSaving"
+          (click)="onSave()">
+          {{ isEditMode ? 'Atualizar' : 'Criar' }}
+        </app-button>
+      </div>
+    </app-card>
+  </div>
+</div>
+

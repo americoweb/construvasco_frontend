@@ -1,0 +1,51 @@
+<div class="product-form-container w-full">
+  <app-page-header
+    [title]="isEditMode ? 'Editar Produto' : 'Novo Produto'"
+    [subtitle]="isEditMode ? 'Atualize as informações do produto' : 'Crie um novo produto'"
+    [breadcrumbs]="breadcrumbs">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6 max-w-4xl">
+    <app-card>
+      <div class="p-6">
+        <div *ngIf="isLoading" class="text-center py-8">
+          <p class="text-gray-500">Carregando produto...</p>
+        </div>
+        <app-dynamic-form
+          *ngIf="!isLoading && formConfig"
+          [config]="formConfig"
+          [initialData]="initialData"
+          [loading]="isSaving"
+          (formReady)="onFormReady($event)"
+          (formChange)="onFormChange($event)">
+        </app-dynamic-form>
+
+        <!-- Size Management Section (only show in edit mode and if product has sizes) -->
+        <div *ngIf="isEditMode && productId && form?.get('has_sizes')?.value" class="mt-6">
+          <app-size-management
+            [productId]="productId"
+            (sizeAdded)="onSizeAdded()"
+            (sizeUpdated)="onSizeUpdated()"
+            (sizeDeleted)="onSizeDeleted()">
+          </app-size-management>
+        </div>
+
+        <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+          <app-button
+            variant="outline"
+            (onClick)="onCancel()">
+            Cancelar
+          </app-button>
+          <app-button
+            variant="primary"
+            (onClick)="onSave()"
+            [disabled]="isSaving || !form?.valid">
+            <span *ngIf="isSaving">Salvando...</span>
+            <span *ngIf="!isSaving">{{ isEditMode ? 'Atualizar' : 'Criar' }}</span>
+          </app-button>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>
+

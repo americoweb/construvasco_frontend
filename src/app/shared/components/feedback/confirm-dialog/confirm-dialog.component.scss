@@ -1,0 +1,29 @@
+.confirm-dialog {
+  min-width: 320px;
+  max-width: 500px;
+
+  .mat-mdc-button,
+  .mat-mdc-raised-button {
+    min-width: 80px;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .confirm-dialog {
+    min-width: 280px;
+    padding: 1rem;
+
+    .flex.items-center.justify-end {
+      flex-direction: column-reverse;
+      align-items: stretch;
+      gap: 0.5rem;
+
+      .mat-mdc-button,
+      .mat-mdc-raised-button {
+        width: 100%;
+        margin: 0;
+      }
+    }
+  }
+}

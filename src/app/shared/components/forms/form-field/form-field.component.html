@@ -1,0 +1,273 @@
+<div [class]="fieldClasses" *ngIf="shouldShowField">
+  
+  <!-- Text Input -->
+  <mat-form-field 
+    *ngIf="field.type === 'text' || field.type === 'email' || field.type === 'password' || field.type === 'tel' || field.type === 'url'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <input 
+      matInput
+      [type]="field.type"
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [readonly]="field.readonly"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)"
+      (blur)="onTouched()">
+    <mat-icon *ngIf="field.prefix" matPrefix>{{ field.prefix }}</mat-icon>
+    <mat-icon *ngIf="field.suffix" matSuffix>{{ field.suffix }}</mat-icon>
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Number Input -->
+  <mat-form-field 
+    *ngIf="field.type === 'number'"
+    [appearance]="field.appearance || 'outline'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <input 
+      matInput
+      type="number"
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [readonly]="field.readonly"
+      [min]="field.validation?.min"
+      [max]="field.validation?.max"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)"
+      (blur)="onTouched()">
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Textarea -->
+  <mat-form-field 
+    *ngIf="field.type === 'textarea'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <textarea 
+      matInput
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [readonly]="field.readonly"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)"
+      rows="4"
+      (blur)="onTouched()">
+    </textarea>
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Select -->
+  <mat-form-field 
+    *ngIf="field.type === 'select'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <mat-select
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)">
+      <mat-option 
+        *ngFor="let option of field.options; trackBy: trackByValue"
+        [value]="option.value"
+        [disabled]="option.disabled">
+        <mat-icon *ngIf="option.icon" class="mr-2">{{ option.icon }}</mat-icon>
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Multi Select -->
+  <mat-form-field 
+    *ngIf="field.type === 'multiselect'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <mat-select
+      multiple
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)">
+      <mat-option 
+        *ngFor="let option of field.options; trackBy: trackByValue"
+        [value]="option.value"
+        [disabled]="option.disabled">
+        <mat-icon *ngIf="option.icon" class="mr-2">{{ option.icon }}</mat-icon>
+        {{ option.label }}
+      </mat-option>
+    </mat-select>
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Radio Group -->
+  <div *ngIf="field.type === 'radio'" class="w-full">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      {{ field.label }}
+      <span *ngIf="field.required" class="text-red-500">*</span>
+    </label>
+    <mat-radio-group
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)"
+      [disabled]="field.disabled || disabled"
+      class="flex flex-col gap-2">
+      <mat-radio-button 
+        *ngFor="let option of field.options; trackBy: trackByValue"
+        [value]="option.value"
+        [disabled]="option.disabled">
+        {{ option.label }}
+      </mat-radio-button>
+    </mat-radio-group>
+    <div *ngIf="field.helpText" class="text-xs text-gray-600 mt-1">{{ field.helpText }}</div>
+    <div *ngIf="hasErrors" class="text-xs text-red-600 mt-1">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Checkbox -->
+  <div *ngIf="field.type === 'checkbox'" class="w-full">
+    <mat-checkbox
+      [(ngModel)]="value"
+      (ngModelChange)="onCheckboxChange($event)"
+      [disabled]="field.disabled || disabled"
+      [required]="field.required">
+      {{ field.label }}
+      <span *ngIf="field.required" class="text-red-500">*</span>
+    </mat-checkbox>
+    <div *ngIf="field.helpText" class="text-xs text-gray-600 mt-1">{{ field.helpText }}</div>
+    <div *ngIf="hasErrors" class="text-xs text-red-600 mt-1">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Date -->
+  <mat-form-field 
+    *ngIf="field.type === 'date'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <input 
+      matInput
+      [matDatepicker]="picker"
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [readonly]="field.readonly"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)"
+      (blur)="onTouched()">
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Time -->
+  <mat-form-field 
+    *ngIf="field.type === 'time'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <input 
+      matInput
+      type="time"
+      [placeholder]="field.placeholder"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [readonly]="field.readonly"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)"
+      (blur)="onTouched()">
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- Range/Slider -->
+  <div *ngIf="field.type === 'range'" class="w-full">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      {{ field.label }}
+      <span *ngIf="field.required" class="text-red-500">*</span>
+      <span class="ml-2 text-gray-500">({{ value || field.validation?.min || 0 }})</span>
+    </label>
+    <mat-slider
+      [min]="field.validation?.min || 0"
+      [max]="field.validation?.max || 100"
+      [step]="field.validation?.step || 1"
+      [disabled]="field.disabled || disabled"
+      [(ngModel)]="value"
+      (ngModelChange)="onValueChange($event)">
+    </mat-slider>
+    <div *ngIf="field.helpText" class="text-xs text-gray-600 mt-1">{{ field.helpText }}</div>
+    <div *ngIf="hasErrors" class="text-xs text-red-600 mt-1">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Color -->
+  <mat-form-field 
+    *ngIf="field.type === 'color'"
+    [appearance]="field.appearance || 'fill'"
+    class="w-full">
+    <mat-label>{{ field.label }}</mat-label>
+    <input 
+      matInput
+      type="color"
+      [required]="field.required"
+      [disabled]="field.disabled || disabled"
+      [value]="value || '#000000'"
+      (input)="onValueChange($event.target?.value)"
+      (blur)="onTouched()">
+    <mat-hint *ngIf="field.helpText">{{ field.helpText }}</mat-hint>
+    <mat-error *ngIf="hasErrors">{{ errorMessage }}</mat-error>
+  </mat-form-field>
+
+  <!-- File Upload -->
+  <div *ngIf="field.type === 'file'" class="w-full">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      {{ field.label }}
+      <span *ngIf="field.required" class="text-red-500">*</span>
+    </label>
+    <app-file-upload
+      [multiple]="field.multiple ?? false"
+      [accept]="field.accept || '*/*'"
+      [maxFiles]="field.maxFiles ?? 1"
+      [maxFileSize]="field.maxFileSize ?? 10485760"
+      [disabled]="field.disabled || disabled"
+      [dragDrop]="true"
+      [showPreview]="true"
+      (filesChange)="onFileChange($event)">
+    </app-file-upload>
+    <div *ngIf="field.helpText" class="text-xs text-gray-600 mt-1">{{ field.helpText }}</div>
+    <div *ngIf="hasErrors" class="text-xs text-red-600 mt-1">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Search -->
+  <div *ngIf="field.type === 'search'" class="w-full">
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      {{ field.label }}
+      <span *ngIf="field.required" class="text-red-500">*</span>
+    </label>
+    <app-search-box
+      [placeholder]="field.placeholder"
+      [disabled]="field.disabled || disabled"
+      [value]="value"
+      (search)="onValueChange($event)">
+    </app-search-box>
+    <div *ngIf="field.helpText" class="text-xs text-gray-600 mt-1">{{ field.helpText }}</div>
+    <div *ngIf="hasErrors" class="text-xs text-red-600 mt-1">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Hidden -->
+  <input 
+    *ngIf="field.type === 'hidden'"
+    type="hidden"
+    [value]="value">
+</div>

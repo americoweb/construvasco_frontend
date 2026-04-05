@@ -1,0 +1,56 @@
+.cart-popup-backdrop {
+  backdrop-filter: blur(2px);
+}
+
+.cart-panel {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+// Mobile adjustments
+@media (max-width: 640px) {
+  .cart-panel {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Scrollbar styling
+.cart-panel ::ng-deep {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e0 #f7fafc;
+}
+
+.cart-panel ::ng-deep::-webkit-scrollbar {
+  width: 6px;
+}
+
+.cart-panel ::ng-deep::-webkit-scrollbar-track {
+  background: #f7fafc;
+}
+
+.cart-panel ::ng-deep::-webkit-scrollbar-thumb {
+  background-color: #cbd5e0;
+  border-radius: 3px;
+}
+
+.cart-panel ::ng-deep::-webkit-scrollbar-thumb:hover {
+  background-color: #a0aec0;
+}
+

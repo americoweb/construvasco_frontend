@@ -1,0 +1,24 @@
+.search-box {
+  .search-icon {
+    color: #6b7280;
+  }
+
+  .clear-button {
+    color: #6b7280;
+    
+    &:hover {
+      color: #374151;
+    }
+  }
+
+  // Hide browser's built-in clear button for search inputs
+  input[type="search"]::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}

@@ -1,0 +1,23 @@
+<div class="color-management-container">
+  <app-card>
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Cores do Produto</h3>
+        <app-button
+          variant="primary"
+          icon="add"
+          (onClick)="addColor()">
+          Adicionar Cor
+        </app-button>
+      </div>
+      <app-data-table
+        [data]="colors"
+        [columns]="columns"
+        [actions]="actions"
+        [loading]="loading"
+        [emptyMessage]="'Nenhuma cor encontrada'">
+      </app-data-table>
+    </div>
+  </app-card>
+</div>
+

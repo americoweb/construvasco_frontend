@@ -1,0 +1,32 @@
+.notification-item {
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(8px);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .mat-mdc-icon-button {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    
+    .mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .notification-item {
+    &.bg-green-50 { background-color: rgba(34, 197, 94, 0.1); }
+    &.bg-red-50 { background-color: rgba(239, 68, 68, 0.1); }
+    &.bg-yellow-50 { background-color: rgba(245, 158, 11, 0.1); }
+    &.bg-blue-50 { background-color: rgba(59, 130, 246, 0.1); }
+  }
+}

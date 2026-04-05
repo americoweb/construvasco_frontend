@@ -1,0 +1,401 @@
+<div class="design-detail-container w-full">
+  <app-page-header
+    [title]="design ? 'Design #' + design.id : 'Carregando...'"
+    [subtitle]="'Detalhes do design'"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="pageHeaderActions"
+    [loading]="loading">
+  </app-page-header>
+
+  <div class="mx-auto px-4 py-6" *ngIf="!loading && design">
+    <!-- Tabs -->
+    <div class="mb-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          (click)="setActiveTab('info')"
+          [class]="activeTab === 'info' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Informações
+        </button>
+        <button
+          (click)="setActiveTab('mockup')"
+          [class]="activeTab === 'mockup' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Mockup
+        </button>
+        <button
+          (click)="setActiveTab('refinements')"
+          [class]="activeTab === 'refinements' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Refinamentos ({{ refinements.length }})
+        </button>
+        <button
+          (click)="setActiveTab('metadata')"
+          [class]="activeTab === 'metadata' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Metadados
+        </button>
+        <button
+          (click)="setActiveTab('printing')"
+          [class]="activeTab === 'printing' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Arquivos para Impressão
+        </button>
+      </nav>
+    </div>
+
+    <!-- Info Tab -->
+    <div *ngIf="activeTab === 'info'">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Design Details -->
+        <app-card class="lg:col-span-2">
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Informações do Design</h3>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">ID</dt>
+                <dd class="text-sm font-semibold text-gray-900">#{{ design.id }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">UUID</dt>
+                <dd class="text-sm text-gray-600 font-mono text-xs">{{ design.uuid }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Produto</dt>
+                <dd class="text-sm font-semibold text-gray-900">{{ design.product?.name || design.product_name || '-' }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Cor</dt>
+                <dd class="text-sm text-gray-900">
+                  <span *ngIf="design.color" class="inline-flex items-center gap-2">
+                    <span [style.background-color]="design.color.hex_code" 
+                          class="w-4 h-4 rounded border border-gray-300"></span>
+                    {{ design.color.name }}
+                  </span>
+                  <span *ngIf="!design.color">{{ design.color_name || '-' }}</span>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Área de Impressão</dt>
+                <dd class="text-sm text-gray-900">{{ design.print_area?.name || design.print_area_name || '-' }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Status</dt>
+                <dd>
+                  <app-badge [color]="getStatusColor(design.status)">
+                    {{ design.status_label || getStatusLabel(design.status) }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div class="md:col-span-2">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Prompt</dt>
+                <dd class="text-sm text-gray-900 bg-gray-50 p-3 rounded-md border border-gray-200 whitespace-pre-wrap">
+                  {{ design.prompt || '-' }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </app-card>
+
+        <!-- Status & Quick Info -->
+        <app-card>
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Status e Estatísticas</h3>
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Status</dt>
+                <dd>
+                  <app-badge [color]="getStatusColor(design.status)">
+                    {{ design.status_label || getStatusLabel(design.status) }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tem Mockup</dt>
+                <dd>
+                  <app-badge [color]="design.has_mockup ? 'green' : 'gray'">
+                    {{ design.has_mockup ? 'Sim' : 'Não' }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tem Logo</dt>
+                <dd>
+                  <div class="flex items-center gap-2">
+                    <app-badge [color]="design.has_logo ? 'green' : 'gray'">
+                      {{ design.has_logo ? 'Sim' : 'Não' }}
+                    </app-badge>
+                    <app-button
+                      *ngIf="design.has_logo"
+                      variant="secondary"
+                      size="sm"
+                      (click)="downloadLogo()">
+                      Baixar Logo
+                    </app-button>
+                  </div>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tem Imagem de Referência</dt>
+                <dd>
+                  <div class="flex items-center gap-2">
+                    <app-badge [color]="design.has_reference_image ? 'green' : 'gray'">
+                      {{ design.has_reference_image ? 'Sim' : 'Não' }}
+                    </app-badge>
+                    <app-button
+                      *ngIf="design.has_reference_image"
+                      variant="secondary"
+                      size="sm"
+                      (click)="downloadReferenceImage()">
+                      Baixar Referência
+                    </app-button>
+                  </div>
+                </dd>
+              </div>
+              <div class="pt-3 border-t border-gray-200">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tentativas de Geração</dt>
+                <dd class="text-lg font-semibold text-gray-900">{{ design.generation_attempts }}</dd>
+              </div>
+              <div *ngIf="design.refinements_count !== undefined">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Refinamentos</dt>
+                <dd class="text-lg font-semibold text-gray-900">{{ design.refinements_count }}</dd>
+              </div>
+            </dl>
+          </div>
+        </app-card>
+      </div>
+    </div>
+
+    <!-- Mockup Tab -->
+    <div *ngIf="activeTab === 'mockup'">
+      <app-card>
+        <div class="p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-medium text-gray-900">Mockup do Design</h3>
+            <div class="flex gap-2" *ngIf="getMockupUrl()">
+              <a [href]="getMockupUrl()" target="_blank" download>
+                <app-button variant="secondary" size="sm">
+                  Baixar Mockup
+                </app-button>
+              </a>
+            </div>
+          </div>
+          <div *ngIf="getMockupUrl()" class="space-y-4">
+            <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+              <img 
+                [src]="getMockupUrl()" 
+                [alt]="'Mockup do design #' + design.id"
+                class="w-full max-h-96 object-contain mx-auto"
+                (error)="$event.target.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2214%22 dy=%2210.5%22 x=%2250%22 y=%2250%22 text-anchor=%22middle%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+              <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
+                <a [href]="getMockupUrl()" target="_blank" class="hover:underline">Ver imagem completa</a>
+              </div>
+            </div>
+          </div>
+          <app-empty-state 
+            *ngIf="!getMockupUrl()"
+            [message]="'Nenhum mockup disponível'"
+            [icon]="'image'">
+          </app-empty-state>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Refinements Tab -->
+    <div *ngIf="activeTab === 'refinements'">
+      <app-card>
+        <div class="p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Histórico de Refinamentos</h3>
+          <app-data-table
+            *ngIf="refinements.length > 0"
+            [data]="refinements"
+            [columns]="refinementColumns"
+            [actions]="refinementActions"
+            [loading]="loadingRefinements"
+            [emptyMessage]="'Nenhum refinamento encontrado'">
+          </app-data-table>
+          <app-empty-state 
+            *ngIf="refinements.length === 0 && !loadingRefinements"
+            [message]="'Nenhum refinamento encontrado'"
+            [icon]="'history'">
+          </app-empty-state>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Metadata Tab -->
+    <div *ngIf="activeTab === 'metadata'">
+      <app-card>
+        <div class="p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Metadados do Design</h3>
+          <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Modelo de IA Usado</dt>
+              <dd class="text-sm text-gray-900">{{ design.ai_model_used || '-' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tentativas de Geração</dt>
+              <dd class="text-sm text-gray-900">{{ design.generation_attempts }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Criado em</dt>
+              <dd class="text-sm text-gray-900">{{ design.created_at | date:'dd/MM/yyyy HH:mm' }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Atualizado em</dt>
+              <dd class="text-sm text-gray-900">{{ design.updated_at | date:'dd/MM/yyyy HH:mm' }}</dd>
+            </div>
+            <div *ngIf="design.is_from_suggestion">
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">De Sugestão</dt>
+              <dd>
+                <app-badge [color]="'blue'">Sim</app-badge>
+              </dd>
+            </div>
+            <div *ngIf="design.suggestion_id">
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">ID da Sugestão</dt>
+              <dd class="text-sm text-gray-900">{{ design.suggestion_id }}</dd>
+            </div>
+            <div *ngIf="design.user_id">
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">ID do Usuário</dt>
+              <dd class="text-sm text-gray-900">{{ design.user_id }}</dd>
+            </div>
+            <div *ngIf="design.session_id">
+              <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">ID da Sessão</dt>
+              <dd class="text-sm text-gray-600 font-mono text-xs">{{ design.session_id }}</dd>
+            </div>
+          </dl>
+        </div>
+      </app-card>
+    </div>
+
+    <!-- Printing Files Tab -->
+    <div *ngIf="activeTab === 'printing'">
+      <app-card>
+        <div class="p-6">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Arquivos para Impressão</h3>
+          
+          <div *ngIf="loadingFiles" class="text-center py-8">
+            <app-loading></app-loading>
+          </div>
+
+          <div *ngIf="!loadingFiles && printingFiles" class="space-y-6">
+            <!-- Logo File -->
+            <div *ngIf="printingFiles.logo" class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <h4 class="text-sm font-semibold text-gray-900 mb-1">Logo</h4>
+                  <p class="text-xs text-gray-500 mb-2">{{ printingFiles.logo.filename }}</p>
+                  <p class="text-xs text-gray-400">Tipo: {{ printingFiles.logo.mime_type }}</p>
+                </div>
+                <div class="flex gap-2">
+                  <a [href]="printingFiles.logo.url" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                    Ver
+                  </a>
+                  <app-button
+                    variant="secondary"
+                    size="sm"
+                    (click)="downloadLogo()">
+                    Baixar
+                  </app-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reference Image File -->
+            <div *ngIf="printingFiles.reference" class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <h4 class="text-sm font-semibold text-gray-900 mb-1">Imagem de Referência</h4>
+                  <p class="text-xs text-gray-500 mb-2">{{ printingFiles.reference.filename }}</p>
+                  <p class="text-xs text-gray-400">Tipo: {{ printingFiles.reference.mime_type }}</p>
+                </div>
+                <div class="flex gap-2">
+                  <a [href]="printingFiles.reference.url" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                    Ver
+                  </a>
+                  <app-button
+                    variant="secondary"
+                    size="sm"
+                    (click)="downloadReferenceImage()">
+                    Baixar
+                  </app-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mockup File -->
+            <div *ngIf="printingFiles.mockup" class="border border-gray-200 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div class="flex-1">
+                  <h4 class="text-sm font-semibold text-gray-900 mb-1">Mockup (Preview)</h4>
+                  <p class="text-xs text-gray-500 mb-2">{{ printingFiles.mockup.filename }}</p>
+                  <p class="text-xs text-gray-400">Tipo: {{ printingFiles.mockup.mime_type }}</p>
+                </div>
+                <div>
+                  <a [href]="printingFiles.mockup.url" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm">
+                    Ver
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Design Specifications -->
+            <div *ngIf="printingFiles.specifications" class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <h4 class="text-sm font-semibold text-gray-900 mb-3">Especificações do Design</h4>
+              <dl class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                <div *ngIf="printingFiles.specifications.product">
+                  <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Produto</dt>
+                  <dd class="text-gray-900">{{ printingFiles.specifications.product.name }}</dd>
+                </div>
+                <div *ngIf="printingFiles.specifications.color">
+                  <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Cor</dt>
+                  <dd class="text-gray-900">
+                    <span class="inline-flex items-center gap-2">
+                      <span [style.background-color]="printingFiles.specifications.color.hex_code" 
+                            class="w-4 h-4 rounded border border-gray-300"></span>
+                      {{ printingFiles.specifications.color.name }} ({{ printingFiles.specifications.color.hex_code }})
+                    </span>
+                  </dd>
+                </div>
+                <div *ngIf="printingFiles.specifications.print_area" class="md:col-span-2">
+                  <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Área de Impressão</dt>
+                  <dd class="text-gray-900">
+                    {{ printingFiles.specifications.print_area.name }} 
+                    ({{ printingFiles.specifications.print_area.max_width_cm }}cm x {{ printingFiles.specifications.print_area.max_height_cm }}cm)
+                  </dd>
+                </div>
+                <div *ngIf="printingFiles.specifications.prompt" class="md:col-span-2">
+                  <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Prompt do Design</dt>
+                  <dd class="text-gray-900 bg-white p-2 rounded border border-gray-200 whitespace-pre-wrap text-xs">
+                    {{ printingFiles.specifications.prompt }}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <app-empty-state 
+            *ngIf="!loadingFiles && (!printingFiles || (!printingFiles.logo && !printingFiles.reference && !printingFiles.mockup))"
+            [message]="'Nenhum arquivo disponível para impressão'"
+            [icon]="'file_download'">
+          </app-empty-state>
+        </div>
+      </app-card>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="mx-auto px-4 py-6 w-full">
+    <app-loading></app-loading>
+  </div>
+</div>
+

@@ -1,0 +1,108 @@
+<div class="max-w-4xl mx-auto p-6">
+  <div class="mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">Modelos de Documentos</h2>
+    <p class="text-gray-600 mt-1">Configure modelos de email, documentos e assinaturas</p>
+  </div>
+
+  <mat-tab-group mat-align-tabs="start" class="custom-tabs">
+    <!-- Email Templates Tab -->
+    <mat-tab label="Modelos de Email">
+      <div class="pt-6">
+        <app-card>
+          <div class="p-6">
+            <!-- Dynamic Email Form -->
+            <app-dynamic-form
+              [config]="emailFormConfig"
+              [initialData]="emailTemplatesData"
+              (formReady)="onEmailFormReady($event)"
+              (formChange)="onEmailFormChange($event)">
+            </app-dynamic-form>
+
+            <div class="flex justify-end pt-6 mt-6 border-t border-gray-200">
+              <app-button 
+                variant="primary" 
+                (onClick)="onSaveEmailTemplates()"
+                [disabled]="!emailFormValid">
+                Salvar Modelos de Email
+              </app-button>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </mat-tab>
+
+    <!-- Document Templates Tab -->
+    <mat-tab label="Modelos de Documento">
+      <div class="pt-6">
+        <app-card>
+          <div class="p-6">
+            <!-- Dynamic Document Form -->
+            <app-dynamic-form
+              [config]="documentFormConfig"
+              [initialData]="documentTemplatesData"
+              (formReady)="onDocumentFormReady($event)"
+              (formChange)="onDocumentFormChange($event)">
+            </app-dynamic-form>
+
+            <div class="flex justify-end pt-6 mt-6 border-t border-gray-200">
+              <app-button 
+                variant="primary" 
+                (onClick)="onSaveDocumentTemplates()"
+                [disabled]="!documentFormValid">
+                Salvar Modelos de Documento
+              </app-button>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </mat-tab>
+
+    <!-- Email Signature Tab -->
+    <mat-tab label="Assinatura de Email">
+      <div class="pt-6">
+        <app-card>
+          <div class="p-6">
+            <!-- Dynamic Signature Form -->
+            <app-dynamic-form
+              [config]="signatureFormConfig"
+              [initialData]="signatureData"
+              (formReady)="onSignatureFormReady($event)"
+              (formChange)="onSignatureFormChange($event)">
+            </app-dynamic-form>
+
+            <!-- Preview -->
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <h4 class="text-sm font-medium text-gray-700 mb-3">Visualização da Assinatura:</h4>
+              <div class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <div class="text-sm">
+                  <div class="font-semibold">{{ signaturePreview.name || 'Seu Nome' }}</div>
+                  <div class="text-gray-600">{{ signaturePreview.title || 'Seu Cargo' }}</div>
+                  <div class="mt-2 space-y-1">
+                    <div *ngIf="signaturePreview.email">
+                      Email: {{ signaturePreview.email }}
+                    </div>
+                    <div *ngIf="signaturePreview.phone">
+                      Tel: {{ signaturePreview.phone }}
+                    </div>
+                    <div *ngIf="signaturePreview.website">
+                      Web: {{ signaturePreview.website }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-6 mt-6 border-t border-gray-200">
+              <app-button 
+                variant="primary" 
+                (onClick)="onSaveSignature()"
+                [disabled]="!signatureFormValid">
+                Salvar Assinatura
+              </app-button>
+            </div>
+          </div>
+        </app-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

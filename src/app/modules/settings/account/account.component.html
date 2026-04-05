@@ -1,0 +1,55 @@
+<div class="max-w-4xl mx-auto p-6 space-y-6">
+  <!-- Profile Picture Section -->
+  <app-card>
+    <div class="flex items-center space-x-6 p-6">
+      <div class="flex items-center space-x-3">
+        <app-avatar
+          [name]="displayName"
+          [size]="80"
+          [src]="avatarUrl">
+        </app-avatar>
+        <app-button
+          variant="outline"
+          size="xs"
+          icon="camera"
+          class="!p-1 !min-w-0 !w-6 !h-6 !rounded-full !bg-white/90 !border-gray-300 hover:!bg-gray-50"
+          (onClick)="onUploadAvatar()">
+        </app-button>
+      </div>
+      <div>
+        <h3 class="text-lg font-medium text-gray-900">Foto do Perfil</h3>
+        <p class="text-sm text-gray-500">JPG, PNG ou WEBP. Tamanho máximo 2MB.</p>
+      </div>
+    </div>
+  </app-card>
+
+  <!-- Personal Information -->
+  <app-card>
+    <div class="p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-6">Informações Pessoais</h3>
+      <!-- Dynamic Form -->
+      <app-dynamic-form
+        [config]="formConfig"
+        [initialData]="userData"
+        (formReady)="onFormReady($event)"
+        (formChange)="onFormChange($event)">
+      </app-dynamic-form>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+        <app-button 
+          variant="outline" 
+          (onClick)="onCancel()">
+          Cancelar
+        </app-button>
+        <app-button 
+          variant="primary" 
+          (onClick)="onSave()"
+          [disabled]="isSaving">
+          <span *ngIf="isSaving">Salvando...</span>
+          <span *ngIf="!isSaving">Salvar Alterações</span>
+        </app-button>
+      </div>
+    </div>
+  </app-card>
+</div>

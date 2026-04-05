@@ -1,0 +1,135 @@
+<div class="orders-container w-full">
+  <h1 class="text-3xl font-bold text-gray-900 mb-6">Meus Pedidos</h1>
+
+  <!-- Filter Tabs -->
+  <div class="mb-6 border-b border-gray-200">
+    <div class="flex space-x-1 overflow-x-auto">
+      <button
+        *ngFor="let tab of tabs"
+        (click)="setActiveTab(tab.id)"
+        [class.border-b-2]="activeTab === tab.id"
+        [class.border-blue-600]="activeTab === tab.id"
+        [class.text-blue-600]="activeTab === tab.id"
+        [class.text-gray-600]="activeTab !== tab.id"
+        class="px-4 py-3 font-medium text-sm whitespace-nowrap hover:text-blue-600 transition-colors">
+        {{ tab.label }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <div class="mb-6">
+    <input
+      type="text"
+      [(ngModel)]="searchTerm"
+      (ngModelChange)="filterOrders()"
+      placeholder="Buscar por número de pedido"
+      class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="text-center py-12 text-gray-500">
+    <p>A carregar pedidos...</p>
+  </div>
+
+  <!-- Orders List -->
+  <div *ngIf="!isLoading && filteredOrders.length === 0" class="text-center py-12 text-gray-500">
+    <p>Nenhum pedido encontrado</p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredOrders.length > 0" class="space-y-4">
+    <div *ngFor="let order of filteredOrders" class="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900">Pedido #{{ order.order_number }}</h3>
+          <p class="text-sm text-gray-500 mt-1">{{ order.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <div class="text-right">
+          <span class="px-3 py-1 text-sm font-medium rounded-full"
+                [class.bg-yellow-100]="order.status === 'pending'"
+                [class.text-yellow-800]="order.status === 'pending'"
+                [class.bg-blue-100]="order.status === 'in_production'"
+                [class.text-blue-800]="order.status === 'in_production'"
+                [class.bg-purple-100]="order.status === 'shipped'"
+                [class.text-purple-800]="order.status === 'shipped'"
+                [class.bg-green-100]="order.status === 'delivered'"
+                [class.text-green-800]="order.status === 'delivered'"
+                [class.bg-red-100]="order.status === 'cancelled'"
+                [class.text-red-800]="order.status === 'cancelled'">
+            {{ order.status_label || order.status }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div *ngIf="order.items && order.items.length > 0" class="mb-4 border-b border-gray-200 pb-4">
+        <h4 class="text-sm font-medium text-gray-700 mb-3">Itens do Pedido</h4>
+        <div class="space-y-3">
+          <div *ngFor="let item of order.items" class="flex items-start gap-4">
+            <img *ngIf="item.mockup_url" 
+                 [src]="item.mockup_url" 
+                 [alt]="item.product_name"
+                 class="w-16 h-16 object-cover rounded border border-gray-200">
+            <div class="flex-1">
+              <p class="font-medium text-gray-900">{{ item.product_name }}</p>
+              <p class="text-sm text-gray-600">
+                Cor: {{ item.color_name }} | Área: {{ item.print_area_name }}
+              </p>
+              <p class="text-sm text-gray-500 mt-1">
+                Quantidade: {{ item.quantity }} × {{ item.unit_price | number:'1.2-2' }} MT = {{ item.total_price | number:'1.2-2' }} MT
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Summary -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-sm text-gray-500 mb-2">Resumo</p>
+          <div class="space-y-1 text-sm">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Subtotal:</span>
+              <span class="text-gray-900">{{ order.subtotal | number:'1.2-2' }} MT</span>
+            </div>
+            <div class="flex justify-between" *ngIf="order.shipping_cost > 0">
+              <span class="text-gray-600">Envio:</span>
+              <span class="text-gray-900">{{ order.shipping_cost | number:'1.2-2' }} MT</span>
+            </div>
+            <div class="flex justify-between font-semibold pt-2 border-t border-gray-200">
+              <span class="text-gray-900">Total:</span>
+              <span class="text-gray-900">{{ order.formatted_total || (order.total_amount | number:'1.2-2') + ' MT' }}</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500 mb-2">Informações</p>
+          <div class="space-y-1 text-sm text-gray-600">
+            <p><strong>Pagamento:</strong> 
+              <span [class.text-green-600]="order.payment_status === 'paid'"
+                    [class.text-yellow-600]="order.payment_status === 'pending'">
+                {{ order.payment_status_label || order.payment_status }}
+              </span>
+            </p>
+            <p *ngIf="order.payment_method"><strong>Método:</strong> {{ order.payment_method }}</p>
+            <p><strong>Total de itens:</strong> {{ order.items_count || order.items?.length || 0 }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="border-t border-gray-200 pt-4">
+        <p class="text-sm font-medium text-gray-700 mb-2">Endereço de Envio</p>
+        <p class="text-sm text-gray-600">
+          {{ order.shipping_name }}<br>
+          {{ order.shipping_address }}<br>
+          {{ order.shipping_city }}{{ order.shipping_state ? ', ' + order.shipping_state : '' }}
+        </p>
+        <p *ngIf="order.shipping_whatsapp" class="text-sm text-gray-600 mt-1">
+          WhatsApp: {{ order.shipping_whatsapp }}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+

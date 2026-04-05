@@ -1,0 +1,22 @@
+.pagination-container {
+  .mat-mdc-select {
+    min-width: 60px;
+  }
+
+  .mat-mdc-button {
+    min-width: 40px;
+    
+    &.bg-blue-600 {
+      background-color: #2563eb;
+      color: white;
+      
+      &:hover {
+        background-color: #1d4ed8;
+      }
+    }
+  }
+
+  .mat-mdc-icon-button[disabled] {
+    opacity: 0.5;
+  }
+}

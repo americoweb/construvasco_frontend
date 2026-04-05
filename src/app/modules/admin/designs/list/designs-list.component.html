@@ -1,0 +1,47 @@
+<div class="designs-list-container w-full">
+  <app-page-header
+    [title]="'Designs'"
+    [subtitle]="'Gerencie os designs criados'"
+    [showSearch]="true"
+    [searchPlaceholder]="'Buscar designs...'"
+    [searchValue]="searchValue"
+    [showFilters]="true"
+    [actions]="pageHeaderActions"
+    [loading]="loading"
+    (searchChange)="onSearchChange($event)"
+    (filterToggle)="onFilterToggle()"
+    (refresh)="onRefresh()">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6">
+    <!-- Filters -->
+    <div class="mb-4">
+      <app-data-filters
+        [fields]="filterFields"
+        [initialValues]="filters"
+        (filtersChange)="onFiltersChange($event)">
+      </app-data-filters>
+    </div>
+
+    <!-- Designs Table -->
+    <app-data-table
+      [data]="designs"
+      [columns]="columns"
+      [actions]="actions"
+      [loading]="loading"
+      [emptyMessage]="'Nenhum design encontrado'"
+      (rowClick)="viewDesign($event)">
+    </app-data-table>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+      <app-pagination
+        [pagination]="pagination"
+        [pageSizeOptions]="[10, 15, 25, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div>
+

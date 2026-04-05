@@ -1,0 +1,11 @@
+<span [class]="classes" (click)="onChipClick()">
+  <ng-content></ng-content>
+  
+  <button 
+    *ngIf="removable"
+    type="button"
+    class="ml-1 -mr-1 p-0.5 rounded-full hover:bg-black hover:bg-opacity-10 focus:outline-none"
+    (click)="onRemoveClick($event)">
+    <mat-icon class="w-3 h-3 text-current">close</mat-icon>
+  </button>
+</span>

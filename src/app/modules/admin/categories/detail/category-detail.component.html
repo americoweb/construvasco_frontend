@@ -1,0 +1,46 @@
+<div class="category-detail-container w-full">
+  <app-page-header
+    [title]="category?.name || 'Categoria'"
+    [breadcrumbs]="[
+      { label: 'Categorias', url: '/admin/categories' },
+      { label: category?.name || 'Detalhes' }
+    ]"
+    [actions]="pageHeaderActions">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6" *ngIf="category">
+    <app-card>
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm font-medium text-gray-700">Nome</label>
+          <p class="mt-1 text-gray-900">{{ category.name }}</p>
+        </div>
+        <div *ngIf="category.description">
+          <label class="text-sm font-medium text-gray-700">Descrição</label>
+          <p class="mt-1 text-gray-900">{{ category.description }}</p>
+        </div>
+        <div *ngIf="category.parent">
+          <label class="text-sm font-medium text-gray-700">Categoria Pai</label>
+          <p class="mt-1 text-gray-900">{{ category.parent.name }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Status</label>
+          <p class="mt-1">
+            <span [class]="category.is_active ? 'text-green-600' : 'text-red-600'">
+              {{ category.is_active ? 'Ativo' : 'Inativo' }}
+            </span>
+          </p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Ordem de Exibição</label>
+          <p class="mt-1 text-gray-900">{{ category.sort_order }}</p>
+        </div>
+        <div *ngIf="category.products_count !== undefined">
+          <label class="text-sm font-medium text-gray-700">Número de Produtos</label>
+          <p class="mt-1 text-gray-900">{{ category.products_count }}</p>
+        </div>
+      </div>
+    </app-card>
+  </div>
+</div>
+

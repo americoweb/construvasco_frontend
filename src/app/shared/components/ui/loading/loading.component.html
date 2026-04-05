@@ -1,0 +1,23 @@
+<div class="flex flex-col items-center justify-center p-4">
+  <!-- Spinner -->
+  <div *ngIf="type === 'spinner'" [class]="spinnerClasses"></div>
+  
+  <!-- Dots -->
+  <div *ngIf="type === 'dots'" class="flex space-x-1">
+    <div [class]="dotsClasses" style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.32s"></div>
+    <div [class]="dotsClasses" style="animation: bounce 1.4s infinite ease-in-out both; animation-delay: -0.16s"></div>
+    <div [class]="dotsClasses" style="animation: bounce 1.4s infinite ease-in-out both;"></div>
+  </div>
+  
+  <!-- Skeleton -->
+  <div *ngIf="type === 'skeleton'" class="w-full space-y-3">
+    <div *ngFor="let row of getSkeletonRows()" 
+         class="animate-pulse bg-gray-200 rounded"
+         [style.height]="size === 'sm' ? '12px' : size === 'md' ? '16px' : '20px'"
+         [style.width]="row === rows - 1 ? '75%' : '100%'">
+    </div>
+  </div>
+  
+  <!-- Loading text -->
+  <p *ngIf="text" class="mt-2 text-sm text-gray-600">{{ text }}</p>
+</div>

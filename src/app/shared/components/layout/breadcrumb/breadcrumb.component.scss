@@ -1,0 +1,115 @@
+:host {
+  display: block;
+}
+
+// Breadcrumb responsive behavior
+@media (max-width: 640px) {
+  // Hide icons on very small screens
+  .breadcrumb-icon {
+    display: none;
+  }
+  
+  // Reduce spacing
+  .space-x-2 > * + * {
+    margin-left: 0.25rem;
+  }
+  
+  // Truncate long labels
+  .breadcrumb-label {
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+// Hover effects
+a {
+  position: relative;
+  text-decoration: none;
+}
+
+a::before {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background-color: currentColor;
+  transition: width 0.2s ease-in-out;
+}
+
+a:hover::before {
+  width: 100%;
+}
+
+// Focus styles
+a:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// Animation for separator icons
+mat-icon {
+  transition: transform 0.2s ease-in-out;
+}
+
+// Current page styling
+[aria-current="page"] {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+// Ellipsis styling
+.ellipsis {
+  color: #6b7280;
+  font-weight: 500;
+  cursor: default;
+  user-select: none;
+}
+
+// Loading state
+.breadcrumb-loading {
+  .breadcrumb-item {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+    height: 20px;
+    width: 80px;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Dark mode support (if using CSS variables)
+@media (prefers-color-scheme: dark) {
+  .text-gray-500 {
+    color: #9ca3af;
+  }
+  
+  .text-gray-700 {
+    color: #d1d5db;
+  }
+  
+  .text-gray-900 {
+    color: #f9fafb;
+  }
+  
+  .text-gray-300 {
+    color: #6b7280;
+  }
+  
+  .text-gray-400 {
+    color: #9ca3af;
+  }
+}

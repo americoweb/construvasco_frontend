@@ -1,0 +1,11 @@
+.profile-photo {
+  display: inline-block;
+  position: relative;
+  
+  img {
+    display: block;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+

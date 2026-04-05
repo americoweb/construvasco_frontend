@@ -1,0 +1,259 @@
+<div class="product-detail-container w-full">
+  <app-page-header
+    [title]="product?.name || 'Carregando...'"
+    [subtitle]="'Detalhes do produto'"
+    [breadcrumbs]="breadcrumbs"
+    [actions]="pageHeaderActions"
+    [loading]="loading">
+  </app-page-header>
+
+  <div class=" mx-auto px-4 py-6" *ngIf="!loading && product">
+    <!-- Tabs -->
+    <div class="mb-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8">
+        <button
+          (click)="setActiveTab('info')"
+          [class]="activeTab === 'info' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Informações
+        </button>
+        <button
+          (click)="setActiveTab('colors')"
+          [class]="activeTab === 'colors' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Cores ({{ colors.length }})
+        </button>
+        <button
+          (click)="setActiveTab('print-areas')"
+          [class]="activeTab === 'print-areas' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Áreas de Impressão ({{ printAreas.length }})
+        </button>
+        <button
+          *ngIf="product.has_sizes"
+          (click)="setActiveTab('sizes')"
+          [class]="activeTab === 'sizes' 
+            ? 'border-blue-500 text-blue-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+          Tamanhos
+        </button>
+      </nav>
+    </div>
+
+    <!-- Info Tab -->
+    <div *ngIf="activeTab === 'info'">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Product Image -->
+        <app-card *ngIf="product.image_url || product.base_image_url" class="lg:col-span-2">
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Imagens do Produto</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div *ngIf="product.image_url" class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Imagem Principal</label>
+                <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                  <img 
+                    [src]="product.image_url" 
+                    [alt]="product.name"
+                    class="w-full h-64 object-contain"
+                    (error)="$event.target.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2214%22 dy=%2210.5%22 x=%2250%22 y=%2250%22 text-anchor=%22middle%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                  <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
+                    <a [href]="product.image_url" target="_blank" class="hover:underline">Ver imagem completa</a>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="product.base_image_url" class="space-y-2">
+                <label class="text-sm font-medium text-gray-700">Imagem Base</label>
+                <div class="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                  <img 
+                    [src]="product.base_image_url" 
+                    [alt]="product.name + ' - Base'"
+                    class="w-full h-64 object-contain"
+                    (error)="$event.target.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2214%22 dy=%2210.5%22 x=%2250%22 y=%2250%22 text-anchor=%22middle%22%3ENo Image%3C/text%3E%3C/svg%3E'">
+                  <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-2">
+                    <a [href]="product.base_image_url" target="_blank" class="hover:underline">Ver imagem completa</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </app-card>
+
+        <!-- Product Status & Quick Info -->
+        <app-card>
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Status e Informações</h3>
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Status</dt>
+                <dd>
+                  <app-badge [color]="getStatusColor(product.status)">
+                    {{ product.status_label || product.status }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Destaque</dt>
+                <dd>
+                  <app-badge [color]="product.is_featured ? 'green' : 'gray'">
+                    {{ product.is_featured ? 'Em Destaque' : 'Não Destacado' }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Disponibilidade</dt>
+                <dd>
+                  <app-badge [color]="product.is_available ? 'green' : 'red'">
+                    {{ product.is_available ? 'Disponível' : 'Indisponível' }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div class="pt-3 border-t border-gray-200">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Preço</dt>
+                <dd class="text-2xl font-bold text-gray-900">
+                  {{ product.price_formatted || (product.price + ' MT') }}
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Quantidade Mínima</dt>
+                <dd class="text-lg font-semibold text-gray-900">
+                  {{ product.min_quantity }} unidade{{ product.min_quantity !== 1 ? 's' : '' }}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </app-card>
+
+        <!-- Product Details -->
+        <app-card class="lg:col-span-2">
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Detalhes do Produto</h3>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Nome</dt>
+                <dd class="text-sm font-semibold text-gray-900">{{ product.name }}</dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Slug</dt>
+                <dd class="text-sm text-gray-600 font-mono">{{ product.slug }}</dd>
+              </div>
+              <div *ngIf="product.description" class="md:col-span-2">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Descrição</dt>
+                <dd class="text-sm text-gray-900 whitespace-pre-wrap">{{ product.description }}</dd>
+              </div>
+              <div *ngIf="product.design_hint" class="md:col-span-2">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Dica de Design</dt>
+                <dd class="text-sm text-gray-900 bg-blue-50 p-3 rounded-md border border-blue-200">
+                  {{ product.design_hint }}
+                </dd>
+              </div>
+              <div *ngIf="product.categories && product.categories.length > 0" class="md:col-span-2">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Categorias</dt>
+                <dd class="flex flex-wrap gap-2">
+                  <span 
+                    *ngFor="let category of product.categories"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    {{ category.name }}
+                  </span>
+                </dd>
+              </div>
+              <div *ngIf="product.tags && product.tags.length > 0" class="md:col-span-2">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tags</dt>
+                <dd class="flex flex-wrap gap-2">
+                  <span 
+                    *ngFor="let tag of product.tags"
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    [style.backgroundColor]="tag.color ? tag.color + '20' : '#f3f4f6'"
+                    [style.color]="tag.color || '#374151'">
+                    {{ tag.name }}
+                  </span>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </app-card>
+
+        <!-- Statistics Card -->
+        <app-card>
+          <div class="p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Estatísticas</h3>
+            <dl class="space-y-4">
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Cores Disponíveis</dt>
+                <dd>
+                  <app-badge [color]="colors.length > 0 ? 'blue' : 'gray'">
+                    {{ colors.length }} cor{{ colors.length !== 1 ? 'es' : '' }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div>
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Áreas de Impressão</dt>
+                <dd>
+                  <app-badge [color]="printAreas.length > 0 ? 'blue' : 'gray'">
+                    {{ printAreas.length }} área{{ printAreas.length !== 1 ? 's' : '' }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div *ngIf="product.has_sizes">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Tem Tamanhos</dt>
+                <dd>
+                  <app-badge [color]="'blue'">
+                    {{ product.pricing_type === 'sqm_based' ? 'Preço por m²' : 'Preço Fixo' }}
+                  </app-badge>
+                </dd>
+              </div>
+              <div *ngIf="product.sort_order !== undefined" class="pt-3 border-t border-gray-200">
+                <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Ordem de Exibição</dt>
+                <dd class="text-lg font-semibold text-gray-900">#{{ product.sort_order }}</dd>
+              </div>
+            </dl>
+          </div>
+        </app-card>
+      </div>
+    </div>
+
+    <!-- Colors Tab -->
+    <div *ngIf="activeTab === 'colors'">
+      <app-color-management
+        *ngIf="product"
+        [productId]="product.id"
+        (colorAdded)="onColorAdded($event)"
+        (colorUpdated)="onColorUpdated($event)"
+        (colorDeleted)="onColorDeleted($event)">
+      </app-color-management>
+    </div>
+
+    <!-- Print Areas Tab -->
+    <div *ngIf="activeTab === 'print-areas'">
+      <app-print-area-management
+        *ngIf="product"
+        [productId]="product.id"
+        (printAreaAdded)="onPrintAreaAdded($event)"
+        (printAreaUpdated)="onPrintAreaUpdated($event)"
+        (printAreaDeleted)="onPrintAreaDeleted($event)">
+      </app-print-area-management>
+    </div>
+
+    <!-- Sizes Tab -->
+    <div *ngIf="activeTab === 'sizes'">
+      <app-size-management
+        *ngIf="product"
+        [productId]="product.id"
+        (sizeAdded)="onSizeAdded($event)"
+        (sizeUpdated)="onSizeUpdated($event)"
+        (sizeDeleted)="onSizeDeleted($event)">
+      </app-size-management>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="mx-auto px-4 py-6 w-full">
+    <app-loading></app-loading>
+  </div>
+</div>
+

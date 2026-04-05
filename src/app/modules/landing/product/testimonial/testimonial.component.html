@@ -1,0 +1,44 @@
+<div *ngIf="testimonials && testimonials.length > 0" class="mt-8">
+  <h2 class="text-2xl font-bold text-gray-900 mb-6">O que nossos clientes dizem</h2>
+  
+  <div *ngIf="isLoading" class="flex items-center justify-center py-8">
+    <div class="text-center">
+      <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-2"></div>
+      <p class="text-gray-600 text-sm">Carregando depoimentos...</p>
+    </div>
+  </div>
+
+  <div *ngIf="error && !isLoading" class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+    <p class="text-red-700 text-sm">{{ error }}</p>
+  </div>
+
+  <div *ngIf="!isLoading && !error" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div
+      *ngFor="let testimonial of testimonials"
+      class="bg-white rounded-xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow"
+    >
+      <div class="flex items-start gap-4">
+        <!-- Photo -->
+        <div class="flex-shrink-0">
+          <img
+            [src]="testimonial.photo_url || getDefaultPhoto()"
+            [alt]="testimonial.author"
+            class="w-16 h-16 rounded-full object-cover border-2 border-indigo-100"
+            onerror="this.src='https://i.pravatar.cc/150?img=0'"
+          />
+        </div>
+        
+        <!-- Content -->
+        <div class="flex-1">
+          <p class="text-gray-700 text-sm leading-relaxed mb-3 italic">
+            "{{ testimonial.text }}"
+          </p>
+          <p class="text-sm font-semibold text-gray-900">
+            — {{ testimonial.author }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

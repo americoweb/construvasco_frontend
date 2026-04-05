@@ -1,0 +1,12 @@
+<div [class]="classes" [style]="style">
+  <img 
+    *ngIf="src && !imageError" 
+    [src]="src" 
+    [alt]="alt || name"
+    class="w-full h-full object-cover"
+    [class.rounded-full]="shape === 'circle'"
+    [class.rounded-md]="shape === 'square'"
+    (error)="onImageError()">
+  
+  <span *ngIf="!src || imageError">{{ initials }}</span>
+</div>

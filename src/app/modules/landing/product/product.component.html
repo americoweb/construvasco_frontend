@@ -1,0 +1,349 @@
+<div class="min-h-screen flex flex-col w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+  <app-landing-header [cartItemCount]="cartItemCount" [orderHistoryCount]="0"></app-landing-header>
+  
+  <main class="w-full flex-grow">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="flex items-center justify-center min-h-[50vh]">
+        <div class="text-center">
+          <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mb-3"></div>
+          <p class="text-gray-600 text-sm">Carregando produto...</p>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !isLoading" class="max-w-2xl mx-auto">
+        <div class="bg-red-50 border-2 border-red-200 rounded-lg p-4 text-center">
+          <p class="text-red-700 font-semibold text-sm mb-3">{{ error }}</p>
+          <button 
+            (click)="goHome()" 
+            class="bg-indigo-600 text-white px-6 py-3 sm:py-2 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium min-h-[44px] sm:min-h-0"
+          >
+            Voltar para Home
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Content -->
+      <div *ngIf="product && !isLoading" class="space-y-4 sm:space-y-5 lg:space-y-6">
+        <!-- Breadcrumb with Category Hierarchy -->
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+          <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
+        </div>
+
+        <!-- Compact Two Column Layout -->
+        <div class="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-6">
+          <!-- Left: Product Preview (Compact) -->
+          <div class="h-fit">
+            <div class="bg-white rounded-xl shadow-sm hover:shadow-md overflow-hidden border border-gray-100">
+              <!-- Product Image/Mockup -->
+              <div class="relative aspect-square bg-gray-50">
+                <img 
+                  [src]="displayImage" 
+                  [alt]="product.name"
+                  class="w-full h-full object-contain p-4"
+                />
+                <div *ngIf="isGeneratingMockup" class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div class="text-center text-white">
+                    <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-white mb-2"></div>
+                    <p class="font-semibold text-sm">Gerando...</p>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Compact Product Info -->
+              <div class="p-4 sm:p-6 border-t border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900 mb-2">{{ product.name }}</h1>
+                <div class="flex items-center justify-between mb-2">
+                  <div>
+                    <span class="text-xs text-gray-500 block">Preço unitário</span>
+                    <p class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      {{ product.price_formatted }}
+                    </p>
+                  </div>
+                  <div *ngIf="product.min_quantity > 1" class="text-xs text-gray-500 text-right">
+                    Mín: {{ product.min_quantity }}
+                  </div>
+                </div>
+                <div *ngIf="product.description" class="bg-indigo-50 border-l-2 border-indigo-500 p-3 sm:p-4 rounded-lg text-sm sm:text-base text-gray-800 leading-relaxed mt-3">
+                  {{ product.description }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Compact Customization Form -->
+          <div class="space-y-4 sm:space-y-6 lg:space-y-8">
+            <div class="bg-white rounded-xl shadow-sm hover:shadow-md p-4 sm:p-6 border border-gray-100">
+              <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Personalize seu produto</h2>
+              
+              <form [formGroup]="customizationForm" (ngSubmit)="generateMockup()" class="space-y-4 sm:space-y-6">
+                <!-- Color Selection - Compact -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Cor do Produto <span class="text-red-500">*</span>
+                  </label>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button
+                      *ngFor="let color of product.active_colors"
+                      type="button"
+                      (click)="onColorSelect(color.id)"
+                      [class.bg-gradient-to-r]="selectedColor?.id === color.id"
+                      [class.from-indigo-600]="selectedColor?.id === color.id"
+                      [class.to-purple-600]="selectedColor?.id === color.id"
+                      [class.text-white]="selectedColor?.id === color.id"
+                      [class.bg-gray-100]="selectedColor?.id !== color.id"
+                      [class.text-gray-700]="selectedColor?.id !== color.id"
+                      class="py-3 px-2 sm:py-2 sm:px-2.5 rounded-lg font-medium transition-all border-2 text-sm hover:shadow-sm min-h-[44px] sm:min-h-0"
+                      [class.border-indigo-500]="selectedColor?.id === color.id"
+                      [class.border-transparent]="selectedColor?.id !== color.id"
+                    >
+                      {{ color.name }}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Print Area Selection - Compact -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Área de Impressão <span class="text-red-500">*</span>
+                  </label>
+                  <select
+                    formControlName="printAreaId"
+                    (change)="onPrintAreaSelect($any($event.target).value)"
+                    class="block w-full border-2 border-gray-200 rounded-xl p-3.5 sm:p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white min-h-[44px] sm:min-h-0"
+                  >
+                    <option value="">Selecione uma área</option>
+                    <option *ngFor="let area of product.active_print_areas" [value]="area.id">
+                      {{ area.name }} ({{ area.width }}x{{ area.height }}cm)
+                    </option>
+                  </select>
+                </div>
+
+                <!-- Size Selection -->
+                <div *ngIf="product.has_sizes">
+                  <app-product-size-selector
+                    [productId]="product.id"
+                    [pricingType]="product.pricing_type"
+                    [pricePerSqm]="product.price_per_sqm"
+                    [sizes]="productSizes"
+                    [restrictions]="sizeRestrictions"
+                    [required]="true"
+                    (sizeSelected)="onSizeSelected($event)"
+                  ></app-product-size-selector>
+                </div>
+
+                <!-- Logo and Reference Image Upload - Side by Side -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- Logo Upload -->
+                  <div *ngIf="!useReferenceAsFinalArt">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Logotipo <span class="text-xs font-normal text-gray-500">(Opcional)</span>
+                    </label>
+                    <div *ngIf="logoPreview" class="relative mb-2">
+                      <div class="bg-gray-50 rounded-lg border-2 border-gray-200 p-3">
+                        <img [src]="logoPreview" alt="Logo Preview" class="w-full h-24 sm:h-32 lg:h-40 object-contain"/>
+                        <button 
+                          type="button"
+                          (click)="removeLogo()" 
+                          class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-2 sm:p-1.5 hover:bg-red-600 transition-colors shadow-md min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <label 
+                      *ngIf="!logoPreview"
+                      class="flex flex-col items-center justify-center w-full h-24 sm:h-32 lg:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-green-400 bg-gray-50 hover:bg-gray-100 min-h-[44px]"
+                    >
+                      <span class="flex flex-col items-center space-y-1">
+                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <span class="text-xs font-medium text-gray-700">Carregar Logo</span>
+                      </span>
+                      <input 
+                        type="file" 
+                        accept="image/png, image/jpeg, image/webp" 
+                        class="hidden" 
+                        (change)="handleLogoFileChange($event)"
+                      />
+                    </label>
+                  </div>
+
+                  <!-- Reference Image Upload - Can be used as final art -->
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                      Imagem de Referência
+                      <span class="text-xs font-normal text-gray-500">(Opcional)</span>
+                    </label>
+                    <div *ngIf="referencePreview" class="relative mb-2">
+                      <div class="bg-gray-50 rounded-lg border-2 border-gray-200 p-3">
+                        <img [src]="referencePreview" alt="Reference Preview" class="w-full h-24 sm:h-32 lg:h-40 object-contain"/>
+                        <button 
+                          type="button"
+                          (click)="removeReference()" 
+                          class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-2 sm:p-1.5 hover:bg-red-600 transition-colors shadow-md min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                    <label 
+                      *ngIf="!referencePreview"
+                      class="flex flex-col items-center justify-center w-full h-24 sm:h-32 lg:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-indigo-400 bg-gray-50 hover:bg-gray-100 min-h-[44px]"
+                    >
+                      <span class="flex flex-col items-center space-y-1">
+                        <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="text-xs font-medium text-gray-700">Carregar Imagem</span>
+                      </span>
+                      <input 
+                        type="file" 
+                        accept="image/png, image/jpeg, image/webp" 
+                        class="hidden" 
+                        (change)="handleReferenceFileChange($event)"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Design Prompt -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Descreva seu design
+                    <span *ngIf="logoPreview || referencePreview" class="text-xs font-normal text-gray-500">(Opcional com logo/imagem)</span>
+                    <span *ngIf="!logoPreview && !referencePreview" class="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    formControlName="designPrompt"
+                    rows="3"
+                    class="block w-full border-2 border-gray-200 rounded-xl p-3.5 sm:p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none min-h-[44px] sm:min-h-0"
+                    placeholder="Ex: Logo da empresa no centro, cores azul e branco..."
+                  ></textarea>
+                  <p class="text-xs text-gray-500 mt-1">
+                    <span *ngIf="!logoPreview && !referencePreview">Mínimo 5 caracteres</span>
+                    <span *ngIf="logoPreview || referencePreview">Opcional</span>
+                  </p>
+                </div>
+
+                <!-- Generate Mockup Button -->
+                <div class="pt-2">
+                  <button 
+                    type="submit" 
+                    [disabled]="customizationForm.invalid || isGeneratingMockup"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 px-4 sm:py-2 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm min-h-[44px] sm:min-h-0"
+                  >
+                    <span *ngIf="!isGeneratingMockup">✨ Gerar Mockup</span>
+                    <span *ngIf="isGeneratingMockup" class="flex items-center justify-center gap-2">
+                      <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                      Gerando...
+                    </span>
+                  </button>
+                  <button
+                    *ngIf="referencePreview && !isGeneratingMockup"
+                    type="button"
+                    (click)="useReferenceAsArt()"
+                    class="w-full mt-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 sm:py-2 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all text-sm min-h-[44px] sm:min-h-0"
+                  >
+                    ✓ Pular geração e usar imagem de referência
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Compact Mockup Preview & Add to Cart -->
+            <div *ngIf="mockupUrl" class="bg-white rounded-xl shadow-sm hover:shadow-md p-4 sm:p-6 border border-gray-100">
+              <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Design pronto!</h3>
+              
+              <!-- Quantity and Price - Inline -->
+              <div class="mb-4 sm:mb-6 space-y-3">
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div class="flex-1">
+                    <label class="block text-xs text-gray-600 mb-1">
+                      Quantidade
+                      <span class="text-[10px] text-gray-500 font-normal ml-1">
+                        (Mín: {{ product.min_quantity }} unidades)
+                      </span>
+                    </label>
+                    <input
+                      type="number"
+                      [ngModel]="quantity"
+                      (ngModelChange)="onQuantityInput($event)"
+                      (blur)="onQuantityChange()"
+                      [min]="product.min_quantity"
+                      class="block w-full border-2 border-gray-200 rounded-xl p-3 sm:p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all min-h-[44px] sm:min-h-0"
+                    />
+                    <p class="text-[10px] text-gray-500 mt-1">
+                      Quantidade mínima de pedido: {{ product.min_quantity }} unidades
+                    </p>
+                  </div>
+                  <div class="flex-1 bg-gradient-to-r from-indigo-50 to-purple-50 p-3 sm:p-4 rounded-lg border-2 border-indigo-200">
+                    <p class="text-xs text-gray-600 mb-0.5">Total</p>
+                    <p class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                      {{ (totalPrice).toFixed(2) }} MT
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Success Message (after adding to cart) -->
+              <div *ngIf="itemAddedToCart" class="mb-4 p-4 bg-green-50 border-2 border-green-200 rounded-lg">
+                <div class="flex items-start gap-3">
+                  <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-green-800 mb-2">Produto adicionado ao carrinho com sucesso!</p>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                      <button
+                        (click)="goToCheckout()"
+                        class="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-md hover:shadow-lg transition-all text-sm min-h-[44px]"
+                      >
+                        Finalizar Compra
+                      </button>
+                      <button
+                        (click)="continueShopping()"
+                        class="flex-1 bg-white border-2 border-indigo-600 text-indigo-600 font-semibold py-2.5 px-4 rounded-lg hover:bg-indigo-50 transition-all text-sm min-h-[44px]"
+                      >
+                        Continuar Comprando
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions (before adding to cart) -->
+              <div *ngIf="!itemAddedToCart" class="flex flex-col sm:flex-row gap-2">
+                <button
+                  (click)="addToCart()"
+                  class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 sm:py-2 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all text-sm min-h-[44px] sm:min-h-0"
+                >
+                  🛒 Adicionar ao Carrinho
+                </button>
+                <button
+                  (click)="startOver()"
+                  class="px-4 py-3 sm:py-2 sm:px-6 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors text-sm min-h-[44px] sm:min-h-0"
+                >
+                  Refazer
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Testimonials Section -->
+        <app-testimonial 
+          [testimonials]="testimonials" 
+          [productId]="product?.id"
+        ></app-testimonial>
+      </div>
+    </div>
+  </main>
+</div>
+

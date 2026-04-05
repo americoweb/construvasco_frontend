@@ -1,0 +1,47 @@
+<div class="products-list-container w-full">
+  <app-page-header
+    [title]="'Produtos'"
+    [subtitle]="'Gerencie seus produtos'"
+    [showSearch]="true"
+    [searchPlaceholder]="'Buscar produtos...'"
+    [searchValue]="searchValue"
+    [showFilters]="true"
+    [actions]="pageHeaderActions"
+    [loading]="loading"
+    (searchChange)="onSearchChange($event)"
+    (filterToggle)="onFilterToggle()"
+    (refresh)="onRefresh()">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6">
+    <!-- Filters -->
+    <div class="mb-4">
+      <app-data-filters
+        [fields]="filterFields"
+        [initialValues]="filters"
+        (filtersChange)="onFiltersChange($event)">
+      </app-data-filters>
+    </div>
+
+    <!-- Products Table -->
+    <app-data-table
+      [data]="products"
+      [columns]="columns"
+      [actions]="actions"
+      [loading]="loading"
+      [emptyMessage]="'Nenhum produto encontrado'"
+      (rowClick)="viewProduct($event)">
+    </app-data-table>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+      <app-pagination
+        [pagination]="pagination"
+        [pageSizeOptions]="[10, 15, 25, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,111 @@
+<div class="size-selector" [formGroup]="sizeForm">
+  <div class="size-options">
+    <h4 class="section-title">Selecione o Tamanho</h4>
+    
+    <!-- Predefined Sizes -->
+    <div class="predefined-sizes" *ngIf="predefinedSizes.length > 0">
+      <label 
+        *ngFor="let size of predefinedSizes" 
+        class="size-option"
+        [class.selected]="selectedSize?.id === size.id">
+        <input 
+          type="radio" 
+          [value]="size.id" 
+          formControlName="sizeOption"
+          (change)="selectSize(size.id)">
+        <div class="size-info">
+          <span class="size-name">{{ size.name }}</span>
+          <span class="size-dimensions" *ngIf="size.dimensions">{{ size.dimensions }}</span>
+          <span class="size-price" *ngIf="size.fixed_price && pricingType === 'fixed'">
+            {{ size.fixed_price | number:'1.2-2' }} MZN
+          </span>
+        </div>
+      </label>
+    </div>
+
+    <!-- Custom Size Option -->
+    <div class="custom-size-option" *ngIf="hasCustomOption">
+      <label class="size-option" [class.selected]="sizeForm.get('sizeOption')?.value === 'custom'">
+        <input 
+          type="radio" 
+          value="custom" 
+          formControlName="sizeOption">
+        <span class="size-name">Tamanho Personalizado</span>
+      </label>
+
+      <!-- Custom Size Inputs -->
+      <div class="custom-size-inputs" *ngIf="sizeForm.get('sizeOption')?.value === 'custom'">
+        <div class="input-group">
+          <label for="customWidth">Largura (cm)</label>
+          <input 
+            type="number" 
+            id="customWidth"
+            formControlName="customWidth"
+            step="0.1"
+            min="0.1"
+            [placeholder]="restrictions?.min_width_cm ? 'Mín: ' + restrictions.min_width_cm + 'cm' : 'Largura'">
+        </div>
+        <div class="input-group">
+          <label for="customHeight">Altura (cm)</label>
+          <input 
+            type="number" 
+            id="customHeight"
+            formControlName="customHeight"
+            step="0.1"
+            min="0.1"
+            [placeholder]="restrictions?.min_height_cm ? 'Mín: ' + restrictions.min_height_cm + 'cm' : 'Altura'">
+        </div>
+
+        <!-- Validation Errors -->
+        <div class="validation-errors" *ngIf="validationErrorsList.length > 0">
+          <div class="error-message" *ngFor="let error of validationErrorsList">
+            {{ error }}
+          </div>
+        </div>
+
+        <!-- Restrictions Info -->
+        <div class="restrictions-info" *ngIf="restrictions">
+          <small>
+            <span *ngIf="restrictions.min_width_cm || restrictions.max_width_cm">
+              Largura: 
+              <span *ngIf="restrictions.min_width_cm">{{ restrictions.min_width_cm }}cm</span>
+              <span *ngIf="restrictions.min_width_cm && restrictions.max_width_cm"> - </span>
+              <span *ngIf="restrictions.max_width_cm">{{ restrictions.max_width_cm }}cm</span>
+            </span>
+            <span *ngIf="(restrictions.min_width_cm || restrictions.max_width_cm) && (restrictions.min_height_cm || restrictions.max_height_cm)"> | </span>
+            <span *ngIf="restrictions.min_height_cm || restrictions.max_height_cm">
+              Altura: 
+              <span *ngIf="restrictions.min_height_cm">{{ restrictions.min_height_cm }}cm</span>
+              <span *ngIf="restrictions.min_height_cm && restrictions.max_height_cm"> - </span>
+              <span *ngIf="restrictions.max_height_cm">{{ restrictions.max_height_cm }}cm</span>
+            </span>
+            <span *ngIf="restrictions.step_increment_cm">
+              <br>Incremento: {{ restrictions.step_increment_cm }}cm
+            </span>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Display (for SQM-based pricing) -->
+  <div class="price-display" *ngIf="pricingType === 'sqm_based' && (priceCalculation || selectedSize)">
+    <div class="price-info" *ngIf="priceCalculation">
+      <div class="price-row">
+        <span class="label">Área:</span>
+        <span class="value">{{ displayArea }}</span>
+      </div>
+      <div class="price-row">
+        <span class="label">Preço por m²:</span>
+        <span class="value">{{ pricePerSqm | number:'1.2-2' }} MZN</span>
+      </div>
+      <div class="price-row total">
+        <span class="label">Preço Total:</span>
+        <span class="value">{{ displayPrice }}</span>
+      </div>
+    </div>
+    <div class="calculating" *ngIf="isCalculatingPrice">
+      Calculando preço...
+    </div>
+  </div>
+</div>

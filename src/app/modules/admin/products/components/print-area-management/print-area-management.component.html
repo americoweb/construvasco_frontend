@@ -1,0 +1,23 @@
+<div class="print-area-management-container">
+  <app-card>
+    <div class="p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-medium text-gray-900">Áreas de Impressão</h3>
+        <app-button
+          variant="primary"
+          icon="add"
+          (onClick)="addPrintArea()">
+          Adicionar Área
+        </app-button>
+      </div>
+      <app-data-table
+        [data]="printAreas"
+        [columns]="columns"
+        [actions]="actions"
+        [loading]="loading"
+        [emptyMessage]="'Nenhuma área de impressão encontrada'">
+      </app-data-table>
+    </div>
+  </app-card>
+</div>
+

@@ -1,0 +1,26 @@
+.dynamic-form {
+  .form-actions {
+    .mat-mdc-button,
+    .mat-mdc-raised-button {
+      min-width: 80px;
+    }
+  }
+
+  .form-errors {
+    ul {
+      margin: 0;
+      padding-left: 1rem;
+    }
+  }
+
+  // Responsive grid adjustments
+  @media (max-width: 640px) {
+    .grid {
+      grid-template-columns: 1fr;
+      
+      [class*="col-span-"] {
+        grid-column: span 1;
+      }
+    }
+  }
+}

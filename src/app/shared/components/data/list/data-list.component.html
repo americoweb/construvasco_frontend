@@ -1,0 +1,112 @@
+<div class="data-list-container">
+  <!-- Loading State -->
+  <app-loading *ngIf="loading" type="skeleton" [rows]="5"></app-loading>
+
+  <!-- Selection Header -->
+  <div *ngIf="selectable && items.length > 0 && !loading" 
+       class="flex items-center justify-between p-4 bg-gray-50 border-b">
+    <div class="flex items-center">
+      <mat-checkbox
+        [checked]="isAllSelected()"
+        [indeterminate]="selectedItems.size > 0 && !isAllSelected()"
+        (change)="selectAll()">
+      </mat-checkbox>
+      <span class="ml-2 text-sm text-gray-600">
+        {{ selectedItems.size }} of {{ items.length }} selected
+      </span>
+    </div>
+  </div>
+
+  <!-- List Items -->
+  <div *ngIf="!loading && items.length > 0" class="divide-y divide-gray-200">
+    <div *ngFor="let item of items; trackBy: trackByItem"
+         class="p-4 hover:bg-gray-50 cursor-pointer transition-colors duration-200"
+         (click)="onItemClick(item)">
+      
+      <div class="flex items-center justify-between">
+        <!-- Left Content -->
+        <div class="flex items-center flex-1 min-w-0">
+          
+          <!-- Selection Checkbox -->
+          <mat-checkbox *ngIf="selectable"
+                        class="mr-3"
+                        [checked]="isSelected(item)"
+                        (change)="toggleSelection(item)"
+                        (click)="$event.stopPropagation()">
+          </mat-checkbox>
+
+          <!-- Avatar -->
+          <app-avatar *ngIf="showAvatar"
+                      [src]="item.avatar"
+                      [name]="item.title"
+                      size="md"
+                      class="mr-3">
+          </app-avatar>
+
+          <!-- Content -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-medium text-gray-900 truncate">
+                {{ item.title }}
+              </h3>
+              
+              <!-- Status Badge -->
+              <app-badge *ngIf="showStatus && item.status"
+                         [variant]="getStatusVariant(item.status)"
+                         size="sm"
+                         class="ml-2">
+                {{ item.status }}
+              </app-badge>
+            </div>
+
+            <!-- Subtitle -->
+            <p *ngIf="item.subtitle" 
+               class="mt-1 text-sm text-gray-600 truncate">
+              {{ item.subtitle }}
+            </p>
+
+            <!-- Description -->
+            <p *ngIf="item.description" 
+               class="mt-1 text-sm text-gray-500 line-clamp-2">
+              {{ item.description }}
+            </p>
+
+            <!-- Metadata -->
+            <div *ngIf="item.metadata" 
+                 class="mt-2 flex flex-wrap gap-2">
+              <span *ngFor="let meta of getMetadataEntries(item.metadata)"
+                    class="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
+                <strong class="mr-1">{{ meta.key }}:</strong>
+                {{ meta.value }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div *ngIf="actions.length > 0" class="ml-4">
+          <button mat-icon-button [matMenuTriggerFor]="actionsMenu"
+                  (click)="$event.stopPropagation()">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #actionsMenu="matMenu">
+            <button *ngFor="let action of actions"
+                    mat-menu-item
+                    [disabled]="!shouldShowAction(action, item)"
+                    (click)="executeAction(action, item, $event)">
+              <mat-icon *ngIf="action.icon" [color]="action.color">{{ action.icon }}</mat-icon>
+              <span>{{ action.label }}</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <app-empty-state 
+    *ngIf="!loading && items.length === 0"
+    [title]="emptyMessage"
+    [icon]="emptyIcon">
+  </app-empty-state>
+</div>

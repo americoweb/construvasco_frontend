@@ -1,0 +1,249 @@
+<div
+    class="flex min-w-0 flex-auto flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start"
+>
+    <div
+        class="w-full px-4 py-8 sm:bg-card sm:w-auto sm:rounded-2xl sm:p-12 sm:shadow md:flex md:h-full md:w-1/2 md:items-center md:justify-end md:rounded-none md:p-16 md:shadow-none"
+    >
+        <div class="mx-auto w-full max-w-80 sm:mx-0 sm:w-80">
+            <!-- Logo -->
+            <div class="w-12">
+                <img src="images/logo/logo.svg" />
+            </div>
+
+            <!-- Title -->
+            <div
+                class="mt-8 text-4xl font-extrabold leading-tight tracking-tight"
+            >
+                Sign up
+            </div>
+            <div class="mt-0.5 flex items-baseline font-medium">
+                <div>Already have an account?</div>
+                <a
+                    class="ml-1 text-primary-500 hover:underline"
+                    [routerLink]="['/sign-in']"
+                    >Sign in
+                </a>
+            </div>
+
+            <!-- Invitation Details -->
+            @if (isInvitationMode && invitationDetails) {
+                <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center">
+                        <mat-icon class="text-blue-600 dark:text-blue-400 mr-2">email</mat-icon>
+                        <div>
+                            <div class="font-medium text-blue-900 dark:text-blue-100">
+                                You've been invited to join {{ invitationDetails.tenant.name }}
+                            </div>
+                            @if (invitationDetails.inviter) {
+                                <div class="text-sm text-blue-700 dark:text-blue-300">
+                                    Invited by {{ invitationDetails.inviter.name }}
+                                </div>
+                            }
+                            <div class="text-sm text-blue-700 dark:text-blue-300">
+                                Role: {{ invitationDetails.role }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (isInvitationMode && companyDetails) {
+                <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div class="flex items-center">
+                        <mat-icon class="text-green-600 dark:text-green-400 mr-2">business</mat-icon>
+                        <div>
+                            <div class="font-medium text-green-900 dark:text-green-100">
+                                You've been invited to join {{ companyDetails.name }}
+                            </div>
+                            <div class="text-sm text-green-700 dark:text-green-300">
+                                Complete your registration to join the team
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Alert -->
+            @if (showAlert) {
+                <fuse-alert
+                    class="mt-8"
+                    [appearance]="'outline'"
+                    [showIcon]="false"
+                    [type]="alert.type"
+                    [@shake]="alert.type === 'error'"
+                >
+                    <span [innerHTML]="alert.message"></span>
+                </fuse-alert>
+            }
+
+            <!-- Sign Up form -->
+            <form [formGroup]="signUpForm" #signUpNgForm="ngForm" (ngSubmit)="signUp()">
+                <!-- Name field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Name</mat-label>
+                    <input matInput formControlName="name" required>
+                    <mat-error *ngIf="signUpForm.get('name')?.hasError('required')">
+                        Name is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Email/WhatsApp field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Email or WhatsApp</mat-label>
+                    <input matInput formControlName="identifier" required>
+                    <mat-icon 
+                        class="icon-size-5"
+                        matSuffix
+                        [svgIcon]="signUpForm.get('type')?.value === 'whatsapp' ? 'heroicons_solid:device-phone-mobile' : 'heroicons_solid:envelope'">
+                    </mat-icon>
+                    <mat-error *ngIf="signUpForm.get('identifier')?.hasError('required')">
+                        Email or WhatsApp is required
+                    </mat-error>
+                    <mat-error *ngIf="signUpForm.get('identifier')?.hasError('invalidEmail')">
+                        Please enter a valid email address
+                    </mat-error>
+                    <mat-error *ngIf="signUpForm.get('identifier')?.hasError('invalidWhatsApp')">
+                        Please enter a valid WhatsApp number (with country code)
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Show detected type -->
+                <div *ngIf="signUpForm.get('identifier')?.value && signUpForm.get('type')?.value" 
+                     class="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md border border-blue-200 dark:border-blue-800">
+                    <div class="flex items-center">
+                        <mat-icon class="text-blue-600 dark:text-blue-400 mr-2" style="font-size: 16px; width: 16px; height: 16px;">
+                            {{ signUpForm.get('type')?.value === 'email' ? 'email' : 'phone' }}
+                        </mat-icon>
+                        <span class="text-sm text-blue-800 dark:text-blue-200">
+                            Detected type: <strong>{{ signUpForm.get('type')?.value === 'email' ? 'Email' : 'WhatsApp' }}</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Password field -->
+                <mat-form-field class="w-full">
+                    <mat-label>Password</mat-label>
+                    <input matInput type="password" formControlName="password" required>
+                    <mat-error *ngIf="signUpForm.get('password')?.hasError('required')">
+                        Password is required
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field class="w-full">
+                    <mat-label>Confirm Password</mat-label>
+                    <input matInput type="password" formControlName="password_confirmation" required>
+                    <mat-error *ngIf="signUpForm.get('password_confirmation')?.hasError('required')">
+                        Password confirmation is required
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Organization field removed - all users default to tenant_id 1 -->
+
+                <!-- ToS and PP -->
+                <div class="mt-1.5 inline-flex w-full items-end">
+                    <mat-checkbox
+                        class="-ml-2"
+                        [color]="'primary'"
+                        [formControlName]="'agreements'"
+                        required
+                    >
+                        <span>I agree with</span>
+                        <a
+                            class="ml-1 text-primary-500 hover:underline"
+                            [routerLink]="['./']"
+                            >Terms
+                        </a>
+                        <span>and</span>
+                        <a
+                            class="ml-1 text-primary-500 hover:underline"
+                            [routerLink]="['./']"
+                            >Privacy Policy
+                        </a>
+                    </mat-checkbox>
+                </div>
+
+                <!-- Submit button -->
+                <button
+                    class="fuse-mat-button-large mt-6 w-full"
+                    mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="signUpForm.invalid || isLoading"
+                    type="submit"
+                >
+                    <span *ngIf="!isLoading">
+                        @if (isInvitationMode) {
+                            Join {{ invitationDetails?.tenant?.name || companyDetails?.name }}
+                        } @else {
+                            Create your free account
+                        }
+                    </span>
+                    <mat-progress-spinner
+                        *ngIf="isLoading"
+                        [diameter]="24"
+                        [mode]="'indeterminate'">
+                    </mat-progress-spinner>
+                </button>
+            </form>
+        </div>
+    </div>
+    <div
+        class="relative hidden h-full w-1/2 flex-auto items-center justify-center overflow-hidden bg-gray-800 p-16 dark:border-l md:flex lg:px-28"
+    >
+        <!-- Background -->
+        <!-- Rings -->
+        <!-- prettier-ignore -->
+        <svg class="absolute inset-0 pointer-events-none"
+             viewBox="0 0 960 540" width="100%" height="100%" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <g class="text-gray-700 opacity-25" fill="none" stroke="currentColor" stroke-width="100">
+                <circle r="234" cx="196" cy="23"></circle>
+                <circle r="234" cx="790" cy="491"></circle>
+            </g>
+        </svg>
+        <!-- Dots -->
+        <!-- prettier-ignore -->
+        <svg class="absolute -top-16 -right-16 text-gray-700"
+             viewBox="0 0 220 192" width="220" height="192" fill="none">
+            <defs>
+                <pattern id="837c3e70-6c3a-44e6-8854-cc48c737b659" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <rect x="0" y="0" width="4" height="4" fill="currentColor"></rect>
+                </pattern>
+            </defs>
+            <rect width="220" height="192" fill="url(#837c3e70-6c3a-44e6-8854-cc48c737b659)"></rect>
+        </svg>
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-2xl">
+            <div class="text-7xl font-bold leading-none text-gray-100">
+                <div>Welcome to</div>
+                <div>our community</div>
+            </div>
+            <div class="mt-6 text-lg leading-6 tracking-tight text-gray-400">
+                Fuse helps developers to build organized and well coded
+                dashboards full of beautiful and rich modules. Join us and start
+                building your application today.
+            </div>
+            <div class="mt-8 flex items-center">
+                <div class="flex flex-0 items-center -space-x-1.5">
+                    <img
+                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
+                        src="images/avatars/female-18.jpg"
+                    />
+                    <img
+                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
+                        src="images/avatars/female-11.jpg"
+                    />
+                    <img
+                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
+                        src="images/avatars/male-09.jpg"
+                    />
+                    <img
+                        class="h-10 w-10 flex-0 rounded-full object-cover ring-4 ring-gray-800 ring-offset-1 ring-offset-gray-800"
+                        src="images/avatars/male-16.jpg"
+                    />
+                </div>
+                <div class="ml-4 font-medium tracking-tight text-gray-400">
+                    More than 17k people joined us, it's your turn
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

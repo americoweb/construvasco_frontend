@@ -1,0 +1,10 @@
+<div [class]="classes">
+  <!-- Header slot -->
+  <ng-content select="[slot=header]"></ng-content>
+  
+  <!-- Default content -->
+  <ng-content></ng-content>
+  
+  <!-- Footer slot -->
+  <ng-content select="[slot=footer]"></ng-content>
+</div>
