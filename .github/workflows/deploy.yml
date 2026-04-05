@@ -1,0 +1,136 @@
+name: Deploy to A2 Hosting
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0 # Fetch all history for proper versioning
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Get npm cache directory
+      id: npm-cache
+      shell: bash
+      run: echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
+    
+    - name: Cache npm dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.npm-cache.outputs.dir }}
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Cache Angular build
+      uses: actions/cache@v3
+      with:
+        path: |
+          .angular/cache
+        key: ${{ runner.os }}-angular-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-angular-
+    
+    - name: Build Angular app
+      run: npm run build:prod
+      env:
+        NODE_ENV: production
+        ANGULAR_ENVIRONMENT: production
+        
+    - name: Verify build output
+      run: |
+        echo "Checking build output..."
+        if [ ! -d "dist/fuse/browser" ]; then
+          echo "❌ Build failed - dist/fuse/browser directory not found"
+          exit 1
+        fi
+        
+        echo "✅ Build successful - dist/fuse/browser directory found"
+        echo "📁 Build contents:"
+        ls -la dist/fuse/browser/
+        
+        # Check if main files exist
+        if [ ! -f "dist/fuse/browser/index.html" ]; then
+          echo "❌ index.html not found in build output"
+          exit 1
+        fi
+        
+        # Check for main entry point (could be main.js, runtime.js, or other names)
+        MAIN_ENTRY=$(find dist/fuse/browser -name "main-*.js" | head -1)
+        if [ -z "$MAIN_ENTRY" ]; then
+          echo "❌ No main JavaScript entry point found in build output"
+          echo "Available JS files:"
+          find dist/fuse/browser -name "*.js" -type f
+          exit 1
+        fi
+        
+        echo "✅ Main entry point found: $MAIN_ENTRY"
+        echo "✅ All required build files present"
+        
+    - name: Validate Environment Configuration
+      run: |
+        echo "🔍 Validating that production environment is used..."
+        # Search all JS chunks (config may live outside main-*.js with the application builder)
+        if grep -rq "127.0.0.1:8000" dist/fuse/browser --include="*.js" 2>/dev/null; then
+          echo "❌ CRITICAL ERROR: Development URLs found in production build!"
+          echo "❌ Environment switching is NOT working correctly"
+          exit 1
+        fi
+        
+        if grep -rq "api.amazing.co.mz" dist/fuse/browser --include="*.js" 2>/dev/null; then
+          echo "✅ Production URLs detected in build output"
+          echo "✅ Environment switching is working correctly"
+        else
+          echo "⚠️  Warning: Could not verify production URLs in build (check environment.prod.ts)"
+        fi
+        
+    - name: Deploy to A2 Hosting
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/fuse/browser/
+        # server-dir: ./public_html/
+        dangerous-clean-slate: false # Evita deletar arquivos existentes
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.angular/**
+          **/.github/**
+          **/.vscode/**
+          **/README.md
+          **/.editorconfig
+          **/.prettierrc
+          **/tsconfig*.json
+          **/angular.json
+          **/package*.json
+          **/.npmrc
+          **/.nvmrc
+          **/ngsw-config.json
+          **/transloco.config.js
+          **/tailwind.config.js
+          **/LICENSE.md
+          **/CREDITS
+          **/favicon*.png
+          
+    - name: Verify deployment
+      run: |
+        echo "Deployment completed. Please verify the application at your domain."
+        echo "If you notice any issues, check the FTP logs above."
