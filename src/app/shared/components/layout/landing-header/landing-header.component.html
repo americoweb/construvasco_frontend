@@ -1,7 +1,23 @@
 <header class="bg-white/80 backdrop-blur-lg shadow-sm w-full sticky top-0 z-50">
   <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Desktop Header shimmer -->
+    <div *ngIf="isHeaderLoading" class="hidden md:flex justify-between items-center h-20 animate-pulse" aria-hidden="true">
+      <div class="h-12 w-40 rounded-lg bg-slate-200"></div>
+      <div class="flex items-center space-x-4">
+        <div class="h-4 w-14 rounded bg-slate-200"></div>
+        <div class="h-4 w-20 rounded bg-slate-200"></div>
+        <div class="h-4 w-24 rounded bg-slate-200"></div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <div class="h-10 w-64 rounded-lg bg-slate-200"></div>
+        <div class="h-10 w-24 rounded-lg bg-slate-200"></div>
+        <div class="h-10 w-10 rounded-full bg-slate-200"></div>
+        <div class="h-10 w-20 rounded-lg bg-slate-200"></div>
+      </div>
+    </div>
+
     <!-- Desktop Header -->
-    <div class="hidden md:flex justify-between items-center h-20">
+    <div *ngIf="!isHeaderLoading" class="hidden md:flex justify-between items-center h-20">
       <!-- Logo -->
       <div class="flex-shrink-0">
         <a routerLink="/" class="flex items-center">
@@ -86,8 +102,18 @@
       </div>
     </div>
 
+    <!-- Mobile Header shimmer -->
+    <div *ngIf="isHeaderLoading" class="md:hidden flex justify-between items-center h-16 animate-pulse" aria-hidden="true">
+      <div class="h-10 w-28 rounded-lg bg-slate-200"></div>
+      <div class="flex items-center space-x-3">
+        <div class="h-9 w-9 rounded-lg bg-slate-200"></div>
+        <div class="h-9 w-9 rounded-lg bg-slate-200"></div>
+        <div class="h-9 w-9 rounded-lg bg-slate-200"></div>
+      </div>
+    </div>
+
     <!-- Mobile Header -->
-    <div class="md:hidden flex justify-between items-center h-16">
+    <div *ngIf="!isHeaderLoading" class="md:hidden flex justify-between items-center h-16">
       <!-- Logo -->
       <a routerLink="/" class="flex items-center">
         <img src="https://i.ibb.co/XZs0Cf8D/amazinglogo.jpg" alt="Logo" class="h-10 w-auto" />

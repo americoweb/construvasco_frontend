@@ -33,6 +33,7 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     @Input() orderHistoryCount: number = 0;
 
     navItemClasses = "text-gray-600 hover:text-indigo-600 transition-colors font-medium";
+    isHeaderLoading = true;
     isCartOpen = false;
     isAuthenticated = false;
     currentModal: 'login' | 'register' | 'forgot-password' | null = null;
@@ -50,6 +51,7 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     private authSubscription?: Subscription;
     private modalSubscription?: Subscription;
     private _unsubscribeAll = new Subject<void>();
+    private headerLoadingTimeout?: ReturnType<typeof setTimeout>;
 
     constructor(
         private cartService: CartService,
@@ -60,6 +62,11 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.headerLoadingTimeout = setTimeout(() => {
+            this.isHeaderLoading = false;
+            this.cdr.markForCheck();
+        }, 700);
+
         // Subscribe to cart count if not provided as input
         if (this.cartItemCount === 0) {
             this.cartSubscription = this.cartService.getCartCount()
@@ -88,6 +95,9 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        if (this.headerLoadingTimeout) {
+            clearTimeout(this.headerLoadingTimeout);
+        }
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
     }
