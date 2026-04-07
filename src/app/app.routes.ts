@@ -104,10 +104,17 @@ export const routes: Route[] = [
         canActivateChild: [adminGuard],
        
         children: [
+            { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
             {
                 path: 'dashboard',
-                pathMatch: 'full',
-                redirectTo: 'products/list'
+                data: {
+                    title: 'Painel',
+                    description: 'Visão geral da administração',
+                },
+                loadComponent: () =>
+                    import('./modules/admin/dashboard/admin-dashboard.component').then(
+                        (m) => m.AdminDashboardComponent
+                    ),
             },
             {
                 path: 'settings',
@@ -156,6 +163,7 @@ export const routes: Route[] = [
                 children: [
                     {path: '', pathMatch: 'full', redirectTo: 'list'},
                     {path: 'list', loadComponent: () => import('./modules/admin/orders/list/orders-list.component').then(m => m.OrdersListComponent)},
+                    {path: 'create', loadComponent: () => import('./modules/admin/orders/create/admin-order-create.component').then(m => m.AdminOrderCreateComponent)},
                     {path: 'kanban', loadComponent: () => import('./modules/admin/orders/kanban/orders-kanban.component').then(m => m.OrdersKanbanComponent)},
                     {path: ':id', loadComponent: () => import('./modules/admin/orders/detail/order-detail.component').then(m => m.OrderDetailComponent)},
                 ]

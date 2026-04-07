@@ -110,3 +110,39 @@ export interface CancelOrderRequest {
   reason?: string;
 }
 
+/** Payload for POST /v1/orders or POST /v1/admin/orders (same validation rules). */
+export interface CreateOrderLinePayload {
+  product_id: number;
+  design_id?: number | null;
+  product_color_id: number;
+  product_print_area_id: number;
+  product_name: string;
+  color_name: string;
+  color_hex_code: string;
+  print_area_name: string;
+  design_prompt?: string;
+  mockup_url?: string;
+  quantity: number;
+  unit_price: number;
+  notes?: string;
+}
+
+export interface CreateOrderPayload {
+  user_id?: number;
+  session_id?: string;
+  shipping_name: string;
+  shipping_address: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_postal_code?: string;
+  shipping_country?: string;
+  shipping_phone?: string;
+  shipping_whatsapp: string;
+  billing_name?: string;
+  billing_email?: string;
+  notes?: string;
+  shipping_cost?: number;
+  discount_amount?: number;
+  items: CreateOrderLinePayload[];
+}
+

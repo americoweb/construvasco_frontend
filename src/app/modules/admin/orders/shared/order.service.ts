@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map, catchError, finalize } from 'rxjs/operators';
+import { map, catchError, finalize, tap } from 'rxjs/operators';
+import { throwError } from 'rxjs';
 import { BaseService } from '../../../../shared/services/base.service';
 import { ConfigService } from '../../../../core/services/config.service';
 import { LoggingService } from '../../../../core/services/logging.service';
@@ -11,7 +12,8 @@ import {
   Order,
   OrderStatus,
   UpdateOrderStatusRequest,
-  CancelOrderRequest
+  CancelOrderRequest,
+  CreateOrderPayload
 } from './order.types';
 
 @Injectable({
@@ -24,6 +26,24 @@ export class OrderService extends BaseService<Order> {
     logger: LoggingService
   ) {
     super(httpClient, configService, logger, API_ENDPOINTS.ORDERS.BASE);
+  }
+
+  /**
+   * Create an order from the admin area (authenticated). Same body as public checkout order creation.
+   */
+  createManualOrder(payload: CreateOrderPayload): Observable<ApiResponse<Order>> {
+    this.loading.next(true);
+    return this.httpClient
+      .post<ApiResponse<Order>>(this.configService.getApiUrl(API_ENDPOINTS.ORDERS.BASE), payload)
+      .pipe(
+        tap(() => this.logger.info('Manual order created')),
+        tap(() => this.refreshList()),
+        catchError((error) => {
+          this.logger.error('Failed to create manual order', error);
+          return throwError(() => error);
+        }),
+        finalize(() => this.loading.next(false))
+      );
   }
 
   // Get order with full details (items and status history)

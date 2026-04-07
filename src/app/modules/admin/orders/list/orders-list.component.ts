@@ -110,6 +110,12 @@ export class OrdersListComponent implements OnInit, OnDestroy {
 
   pageHeaderActions = [
     {
+      label: 'Novo pedido',
+      icon: 'add',
+      variant: 'primary' as const,
+      callback: () => this.router.navigate(['/admin/orders/create'])
+    },
+    {
       label: 'Visualização Kanban',
       icon: 'view_kanban',
       variant: 'secondary' as const,

@@ -39,7 +39,7 @@ export class NavigationService {
                     title: 'Dashboard',
                     type: 'basic',
                     icon: 'heroicons_outline:home',
-                    link: '/dashboard'
+                    link: '/admin/dashboard'
                 },
                 {
                     id: 'products',

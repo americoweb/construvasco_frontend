@@ -1,0 +1,147 @@
+<div class="admin-order-create w-full">
+  <app-page-header
+    [title]="'Novo pedido'"
+    [subtitle]="'Registe um pedido em nome do cliente e continue a gestão a partir da lista'"
+    [showSearch]="false"
+    [loading]="submitting || loadingProducts">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6 max-w-5xl">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-8">
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Cliente e envio</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="field">
+            <span>Nome *</span>
+            <input type="text" formControlName="shipping_name" class="input" />
+          </label>
+          <label class="field">
+            <span>WhatsApp *</span>
+            <input type="text" formControlName="shipping_whatsapp" class="input" placeholder="+258..." />
+          </label>
+          <label class="field md:col-span-2">
+            <span>Morada *</span>
+            <textarea formControlName="shipping_address" rows="2" class="input"></textarea>
+          </label>
+          <label class="field">
+            <span>Cidade</span>
+            <input type="text" formControlName="shipping_city" class="input" />
+          </label>
+          <label class="field">
+            <span>Província / Estado</span>
+            <input type="text" formControlName="shipping_state" class="input" />
+          </label>
+          <label class="field">
+            <span>Código postal</span>
+            <input type="text" formControlName="shipping_postal_code" class="input" />
+          </label>
+          <label class="field">
+            <span>País</span>
+            <input type="text" formControlName="shipping_country" class="input" />
+          </label>
+          <label class="field">
+            <span>Telefone</span>
+            <input type="text" formControlName="shipping_phone" class="input" />
+          </label>
+          <label class="field">
+            <span>E-mail (faturação)</span>
+            <input type="email" formControlName="billing_email" class="input" />
+          </label>
+          <label class="field">
+            <span>Nome faturação</span>
+            <input type="text" formControlName="billing_name" class="input" />
+          </label>
+          <label class="field md:col-span-2">
+            <span>Notas internas</span>
+            <textarea formControlName="notes" rows="2" class="input"></textarea>
+          </label>
+          <label class="field">
+            <span>Portes (MT)</span>
+            <input type="number" formControlName="shipping_cost" class="input" min="0" step="0.01" />
+          </label>
+          <label class="field">
+            <span>Desconto (MT)</span>
+            <input type="number" formControlName="discount_amount" class="input" min="0" step="0.01" />
+          </label>
+        </div>
+      </section>
+
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+          <h2 class="text-lg font-semibold text-gray-900">Itens</h2>
+          <app-button type="button" variant="outline" (onClick)="addLine()">Adicionar linha</app-button>
+        </div>
+
+        <div formArrayName="items" class="space-y-6">
+          @for (ctrl of items.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="item-block rounded-lg border border-gray-100 p-4 bg-gray-50/80">
+              <div class="flex justify-between items-start gap-2 mb-3">
+                <span class="text-sm font-medium text-gray-700">Linha {{ i + 1 }}</span>
+                @if (items.length > 1) {
+                  <button type="button" class="text-sm text-red-600 hover:underline" (click)="removeLine(i)">
+                    Remover
+                  </button>
+                }
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <label class="field md:col-span-2">
+                  <span>Produto *</span>
+                  <select
+                    class="input"
+                    formControlName="product_id"
+                    (change)="onProductSelected(i)">
+                    <option [ngValue]="null">Selecionar…</option>
+                    @for (p of products; track p.id) {
+                      <option [ngValue]="p.id">{{ p.name }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Cor *</span>
+                  <select
+                    class="input"
+                    formControlName="product_color_id"
+                    (change)="onColorOrAreaChange(i)">
+                    <option [ngValue]="null">—</option>
+                    @for (c of colorsForRow(i); track c.id) {
+                      <option [ngValue]="c.id">{{ c.name }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Área de impressão *</span>
+                  <select
+                    class="input"
+                    formControlName="product_print_area_id"
+                    (change)="onColorOrAreaChange(i)">
+                    <option [ngValue]="null">—</option>
+                    @for (a of areasForRow(i); track a.id) {
+                      <option [ngValue]="a.id">{{ a.name }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Quantidade *</span>
+                  <input type="number" formControlName="quantity" class="input" min="1" />
+                </label>
+                <label class="field">
+                  <span>Preço unitário (MT) *</span>
+                  <input type="number" formControlName="unit_price" class="input" min="0" step="0.01" />
+                </label>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+
+      <div class="flex flex-wrap gap-3 justify-end">
+        <app-button type="button" variant="outline" [disabled]="submitting" (onClick)="cancel()">
+          Cancelar
+        </app-button>
+        <app-button type="submit" variant="primary" [disabled]="submitting || loadingProducts">
+          {{ submitting ? 'A guardar…' : 'Criar pedido' }}
+        </app-button>
+      </div>
+    </form>
+  </div>
+</div>

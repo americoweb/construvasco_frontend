@@ -77,13 +77,13 @@
             <div class="bg-white rounded-xl shadow-sm hover:shadow-md p-4 sm:p-6 border border-gray-100">
               <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Personalize seu produto</h2>
               
-              <form [formGroup]="customizationForm" (ngSubmit)="generateMockup()" class="space-y-4 sm:space-y-6">
-                <!-- Color Selection - Compact -->
+              <form [formGroup]="customizationForm" (ngSubmit)="generateMockup()" class="space-y-5 sm:space-y-6">
+                <!-- Color Selection -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">
                     Cor do Produto <span class="text-red-500">*</span>
                   </label>
-                  <div class="grid grid-cols-3 gap-2">
+                  <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory">
                     <button
                       *ngFor="let color of product.active_colors"
                       type="button"
@@ -94,7 +94,7 @@
                       [class.text-white]="selectedColor?.id === color.id"
                       [class.bg-gray-100]="selectedColor?.id !== color.id"
                       [class.text-gray-700]="selectedColor?.id !== color.id"
-                      class="py-3 px-2 sm:py-2 sm:px-2.5 rounded-lg font-medium transition-all border-2 text-sm hover:shadow-sm min-h-[44px] sm:min-h-0"
+                      class="snap-start shrink-0 py-3 px-4 rounded-xl font-medium transition-all border-2 text-sm hover:shadow-sm min-h-[44px]"
                       [class.border-indigo-500]="selectedColor?.id === color.id"
                       [class.border-transparent]="selectedColor?.id !== color.id"
                     >
@@ -103,7 +103,7 @@
                   </div>
                 </div>
 
-                <!-- Print Area Selection - Compact -->
+                <!-- Print Area Selection -->
                 <div>
                   <label class="block text-sm font-medium text-gray-700 mb-2">
                     Área de Impressão <span class="text-red-500">*</span>
@@ -111,7 +111,7 @@
                   <select
                     formControlName="printAreaId"
                     (change)="onPrintAreaSelect($any($event.target).value)"
-                    class="block w-full border-2 border-gray-200 rounded-xl p-3.5 sm:p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white min-h-[44px] sm:min-h-0"
+                    class="block w-full border-2 border-gray-200 rounded-xl p-3.5 text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white min-h-[48px]"
                   >
                     <option value="">Selecione uma área</option>
                     <option *ngFor="let area of product.active_print_areas" [value]="area.id">
@@ -133,8 +133,12 @@
                   ></app-product-size-selector>
                 </div>
 
-                <!-- Logo and Reference Image Upload - Side by Side -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- Logo and Reference Image Upload -->
+                <div
+                  class="grid gap-3 items-start"
+                  [class.grid-cols-2]="!useReferenceAsFinalArt"
+                  [class.grid-cols-1]="useReferenceAsFinalArt"
+                >
                   <!-- Logo Upload -->
                   <div *ngIf="!useReferenceAsFinalArt">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -156,7 +160,7 @@
                     </div>
                     <label 
                       *ngIf="!logoPreview"
-                      class="flex flex-col items-center justify-center w-full h-24 sm:h-32 lg:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-green-400 bg-gray-50 hover:bg-gray-100 min-h-[44px]"
+                      class="flex flex-col items-center justify-center w-full h-28 sm:h-32 lg:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-green-400 bg-gray-50 hover:bg-gray-100 min-h-[48px]"
                     >
                       <span class="flex flex-col items-center space-y-1">
                         <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -195,7 +199,7 @@
                     </div>
                     <label 
                       *ngIf="!referencePreview"
-                      class="flex flex-col items-center justify-center w-full h-24 sm:h-32 lg:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-indigo-400 bg-gray-50 hover:bg-gray-100 min-h-[44px]"
+                      class="flex flex-col items-center justify-center w-full h-28 sm:h-32 lg:h-40 px-4 transition-all rounded-lg appearance-none cursor-pointer border-2 border-dashed border-gray-300 hover:border-indigo-400 bg-gray-50 hover:bg-gray-100 min-h-[48px]"
                     >
                       <span class="flex flex-col items-center space-y-1">
                         <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -222,8 +226,8 @@
                   </label>
                   <textarea
                     formControlName="designPrompt"
-                    rows="3"
-                    class="block w-full border-2 border-gray-200 rounded-xl p-3.5 sm:p-2.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-none min-h-[44px] sm:min-h-0"
+                    rows="4"
+                    class="block w-full border-2 border-gray-200 rounded-xl p-3.5 text-base focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all resize-y min-h-[120px]"
                     placeholder="Ex: Logo da empresa no centro, cores azul e branco..."
                   ></textarea>
                   <p class="text-xs text-gray-500 mt-1">
@@ -233,11 +237,12 @@
                 </div>
 
                 <!-- Generate Mockup Button -->
-                <div class="pt-2">
+                <div class="pt-2 sticky bottom-2 z-10">
+                  <div class="bg-white/95 backdrop-blur-sm rounded-xl p-2 border border-gray-100 shadow-sm">
                   <button 
                     type="submit" 
                     [disabled]="customizationForm.invalid || isGeneratingMockup"
-                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 px-4 sm:py-2 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm min-h-[44px] sm:min-h-0"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 px-4 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm min-h-[48px]"
                   >
                     <span *ngIf="!isGeneratingMockup">✨ Gerar Mockup</span>
                     <span *ngIf="isGeneratingMockup" class="flex items-center justify-center gap-2">
@@ -249,10 +254,11 @@
                     *ngIf="referencePreview && !isGeneratingMockup"
                     type="button"
                     (click)="useReferenceAsArt()"
-                    class="w-full mt-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 sm:py-2 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all text-sm min-h-[44px] sm:min-h-0"
+                    class="w-full mt-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-3 px-4 sm:px-6 rounded-lg shadow-md hover:shadow-lg transition-all text-sm min-h-[48px]"
                   >
                     ✓ Pular geração e usar imagem de referência
                   </button>
+                  </div>
                 </div>
               </form>
             </div>
