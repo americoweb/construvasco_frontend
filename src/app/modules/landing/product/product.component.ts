@@ -46,6 +46,7 @@ export class ProductComponent implements OnInit {
   useReferenceAsFinalArt: boolean = false;
   
   isGeneratingMockup = false;
+  asyncStatusMessage: string | null = null;
   mockupUrl: string | null = null;
   designId: number | null = null;
   
@@ -54,6 +55,8 @@ export class ProductComponent implements OnInit {
   
   cartItemCount: number = 0;
   itemAddedToCart: boolean = false;
+  isAddingToCart = false;
+  submitAttempted = false;
   
   testimonials: Testimonial[] = [];
   
@@ -112,6 +115,68 @@ export class ProductComponent implements OnInit {
       designPromptControl.setValidators([Validators.required, Validators.minLength(5)]);
     }
     designPromptControl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  get ctaHintMessage(): string {
+    if (!this.product) {
+      return 'Carregando informações do produto...';
+    }
+
+    if (!this.selectedColor) {
+      return 'Selecione uma cor para continuar.';
+    }
+
+    if (!this.selectedPrintArea) {
+      return 'Selecione uma área de impressão para continuar.';
+    }
+
+    if (this.product.has_sizes && !this.selectedSize) {
+      return 'Selecione um tamanho para continuar.';
+    }
+
+    if (!this.logoFile && !this.referenceFile) {
+      const prompt = (this.customizationForm.value.designPrompt || '').trim();
+      if (prompt.length < 5) {
+        return 'Adicione um prompt com no mínimo 5 caracteres, ou envie um arquivo.';
+      }
+    }
+
+    return 'Pronto para gerar o mockup.';
+  }
+
+  get canUseReferenceAsFinalArt(): boolean {
+    if (!this.referencePreview || this.isGeneratingMockup || !this.product) {
+      return false;
+    }
+
+    if (!this.selectedColor || !this.selectedPrintArea) {
+      return false;
+    }
+
+    if (this.product.has_sizes && !this.selectedSize) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private touchAllFormFields(): void {
+    this.customizationForm.markAllAsTouched();
+    Object.values(this.customizationForm.controls).forEach(control => {
+      control.updateValueAndValidity({ onlySelf: true });
+    });
+  }
+
+  private focusFirstInvalidField(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const firstInvalid = document.querySelector('.ng-invalid[formcontrolname], .ng-invalid input, .ng-invalid select, .ng-invalid textarea') as HTMLElement | null;
+    if (firstInvalid) {
+      firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => firstInvalid.focus(), 120);
+    }
   }
 
   ngOnInit(): void {
@@ -361,6 +426,7 @@ export class ProductComponent implements OnInit {
     }
 
     // Use reference preview as temporary mockup URL for display
+    this.asyncStatusMessage = 'A preparar arte de referência...';
     this.mockupUrl = this.referencePreview;
     this.isGeneratingMockup = true;
 
@@ -407,27 +473,33 @@ export class ProductComponent implements OnInit {
               if (uploadResponse.data?.mockup_url) {
                 this.mockupUrl = this.getFullImageUrl(uploadResponse.data.mockup_url);
               }
+              this.asyncStatusMessage = null;
               this.isGeneratingMockup = false;
             },
             error: (err) => {
               console.error('Error uploading reference image to design:', err);
               // Keep using the data URL if upload fails
+              this.asyncStatusMessage = null;
               this.isGeneratingMockup = false;
             }
           });
         } else {
+          this.asyncStatusMessage = null;
           this.isGeneratingMockup = false;
         }
       },
       error: (err) => {
         console.error('Error creating design record from reference:', err);
         this.error = 'Erro ao criar design. Por favor, tente novamente.';
+        this.asyncStatusMessage = null;
         this.isGeneratingMockup = false;
       }
     });
   }
 
   async generateMockup(): Promise<void> {
+    this.submitAttempted = true;
+
     if (!this.product) {
       this.error = 'Produto não encontrado.';
       return;
@@ -440,11 +512,15 @@ export class ProductComponent implements OnInit {
     }
 
     if (!this.customizationForm.valid) {
+      this.touchAllFormFields();
+      this.focusFirstInvalidField();
       this.error = 'Por favor, preencha todos os campos obrigatórios.';
       return;
     }
 
+    this.touchAllFormFields();
     this.isGeneratingMockup = true;
+    this.asyncStatusMessage = 'Processando ficheiros...';
     this.error = null;
     this.mockupUrl = null;
     this.itemAddedToCart = false;
@@ -492,6 +568,7 @@ export class ProductComponent implements OnInit {
       });
 
       // Generate mockup
+      this.asyncStatusMessage = 'Gerando mockup...';
       this.productService.generateMockup(request).subscribe({
         next: (response) => {
           // Convert relative path to full URL if needed
@@ -505,16 +582,19 @@ export class ProductComponent implements OnInit {
           }
           
           // Create design record (store the original path from response)
+          this.asyncStatusMessage = 'Salvando design...';
           this.createDesignRecord(mockupPath);
         },
         error: (err) => {
           this.error = err.error?.message || 'Erro ao gerar mockup. Por favor, tente novamente.';
+          this.asyncStatusMessage = null;
           this.isGeneratingMockup = false;
           console.error('Error generating mockup:', err);
         }
       });
     } catch (err) {
       this.error = 'Erro ao processar imagens. Por favor, tente novamente.';
+      this.asyncStatusMessage = null;
       this.isGeneratingMockup = false;
     }
   }
@@ -560,11 +640,13 @@ export class ProductComponent implements OnInit {
           });
         }
 
+        this.asyncStatusMessage = null;
         this.isGeneratingMockup = false;
       },
       error: (err) => {
         console.error('Error creating design record:', err);
         // Don't show error to user, mockup was generated successfully
+        this.asyncStatusMessage = null;
         this.isGeneratingMockup = false;
       }
     });
@@ -658,6 +740,7 @@ export class ProductComponent implements OnInit {
     };
 
     try {
+      this.isAddingToCart = true;
       await this.cartService.addItem(itemData).toPromise();
       // Update cart count
       this.cartService.getCartCount().subscribe(count => {
@@ -667,9 +750,11 @@ export class ProductComponent implements OnInit {
       // Show success state instead of navigating
       this.itemAddedToCart = true;
       this.error = null;
+      this.isAddingToCart = false;
       this._changeDetectorRef.markForCheck();
     } catch (err) {
       this.error = 'Erro ao adicionar ao carrinho. Por favor, tente novamente.';
+      this.isAddingToCart = false;
       console.error('Error adding to cart:', err);
     }
   }

@@ -1,0 +1,588 @@
+<div class="job-card-create w-full">
+
+  <app-page-header
+    [title]="'Novo Job Card'"
+    [subtitle]="'Preencha o brief estruturado para iniciar o trabalho de design'"
+    [showSearch]="false"
+    [actions]="pageHeaderActions"
+    [loading]="submitting">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6 max-w-6xl">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+
+        <!-- ============================================================
+             MAIN COLUMN
+        ============================================================ -->
+        <div class="lg:col-span-2 space-y-6">
+
+          <!-- SECTION 1 · Cliente & Equipa -->
+          <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Cliente &amp; Equipa</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <!-- Client search autocomplete -->
+              <div class="field md:col-span-2">
+                <span>Cliente *</span>
+
+                @if (selectedClient) {
+                  <!-- Selected chip — same pattern as product -->
+                  <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-blue-300 bg-blue-50 w-full">
+                    <div class="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center text-blue-700 text-xs font-bold flex-shrink-0">
+                      {{ selectedClient.name.charAt(0).toUpperCase() }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-semibold text-gray-900 truncate">{{ selectedClient.name }}</p>
+                      <p class="text-xs text-gray-500">{{ selectedClient.identifier }}</p>
+                    </div>
+                    <button type="button" (click)="clearClient()"
+                      class="flex-shrink-0 text-gray-400 hover:text-gray-600" title="Remover cliente">
+                      <span class="material-icons text-base leading-none">close</span>
+                    </button>
+                  </div>
+                } @else {
+                  <!-- Search input -->
+                  <div class="relative w-full">
+                    <input
+                      type="text"
+                      class="input w-full pr-10"
+                      [value]="clientQuery"
+                      (input)="onClientInput($any($event.target).value)"
+                      (focus)="clientDropdownOpen = clientQuery.length >= 1"
+                      placeholder="Pesquisar por nome ou contacto..."
+                      autocomplete="off"
+                    />
+                    <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">search</span>
+
+                    <!-- Dropdown -->
+                    @if (clientDropdownOpen && (clientResults.length > 0 || clientQuery.length >= 1)) {
+                      <div class="absolute z-50 left-0 right-0 top-full mt-1 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                        @for (c of clientResults; track c.id) {
+                          <button
+                            type="button"
+                            (click)="selectClient(c)"
+                            class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left border-b border-gray-100 last:border-b-0 transition-colors">
+                            <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                              {{ c.name.charAt(0).toUpperCase() }}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-sm font-semibold text-gray-900 truncate">{{ c.name }}</p>
+                              <p class="text-xs text-gray-500 flex items-center gap-1">
+                                <span class="material-icons text-xs leading-none">{{ c.type === 'phone' || c.type === 'whatsapp' ? 'phone' : 'email' }}</span>
+                                {{ c.identifier }}
+                              </p>
+                            </div>
+                          </button>
+                        }
+                        <!-- Create new client row -->
+                        <button
+                          type="button"
+                          (click)="openCreateClientModal()"
+                          class="w-full flex items-center gap-3 px-4 py-3 hover:bg-green-50 text-left transition-colors text-green-700 border-t border-gray-100">
+                          <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-icons text-green-600 text-base">person_add</span>
+                          </div>
+                          <span class="text-sm font-medium">
+                            @if (clientQuery) { Criar cliente "{{ clientQuery }}" } @else { Criar novo cliente }
+                          </span>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (hasError('client_id')) {
+                  <span class="error-msg">O cliente é obrigatório.</span>
+                }
+              </div>
+
+              <label class="field">
+                <span>Designer <span class="text-gray-400 font-normal">(opcional)</span></span>
+                <select formControlName="assigned_designer_id" class="input">
+                  <option [value]="null">— sem designer —</option>
+                  @for (d of designers; track d.id) {
+                    <option [value]="d.id">{{ d.name }}</option>
+                  }
+                </select>
+                @if (designers.length === 0) {
+                  <span class="text-xs text-gray-400">
+                    Nenhum designer activo. <a routerLink="/admin/staff/create" class="text-blue-600 hover:underline">Adicionar designer</a>
+                  </span>
+                }
+              </label>
+
+              <div class="field">
+                <span>Tier do Cliente</span>
+                <div class="flex gap-2 mt-0.5">
+                  @for (tier of tiers; track tier.value) {
+                    <button
+                      type="button"
+                      (click)="setTier(tier.value)"
+                      class="flex-1 py-2 rounded-lg text-xs font-semibold border-2 transition-all"
+                      [ngClass]="getTier() === tier.value
+                        ? (tier.value === 'vip'    ? 'bg-amber-500 border-amber-500 text-white'
+                          : tier.value === 'normal' ? 'bg-blue-600 border-blue-600 text-white'
+                          :                          'bg-gray-500 border-gray-500 text-white')
+                        : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'"
+                    >{{ tier.value === 'vip' ? '⭐ VIP' : tier.value === 'normal' ? 'Normal' : '🆕 Novo' }}</button>
+                  }
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- SECTION 2 · Brief -->
+          <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Brief do Job</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <label class="field md:col-span-2">
+                <span>Título do Job *</span>
+                <input
+                  type="text"
+                  formControlName="title"
+                  class="input"
+                  placeholder="ex: Cartaz Promoção Natal 2026 – Vodacom"
+                />
+                @if (hasError('title')) {
+                  <span class="error-msg">O título é obrigatório.</span>
+                }
+              </label>
+
+              <label class="field">
+                <span>Objectivo</span>
+                <input
+                  type="text"
+                  formControlName="objective"
+                  class="input"
+                  placeholder="Promoção, Branding, Evento..."
+                />
+              </label>
+
+              <label class="field">
+                <span>Prazo de Entrega *</span>
+                <input
+                  type="datetime-local"
+                  formControlName="deadline"
+                  class="input"
+                />
+                @if (hasError('deadline')) {
+                  <span class="error-msg">O prazo é obrigatório.</span>
+                }
+              </label>
+
+              <label class="field md:col-span-2">
+                <span>Descrição / Conteúdo</span>
+                <textarea
+                  formControlName="description"
+                  rows="4"
+                  class="input"
+                  placeholder="Descreva o trabalho: textos a incluir, logos, referências visuais, cores da marca, etc."
+                ></textarea>
+              </label>
+
+              <label class="field md:col-span-2">
+                <span>Notas Internas <span class="text-gray-400 font-normal">(não visíveis ao cliente)</span></span>
+                <textarea
+                  formControlName="notes"
+                  rows="2"
+                  class="input"
+                  placeholder="Observações para a equipa interna..."
+                ></textarea>
+              </label>
+
+            </div>
+          </section>
+
+          <!-- SECTION 3 · Itens -->
+          <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <h2 class="text-lg font-semibold text-gray-900">Produtos / Itens</h2>
+              <app-button type="button" variant="outline" size="sm" (onClick)="addItem()">
+                Adicionar item
+              </app-button>
+            </div>
+
+            @if (loadingProducts) {
+              <div class="py-4 text-center text-sm text-gray-400">A carregar catálogo de produtos...</div>
+            }
+
+            <div formArrayName="items" class="space-y-4">
+              @for (item of items.controls; track $index; let itemIdx = $index) {
+                <div [formGroupName]="itemIdx" class="item-block">
+
+                  <!-- Item header -->
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm font-semibold text-gray-700">Item {{ itemIdx + 1 }}</span>
+                    @if (items.length > 1) {
+                      <button
+                        type="button"
+                        class="text-xs text-red-500 hover:text-red-700 hover:underline"
+                        (click)="removeItem(itemIdx)">
+                        Remover
+                      </button>
+                    }
+                  </div>
+
+                  <!-- Catalog search -->
+                  <div class="field mb-4 w-full">
+                    <span>Produto do catálogo <span class="text-gray-400 font-normal">(opcional)</span></span>
+
+                    @if (getItemMeta(itemIdx).selectedProduct; as prod) {
+                      <!-- Selected chip -->
+                      <div class="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-blue-300 bg-blue-50 w-full">
+                        @if (prod.image_url) {
+                          <img [src]="prod.image_url" [alt]="prod.name" class="w-8 h-8 rounded object-cover flex-shrink-0" />
+                        } @else {
+                          <div class="w-8 h-8 rounded bg-blue-200 flex items-center justify-center flex-shrink-0">
+                            <span class="material-icons text-blue-600 text-base">inventory_2</span>
+                          </div>
+                        }
+                        <div class="flex-1 min-w-0">
+                          <p class="text-sm font-semibold text-gray-900 truncate">{{ prod.name }}</p>
+                        </div>
+                        <button type="button" (click)="clearProductSelection(itemIdx)"
+                          class="flex-shrink-0 text-gray-400 hover:text-gray-600" title="Remover produto">
+                          <span class="material-icons text-base leading-none">close</span>
+                        </button>
+                      </div>
+                    } @else {
+                      <!-- Search input -->
+                      <div class="relative w-full">
+                        <input
+                          type="text"
+                          class="input w-full pr-10"
+                          [value]="getItemMeta(itemIdx).productQuery"
+                          (input)="onProductSearchInput(itemIdx, $any($event.target).value)"
+                          (focus)="onProductSearchInput(itemIdx, getItemMeta(itemIdx).productQuery)"
+                          placeholder="Pesquisar produto do catálogo..."
+                          autocomplete="off"
+                        />
+                        @if (loadingProducts) {
+                          <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base animate-spin pointer-events-none">refresh</span>
+                        } @else {
+                          <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">search</span>
+                        }
+
+                        @if (getItemMeta(itemIdx).productDropdownOpen) {
+                          <div class="absolute z-50 left-0 right-0 top-full mt-1 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                            @for (p of getFilteredProducts(itemIdx); track p.id) {
+                              <button
+                                type="button"
+                                (click)="selectProductFromSearch(itemIdx, p)"
+                                class="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-left border-b border-gray-100 last:border-b-0 transition-colors">
+                                @if (p.image_url) {
+                                  <img [src]="p.image_url" [alt]="p.name" class="w-8 h-8 rounded object-cover flex-shrink-0" />
+                                } @else {
+                                  <div class="w-8 h-8 rounded bg-gray-100 flex items-center justify-center flex-shrink-0">
+                                    <span class="material-icons text-gray-400 text-base">inventory_2</span>
+                                  </div>
+                                }
+                                <span class="text-sm font-medium text-gray-900 truncate">{{ p.name }}</span>
+                              </button>
+                            }
+                            @if (getFilteredProducts(itemIdx).length === 0) {
+                              <div class="px-4 py-3 text-sm text-gray-400">Nenhum produto encontrado.</div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Color swatches -->
+                  @if (getItemMeta(itemIdx).colors.length > 0) {
+                    <div class="mb-4">
+                      <span class="field-label text-sm text-gray-700 block mb-1.5">Cor</span>
+                      <div class="flex flex-wrap gap-2">
+                        @for (c of getItemMeta(itemIdx).colors; track c.id) {
+                          <button
+                            type="button"
+                            (click)="selectColor(itemIdx, c.id)"
+                            class="w-8 h-8 rounded-full border-2 transition-all shadow-sm hover:scale-110"
+                            [style.background-color]="c.hex_code"
+                            [title]="c.name"
+                            [ngClass]="getItemColorId(itemIdx) === c.id
+                              ? 'border-blue-600 ring-2 ring-blue-300 scale-110'
+                              : 'border-gray-300 hover:border-gray-400'"
+                          ></button>
+                        }
+                      </div>
+                      @if (getItemColorId(itemIdx)) {
+                        <span class="text-xs text-gray-500 mt-1 block">{{ getSelectedColorName(itemIdx) }}</span>
+                      }
+                    </div>
+                  }
+
+                  <!-- Size buttons -->
+                  @if (getItemMeta(itemIdx).sizes.length > 0) {
+                    <div class="mb-4">
+                      <span class="field-label text-sm text-gray-700 block mb-1.5">Tamanho</span>
+                      <div class="flex flex-wrap gap-2">
+                        @for (s of getItemMeta(itemIdx).sizes; track s.id) {
+                          <button
+                            type="button"
+                            (click)="selectSize(itemIdx, s)"
+                            class="px-3 py-1.5 rounded-lg border-2 text-xs font-medium transition-all"
+                            [ngClass]="getItemSizeId(itemIdx) === s.id
+                              ? 'border-blue-600 bg-blue-50 text-blue-700'
+                              : 'border-gray-200 bg-white text-gray-600 hover:border-gray-400'"
+                          >
+                            <span>{{ s.name }}</span>
+                            @if (s.dimensions) {
+                              <span class="text-gray-400 ml-1">{{ s.dimensions }}</span>
+                            }
+                          </button>
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  <!-- Fields grid -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                    <label class="field md:col-span-2">
+                      <span>Tipo / Descrição do Produto *</span>
+                      <input
+                        type="text"
+                        formControlName="product_type"
+                        class="input"
+                        placeholder="ex: Cartaz, Flyer, Banner, Caneca..."
+                      />
+                      @if (hasItemError(itemIdx, 'product_type')) {
+                        <span class="error-msg">O tipo de produto é obrigatório.</span>
+                      }
+                    </label>
+
+                    <label class="field">
+                      <span>Quantidade *</span>
+                      <input type="number" formControlName="quantity" class="input" min="1" />
+                    </label>
+
+                    <label class="field">
+                      <span>Tamanho / Dimensões</span>
+                      <input type="text" formControlName="size" class="input" placeholder="A4, 90×60cm..." />
+                    </label>
+
+                    <label class="field">
+                      <span>Material</span>
+                      <input type="text" formControlName="material" class="input" placeholder="Vinil, papel couché..." />
+                    </label>
+
+                    <label class="field md:col-span-2 lg:col-span-1">
+                      <span>Observações</span>
+                      <input type="text" formControlName="notes" class="input" placeholder="Detalhes específicos..." />
+                    </label>
+
+                  </div>
+                </div>
+              }
+
+              @if (items.length === 0) {
+                <div class="py-8 text-center text-gray-400 text-sm">
+                  <span class="material-icons text-2xl mb-1 block">inventory_2</span>
+                  Nenhum item — clique em "Adicionar item" para começar.
+                </div>
+              }
+            </div>
+          </section>
+
+        </div>
+        <!-- /MAIN COLUMN -->
+
+
+        <!-- ============================================================
+             SIDEBAR
+        ============================================================ -->
+        <div class="space-y-4 lg:sticky lg:top-6">
+
+          <!-- Priority -->
+          <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Prioridade</h3>
+            <div class="space-y-2">
+              @for (p of priorities; track p.value) {
+                <button
+                  type="button"
+                  (click)="setPriority(p.value)"
+                  class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 transition-all text-left text-sm"
+                  [ngClass]="getPriority() === p.value
+                    ? (p.value === 'high'   ? 'border-red-500 bg-red-50 text-red-700'
+                      : p.value === 'medium' ? 'border-yellow-400 bg-yellow-50 text-yellow-700'
+                      :                        'border-green-400 bg-green-50 text-green-700')
+                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'"
+                >
+                  <span>{{ p.value === 'high' ? '🔴' : p.value === 'medium' ? '🟡' : '🟢' }}</span>
+                  <span class="font-medium">{{ p.label }}</span>
+                  @if (getPriority() === p.value) {
+                    <span class="material-icons text-sm ml-auto">check</span>
+                  }
+                </button>
+              }
+            </div>
+
+            <!-- Urgent override -->
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <button
+                type="button"
+                (click)="toggleOverride()"
+                class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border-2 transition-all text-left text-sm"
+                [ngClass]="isOverrideActive()
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-dashed border-gray-200 hover:border-gray-300'"
+              >
+                <span>⚠️</span>
+                <span class="flex-1 font-medium"
+                  [class.text-red-700]="isOverrideActive()"
+                  [class.text-gray-600]="!isOverrideActive()">
+                  Marcar como URGENTE
+                </span>
+                <div
+                  class="w-9 h-5 rounded-full transition-colors flex-shrink-0 relative"
+                  [class.bg-red-500]="isOverrideActive()"
+                  [class.bg-gray-300]="!isOverrideActive()"
+                >
+                  <div
+                    class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
+                    [class.translate-x-4]="isOverrideActive()"
+                    [class.translate-x-0.5]="!isOverrideActive()"
+                  ></div>
+                </div>
+              </button>
+              <p class="text-xs text-gray-400 mt-1 pl-1">Máx. 3 urgentes simultâneos</p>
+
+              @if (isOverrideActive()) {
+                <label class="field mt-3">
+                  <span>Motivo do urgente *</span>
+                  <input
+                    type="text"
+                    formControlName="priority_reason"
+                    class="input"
+                    placeholder="ex: Cliente VIP, entrega amanhã"
+                  />
+                  @if (hasError('priority_reason')) {
+                    <span class="error-msg">O motivo é obrigatório.</span>
+                  }
+                </label>
+              }
+            </div>
+          </section>
+
+          <!-- Settings -->
+          <section class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">Configurações</h3>
+            <div class="field">
+              <span>Limite de Revisões</span>
+              <div class="flex items-center gap-3 mt-1">
+                <button
+                  type="button"
+                  (click)="decrementRevisions()"
+                  class="w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center font-bold text-lg leading-none"
+                >−</button>
+                <span class="text-xl font-bold text-gray-900 w-6 text-center">{{ getRevisionLimit() }}</span>
+                <button
+                  type="button"
+                  (click)="incrementRevisions()"
+                  class="w-8 h-8 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 flex items-center justify-center font-bold text-lg leading-none"
+                >+</button>
+                <span class="text-xs text-gray-400">revisões incluídas</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Revisões extra terão custo adicional.</p>
+            </div>
+          </section>
+
+          <!-- Actions -->
+          <div class="flex flex-col gap-3">
+            <app-button type="submit" variant="primary" [fullWidth]="true" [loading]="submitting">
+              {{ submitting ? 'A criar...' : 'Criar Job Card' }}
+            </app-button>
+            <app-button type="button" variant="outline" [fullWidth]="true" (onClick)="goBack()">
+              Cancelar
+            </app-button>
+            @if (form.invalid && form.touched) {
+              <p class="text-xs text-red-500 text-center">Preencha os campos obrigatórios</p>
+            }
+          </div>
+
+        </div>
+        <!-- /SIDEBAR -->
+
+      </div>
+    </form>
+  </div>
+  <!-- ── Create Client Modal ──────────────────────────────────────────────── -->
+  @if (showCreateClientModal) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" (click)="closeCreateClientModal()">
+      <div class="w-full max-w-md rounded-xl bg-white shadow-2xl" (click)="$event.stopPropagation()">
+
+        <!-- Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <h3 class="text-lg font-semibold text-gray-900">Novo Cliente</h3>
+          <button type="button" (click)="closeCreateClientModal()"
+            class="text-gray-400 hover:text-gray-600">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <!-- Body -->
+        <form [formGroup]="createClientForm" (ngSubmit)="saveNewClient()" class="p-6 space-y-4">
+
+          <label class="field">
+            <span>Nome completo *</span>
+            <input type="text" formControlName="name" class="input" placeholder="ex: João Manuel da Silva" />
+            @if (createClientForm.get('name')?.invalid && createClientForm.get('name')?.touched) {
+              <span class="error-msg">Nome é obrigatório.</span>
+            }
+          </label>
+
+          <div class="field">
+            <span>Tipo de contacto</span>
+            <div class="flex gap-2 mt-0.5">
+              <button type="button"
+                (click)="createClientForm.get('type')!.setValue('phone')"
+                class="flex-1 py-2 rounded-lg text-xs font-semibold border-2 transition-all flex items-center justify-center gap-1"
+                [ngClass]="createClientForm.get('type')?.value === 'phone'
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'">
+                <span class="material-icons text-sm">phone</span> Telemóvel
+              </button>
+              <button type="button"
+                (click)="createClientForm.get('type')!.setValue('email')"
+                class="flex-1 py-2 rounded-lg text-xs font-semibold border-2 transition-all flex items-center justify-center gap-1"
+                [ngClass]="createClientForm.get('type')?.value === 'email'
+                  ? 'bg-blue-600 border-blue-600 text-white'
+                  : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'">
+                <span class="material-icons text-sm">email</span> E-mail
+              </button>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>{{ createClientForm.get('type')?.value === 'phone' ? 'Número de telemóvel' : 'Endereço de e-mail' }} *</span>
+            <input
+              type="text"
+              formControlName="identifier"
+              class="input"
+              [placeholder]="createClientForm.get('type')?.value === 'phone' ? 'ex: 841234567' : 'ex: joao@empresa.co.mz'"
+            />
+            @if (createClientForm.get('identifier')?.invalid && createClientForm.get('identifier')?.touched) {
+              <span class="error-msg">Contacto é obrigatório.</span>
+            }
+          </label>
+
+          <div class="flex gap-3 pt-2">
+            <app-button type="button" variant="outline" [fullWidth]="true" (onClick)="closeCreateClientModal()">
+              Cancelar
+            </app-button>
+            <app-button type="submit" variant="primary" [fullWidth]="true" [loading]="creatingClient">
+              {{ creatingClient ? 'A criar...' : 'Criar Cliente' }}
+            </app-button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  }
+</div>

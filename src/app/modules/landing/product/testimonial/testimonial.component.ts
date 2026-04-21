@@ -16,6 +16,8 @@ export class TestimonialComponent implements OnInit {
 
   isLoading = false;
   error: string | null = null;
+  showAll = false;
+  readonly initialVisibleCount = 2;
 
   constructor(private testimonialService: TestimonialService) {}
 
@@ -46,6 +48,17 @@ export class TestimonialComponent implements OnInit {
 
   getDefaultPhoto(): string {
     return 'https://i.pravatar.cc/150?img=0';
+  }
+
+  get visibleTestimonials(): Testimonial[] {
+    if (this.showAll) {
+      return this.testimonials;
+    }
+    return this.testimonials.slice(0, this.initialVisibleCount);
+  }
+
+  get hasMoreTestimonials(): boolean {
+    return this.testimonials.length > this.initialVisibleCount;
   }
 }
 

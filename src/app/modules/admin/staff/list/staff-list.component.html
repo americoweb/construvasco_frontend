@@ -1,0 +1,36 @@
+<div class="staff-list w-full">
+  <app-page-header
+    [title]="'Staff'"
+    [subtitle]="'Gestão de membros da equipa'"
+    [showSearch]="true"
+    [showFilters]="true"
+    [actions]="pageHeaderActions"
+    [loading]="loading"
+    (searchChange)="onSearchChange($event)"
+    (filterToggle)="onFilterToggle()"
+    (refresh)="onRefresh()">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6">
+
+    <app-data-filters
+      [fields]="filterFields"
+      (filtersChange)="onFiltersChange($event)">
+    </app-data-filters>
+
+    <app-data-table
+      [data]="staff"
+      [columns]="columns"
+      [actions]="actions"
+      [loading]="loading"
+      emptyMessage="Nenhum membro encontrado">
+    </app-data-table>
+
+    <app-pagination
+      [pagination]="pagination"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)">
+    </app-pagination>
+
+  </div>
+</div>

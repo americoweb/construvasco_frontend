@@ -1,0 +1,95 @@
+<div class="staff-form w-full">
+  <app-page-header
+    [title]="isEditMode ? 'Editar Membro' : 'Novo Membro de Staff'"
+    [subtitle]="isEditMode ? 'Actualizar dados e perfil' : 'Adicionar membro à equipa'"
+    [showSearch]="false"
+    [actions]="pageHeaderActions"
+    [loading]="submitting">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6 max-w-2xl">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+
+      <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Dados do Membro</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <label class="field md:col-span-2">
+            <span>Nome completo *</span>
+            <input type="text" formControlName="name" class="input" placeholder="Nome do colaborador" />
+            @if (hasError('name')) {
+              <span class="error-msg">O nome é obrigatório.</span>
+            }
+          </label>
+
+          <label class="field md:col-span-2">
+            <span>E-mail *</span>
+            <input
+              type="email"
+              formControlName="identifier"
+              class="input"
+              placeholder="email@empresa.com"
+            />
+            @if (hasError('identifier')) {
+              <span class="error-msg">Introduza um e-mail válido.</span>
+            }
+            @if (isEditMode) {
+              <span class="text-xs text-gray-400">O e-mail não pode ser alterado após a criação.</span>
+            }
+          </label>
+
+          <label class="field">
+            <span>Perfil / Função *</span>
+            <select formControlName="role" class="input">
+              <option value="">Selecionar perfil...</option>
+              @for (r of roles; track r.value) {
+                <option [value]="r.value">{{ r.label }}</option>
+              }
+            </select>
+            @if (hasError('role')) {
+              <span class="error-msg">Selecione um perfil.</span>
+            }
+          </label>
+
+          <label class="field">
+            <span>
+              Senha
+              @if (!isEditMode) { <span class="text-red-500">*</span> }
+              @if (isEditMode) { <span class="text-gray-400 font-normal">(deixar em branco para manter)</span> }
+            </span>
+            <input
+              type="password"
+              formControlName="password"
+              class="input"
+              placeholder="Mínimo 8 caracteres"
+            />
+            @if (hasError('password', 'required')) {
+              <span class="error-msg">A senha é obrigatória.</span>
+            }
+            @if (hasError('password', 'minlength')) {
+              <span class="error-msg">A senha deve ter pelo menos 8 caracteres.</span>
+            }
+          </label>
+
+          @if (isEditMode) {
+            <label class="field md:col-span-2 flex-row items-center gap-3">
+              <input type="checkbox" formControlName="is_active" class="w-4 h-4 rounded border-gray-300 text-blue-600" />
+              <span>Conta activa</span>
+            </label>
+          }
+
+        </div>
+      </section>
+
+      <div class="flex flex-wrap gap-3 justify-end">
+        <app-button type="button" variant="outline" (onClick)="goBack()">
+          Cancelar
+        </app-button>
+        <app-button type="submit" variant="primary" [loading]="submitting" [disabled]="submitting">
+          {{ isEditMode ? 'Guardar alterações' : 'Criar membro' }}
+        </app-button>
+      </div>
+
+    </form>
+  </div>
+</div>

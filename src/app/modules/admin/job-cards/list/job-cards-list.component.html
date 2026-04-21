@@ -1,0 +1,48 @@
+<div class="job-cards-list-container w-full">
+  <app-page-header
+    [title]="'Job Cards'"
+    [subtitle]="'Gestão de trabalhos de design e produção — ordenados por prioridade'"
+    [showSearch]="true"
+    [searchPlaceholder]="'Pesquisar job cards...'"
+    [searchValue]="searchValue"
+    [showFilters]="true"
+    [actions]="pageHeaderActions"
+    [loading]="loading"
+    (searchChange)="onSearchChange($event)"
+    (filterToggle)="onFilterToggle()"
+    (refresh)="onRefresh()">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6">
+
+    <!-- Filters -->
+    <div class="mb-4">
+      <app-data-filters
+        [fields]="filterFields"
+        [initialValues]="filters"
+        (filtersChange)="onFiltersChange($event)">
+      </app-data-filters>
+    </div>
+
+    <!-- Table -->
+    <app-data-table
+      [data]="jobCards"
+      [columns]="columns"
+      [actions]="actions"
+      [loading]="loading"
+      [emptyMessage]="'Nenhum Job Card encontrado'"
+      (rowClick)="view($event)">
+    </app-data-table>
+
+    <!-- Pagination -->
+    <div class="mt-4">
+      <app-pagination
+        [pagination]="pagination"
+        [pageSizeOptions]="[10, 15, 25, 50]"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)">
+      </app-pagination>
+    </div>
+
+  </div>
+</div>

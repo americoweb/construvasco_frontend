@@ -12,6 +12,7 @@
           type="radio" 
           [value]="size.id" 
           formControlName="sizeOption"
+          aria-label="Selecionar tamanho {{ size.name }}"
           (change)="selectSize(size.id)">
         <div class="size-info">
           <span class="size-name">{{ size.name }}</span>
@@ -29,6 +30,7 @@
         <input 
           type="radio" 
           value="custom" 
+          aria-label="Selecionar tamanho personalizado"
           formControlName="sizeOption">
         <span class="size-name">Tamanho Personalizado</span>
       </label>
@@ -43,6 +45,8 @@
             formControlName="customWidth"
             step="0.1"
             min="0.1"
+            inputmode="decimal"
+            aria-label="Largura personalizada em centímetros"
             [placeholder]="restrictions?.min_width_cm ? 'Mín: ' + restrictions.min_width_cm + 'cm' : 'Largura'">
         </div>
         <div class="input-group">
@@ -53,11 +57,13 @@
             formControlName="customHeight"
             step="0.1"
             min="0.1"
+            inputmode="decimal"
+            aria-label="Altura personalizada em centímetros"
             [placeholder]="restrictions?.min_height_cm ? 'Mín: ' + restrictions.min_height_cm + 'cm' : 'Altura'">
         </div>
 
         <!-- Validation Errors -->
-        <div class="validation-errors" *ngIf="validationErrorsList.length > 0">
+        <div class="validation-errors" *ngIf="validationErrorsList.length > 0" aria-live="polite">
           <div class="error-message" *ngFor="let error of validationErrorsList">
             {{ error }}
           </div>

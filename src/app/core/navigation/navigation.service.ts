@@ -70,6 +70,20 @@ export class NavigationService {
                     link: '/admin/orders'
                 },
                 {
+                    id: 'job-cards',
+                    title: 'Job Cards',
+                    type: 'basic',
+                    icon: 'heroicons_outline:briefcase',
+                    link: '/admin/job-cards'
+                },
+                {
+                    id: 'staff',
+                    title: 'Staff',
+                    type: 'basic',
+                    icon: 'heroicons_outline:users',
+                    link: '/admin/staff'
+                },
+                {
                     id: 'reports',
                     title: 'Reports',
                     type: 'basic',

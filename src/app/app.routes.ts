@@ -184,6 +184,32 @@ export const routes: Route[] = [
                     {path: ':id', loadComponent: () => import('./modules/admin/categories/detail/category-detail.component').then(m => m.CategoryDetailComponent)},
                 ]
             },
+            {
+                path: 'staff',
+                data: { title: 'Staff', description: 'Gestão de membros da equipa' },
+                loadComponent: () => import('./modules/admin/staff/staff.component').then(m => m.StaffComponent),
+                children: [
+                    { path: '', pathMatch: 'full', redirectTo: 'list' },
+                    { path: 'list',     loadComponent: () => import('./modules/admin/staff/list/staff-list.component').then(m => m.StaffListComponent) },
+                    { path: 'create',   loadComponent: () => import('./modules/admin/staff/form/staff-form.component').then(m => m.StaffFormComponent) },
+                    { path: ':id/edit', loadComponent: () => import('./modules/admin/staff/form/staff-form.component').then(m => m.StaffFormComponent) },
+                ]
+            },
+            {
+                path: 'job-cards',
+                data: {
+                    title: 'Job Cards',
+                    description: 'Gestão de trabalhos de design e produção',
+                },
+                loadComponent: () => import('./modules/admin/job-cards/job-cards.component').then(m => m.JobCardsComponent),
+                children: [
+                    {path: '', pathMatch: 'full', redirectTo: 'list'},
+                    {path: 'list',   loadComponent: () => import('./modules/admin/job-cards/list/job-cards-list.component').then(m => m.JobCardsListComponent)},
+                    {path: 'kanban', loadComponent: () => import('./modules/admin/job-cards/kanban/job-cards-kanban.component').then(m => m.JobCardsKanbanComponent)},
+                    {path: 'create', loadComponent: () => import('./modules/admin/job-cards/create/job-card-create.component').then(m => m.JobCardCreateComponent)},
+                    {path: ':id',    loadComponent: () => import('./modules/admin/job-cards/detail/job-card-detail.component').then(m => m.JobCardDetailComponent)},
+                ]
+            },
         ]
     },
 

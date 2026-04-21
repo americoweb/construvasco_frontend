@@ -1,0 +1,747 @@
+<div class="job-card-detail-container w-full">
+
+  <app-page-header
+    [title]="loading ? 'A carregar...' : (jobCard ? jobCard.job_number + ' — ' + jobCard.title : 'Job Card')"
+    [subtitle]="jobCard ? 'Criado em ' + formatDate(jobCard.created_at) : ''"
+    [actions]="pageHeaderActions"
+    [loading]="loading">
+  </app-page-header>
+
+  <div class="container mx-auto px-4 py-6">
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="flex items-center justify-center h-64 text-gray-400">
+      <span class="animate-spin material-icons mr-2">autorenew</span> A carregar...
+    </div>
+  }
+
+  @if (!loading && jobCard) {
+
+  <!-- Urgent banner -->
+  @if (jobCard.priority_override) {
+    <div class="bg-red-50 border border-red-200 rounded-xl px-5 py-3 mb-4 flex items-center justify-between">
+      <div class="flex items-center gap-2 text-red-700 font-semibold">
+        <span class="material-icons text-base">warning</span>
+        ⚠️ JOB URGENTE — {{ jobCard.priority_reason }}
+      </div>
+      <button (click)="removeOverride()" class="text-xs text-red-500 hover:text-red-700 underline">Remover urgente</button>
+    </div>
+  }
+
+  <!-- Overdue banner -->
+  @if (jobCard.is_overdue) {
+    <div class="bg-orange-50 border border-orange-200 rounded-xl px-5 py-3 mb-4 flex items-center gap-2 text-orange-700">
+      <span class="material-icons text-base">schedule</span>
+      <strong>Prazo ultrapassado!</strong> Este job está em atraso.
+    </div>
+  }
+
+  <!-- Status + Priority actions panels -->
+  @if (showStatusPanel) {
+    <div class="bg-white border border-indigo-200 rounded-xl p-5 mb-4 shadow-sm">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">Actualizar Status</h3>
+      <form [formGroup]="statusForm" (ngSubmit)="submitStatus()" class="flex flex-wrap gap-3 items-end">
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Novo Status</label>
+          <select formControlName="status" class="w-full border rounded-lg px-3 py-2 text-sm">
+            <option value="">Selecionar...</option>
+            @for (s of nextStatuses; track s) {
+              <option [value]="s">{{ statusLabels[s] }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex-1 min-w-[200px]">
+          <label class="block text-xs font-medium text-gray-600 mb-1">Notas (opcional)</label>
+          <input formControlName="notes" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Motivo da mudança..." />
+        </div>
+        <div class="flex gap-2">
+          <app-button variant="primary" type="submit" [loading]="updatingStatus">Guardar</app-button>
+          <app-button variant="secondary" type="button" (click)="showStatusPanel = false">Cancelar</app-button>
+        </div>
+      </form>
+    </div>
+  }
+
+  @if (showPriorityPanel) {
+    <div class="bg-white border border-yellow-200 rounded-xl p-5 mb-4 shadow-sm">
+      <h3 class="text-sm font-semibold text-gray-700 mb-3">Actualizar Prioridade</h3>
+      <form [formGroup]="priorityForm" (ngSubmit)="submitPriority()" class="flex flex-wrap gap-3 items-end">
+        <div>
+          <label class="block text-xs font-medium text-gray-600 mb-1">Prioridade</label>
+          <select formControlName="priority" class="border rounded-lg px-3 py-2 text-sm">
+            @for (p of allPriorities; track p) {
+              <option [value]="p">{{ priorityLabels[p] }}</option>
+            }
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" formControlName="priority_override" class="w-4 h-4 text-red-600" id="po" />
+          <label for="po" class="text-sm font-medium text-gray-700 cursor-pointer">Marcar como Urgente</label>
+        </div>
+        @if (isOverrideFormActive()) {
+          <div class="w-full">
+            <label class="block text-xs font-medium text-gray-600 mb-1">Motivo do Urgente *</label>
+            <input formControlName="priority_reason" type="text" class="w-full border rounded-lg px-3 py-2 text-sm" placeholder="Descreva o motivo..." />
+          </div>
+        }
+        <div class="flex gap-2">
+          <app-button variant="primary" type="submit" [loading]="updatingPriority">Guardar</app-button>
+          <app-button variant="secondary" type="button" (click)="showPriorityPanel = false">Cancelar</app-button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Summary cards row -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+    <!-- Status -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-400 mb-1">Status</p>
+      <span
+        class="text-sm font-semibold px-3 py-1 rounded-full"
+        [ngClass]="{
+          'bg-gray-100 text-gray-600':    jobCard.status_color === 'gray',
+          'bg-blue-100 text-blue-700':    jobCard.status_color === 'blue',
+          'bg-purple-100 text-purple-700':jobCard.status_color === 'purple',
+          'bg-yellow-100 text-yellow-700':jobCard.status_color === 'yellow',
+          'bg-orange-100 text-orange-700':jobCard.status_color === 'orange',
+          'bg-indigo-100 text-indigo-700':jobCard.status_color === 'indigo',
+          'bg-green-100 text-green-700':  jobCard.status_color === 'green',
+          'bg-red-100 text-red-700':      jobCard.status_color === 'red'
+        }"
+      >{{ jobCard.status_label }}</span>
+    </div>
+
+    <!-- Priority -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-400 mb-1">Prioridade</p>
+      <div class="flex items-center gap-2">
+        <span
+          class="text-sm font-semibold px-3 py-1 rounded-full"
+          [ngClass]="{
+            'bg-green-100 text-green-700':  jobCard.priority_color === 'green',
+            'bg-yellow-100 text-yellow-700':jobCard.priority_color === 'yellow',
+            'bg-red-100 text-red-700':      jobCard.priority_color === 'red'
+          }"
+        >{{ jobCard.priority_label }}</span>
+        <button (click)="showPriorityPanel = !showPriorityPanel" class="text-gray-400 hover:text-indigo-600" title="Alterar prioridade">
+          <span class="material-icons text-sm">edit</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Deadline -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-400 mb-1">Prazo</p>
+      <p class="text-sm font-semibold" [class.text-red-600]="jobCard.is_overdue">
+        {{ formatDate(jobCard.deadline) }}
+      </p>
+    </div>
+
+    <!-- Revisions -->
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-400 mb-1">Revisões</p>
+      <p class="text-sm font-semibold" [class.text-red-600]="jobCard.over_revision_limit">
+        {{ jobCard.revision_count }} / {{ jobCard.revision_limit }}
+        @if (jobCard.over_revision_limit) { <span class="text-xs text-red-500 ml-1">(limite atingido)</span> }
+      </p>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex border-b border-gray-200 mb-6 gap-1 overflow-x-auto">
+    @for (tab of ['info', 'items', 'design', 'files', 'feedback']; track tab) {
+      <button
+        (click)="setTab(tab)"
+        class="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap flex items-center gap-1.5"
+        [class.border-indigo-500]="activeTab === tab"
+        [class.text-indigo-600]="activeTab === tab"
+        [class.border-transparent]="activeTab !== tab"
+        [class.text-gray-500]="activeTab !== tab"
+      >
+        @if (tab === 'design') {
+          <span class="material-icons text-sm">auto_awesome</span>
+        }
+        {{ tab === 'info' ? 'Informação' : tab === 'items' ? 'Itens' : tab === 'design' ? 'Design' : tab === 'files' ? 'Ficheiros' : 'Feedback' }}
+        @if (tab === 'design' && designFiles.length > 0) {
+          <span class="ml-0.5 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600 text-[10px] font-bold leading-none">{{ designFiles.length }}</span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- TAB: Info -->
+  @if (activeTab === 'info') {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <!-- Brief -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Brief</h3>
+        <dl class="space-y-2 text-sm">
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Título</dt><dd class="font-medium text-gray-800">{{ jobCard.title }}</dd></div>
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Objectivo</dt><dd class="text-gray-700">{{ jobCard.objective || '—' }}</dd></div>
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Descrição</dt><dd class="text-gray-700 whitespace-pre-line">{{ jobCard.description || '—' }}</dd></div>
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Notas</dt><dd class="text-gray-700">{{ jobCard.notes || '—' }}</dd></div>
+        </dl>
+      </div>
+
+      <!-- Equipa -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Equipa</h3>
+        <dl class="space-y-2 text-sm">
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Cliente</dt><dd class="font-medium text-gray-800">{{ jobCard.client?.name || '—' }}</dd></div>
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Criado por</dt><dd class="text-gray-700">{{ jobCard.creator?.name || '—' }}</dd></div>
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Designer</dt><dd class="text-gray-700">{{ jobCard.designer?.name || 'Não atribuído' }}</dd></div>
+          <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Tier</dt><dd class="text-gray-700">{{ jobCard.client_tier_label }}</dd></div>
+        </dl>
+      </div>
+
+    </div>
+  }
+
+  <!-- TAB: Items -->
+  @if (activeTab === 'items') {
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      @if (jobCard.items && jobCard.items.length > 0) {
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-500 text-xs uppercase">
+            <tr>
+              <th class="px-4 py-3 text-left">Produto</th>
+              <th class="px-4 py-3 text-left">Qtd</th>
+              <th class="px-4 py-3 text-left">Tamanho</th>
+              <th class="px-4 py-3 text-left">Material</th>
+              <th class="px-4 py-3 text-left">Notas</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-50">
+            @for (item of jobCard.items; track item.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-800">{{ item.product_type }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ item.quantity }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ item.size || '—' }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ item.material || '—' }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ item.notes || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <div class="text-center py-12 text-gray-400">
+          <span class="material-icons text-3xl mb-2">inventory_2</span>
+          <p>Sem itens adicionados</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- TAB: Files -->
+  @if (activeTab === 'files') {
+    <div class="space-y-4">
+
+      <!-- Header row -->
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-gray-500">{{ (jobCard.files?.length ?? 0) }} ficheiro(s) anexado(s)</p>
+        <button
+          type="button"
+          (click)="showUploadPanel = !showUploadPanel; cdr.markForCheck()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition-colors">
+          <span class="material-icons text-base">upload_file</span>
+          Anexar ficheiro
+        </button>
+      </div>
+
+      <!-- Upload panel -->
+      @if (showUploadPanel) {
+        <div class="rounded-xl border border-indigo-200 bg-indigo-50/50 p-5 space-y-4">
+          <h4 class="text-sm font-semibold text-indigo-900">Novo ficheiro</h4>
+
+          <!-- File type selector -->
+          <div class="flex flex-wrap gap-2">
+            @for (t of fileTypes; track t) {
+              <button type="button"
+                (click)="uploadType = t; cdr.markForCheck()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all"
+                [ngClass]="uploadType === t
+                  ? 'border-indigo-600 bg-indigo-600 text-white'
+                  : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-300'">
+                {{ fileTypeLabels[t] }}
+              </button>
+            }
+          </div>
+
+          <!-- Drop zone -->
+          <label class="flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-indigo-300 bg-white p-6 cursor-pointer hover:border-indigo-500 transition-colors">
+            <span class="material-icons text-3xl text-indigo-400">cloud_upload</span>
+            @if (uploadFile) {
+              <span class="text-sm font-medium text-indigo-700">{{ uploadFile.name }}</span>
+              <span class="text-xs text-gray-400">{{ formatFileSize(uploadFile.size) }}</span>
+            } @else {
+              <span class="text-sm text-gray-500">Clique ou arraste o ficheiro aqui</span>
+              <span class="text-xs text-gray-400">Máx. 50 MB</span>
+            }
+            <input type="file" class="hidden" (change)="onFileSelected($event)" />
+          </label>
+
+          <!-- Notes -->
+          <label class="flex flex-col gap-1 text-sm text-gray-700">
+            <span>Notas <span class="text-gray-400 font-normal">(opcional)</span></span>
+            <input type="text" class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              [(ngModel)]="uploadNotes" placeholder="ex: versão aprovada pelo cliente" />
+          </label>
+
+          <!-- Actions -->
+          <div class="flex gap-3">
+            <button type="button"
+              (click)="showUploadPanel = false; cdr.markForCheck()"
+              class="flex-1 py-2 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+              Cancelar
+            </button>
+            <button type="button"
+              (click)="submitUpload()"
+              [disabled]="!uploadFile || uploadingFile"
+              class="flex-1 py-2 rounded-lg bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
+              @if (uploadingFile) {
+                <span class="material-icons text-base animate-spin">refresh</span> A enviar...
+              } @else {
+                <span class="material-icons text-base">upload</span> Enviar
+              }
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- File list -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+        @if (jobCard.files && jobCard.files.length > 0) {
+          <div class="divide-y divide-gray-100">
+            @for (file of jobCard.files; track file.id) {
+              <div class="flex items-center gap-4 px-5 py-4">
+
+                <!-- Icon -->
+                <div class="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                  <span class="material-icons text-indigo-600 text-base">
+                    {{ file.mime_type?.startsWith('image/') ? 'image' : file.mime_type === 'application/pdf' ? 'picture_as_pdf' : 'attach_file' }}
+                  </span>
+                </div>
+
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-gray-800 truncate">{{ file.file_name }}</p>
+                  <p class="text-xs text-gray-400 mt-0.5">
+                    {{ file.type_label }} · v{{ file.version }}
+                    @if (file.file_size) { · {{ formatFileSize(file.file_size) }} }
+                    @if (file.uploaded_by) { · {{ file.uploaded_by.name }} }
+                  </p>
+                </div>
+
+                <!-- Drive sync badge -->
+                @if (file.drive_synced) {
+                  <a [href]="file.drive_link" target="_blank"
+                    class="flex items-center gap-1 px-2 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium hover:bg-green-200 transition-colors flex-shrink-0"
+                    title="Abrir no Google Drive">
+                    <svg class="w-3 h-3" viewBox="0 0 87.3 78" fill="currentColor">
+                      <path d="M6.6 66.85l3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8H0c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+                      <path d="M43.65 25L29.9 1.2C28.55 2 27.4 3.1 26.6 4.5L1.2 48.55c-.8 1.4-1.2 2.95-1.2 4.5h27.5z" fill="#00ac47"/>
+                      <path d="M73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5H59.8l5.85 11.5z" fill="#ea4335"/>
+                      <path d="M43.65 25L57.4 1.2C56.05.4 54.5 0 52.9 0H34.4c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+                      <path d="M59.8 53.05H27.5L13.75 76.85c1.35.8 2.9 1.15 4.5 1.15h50.8c1.6 0 3.15-.4 4.5-1.2z" fill="#2684fc"/>
+                      <path d="M73.4 26.5l-12.65-21.9C59.95 3.2 58.8 2.1 57.4 1.3L43.65 25l16.15 28h27.45c0-1.6-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+                    </svg>
+                    Drive
+                  </a>
+                } @else {
+                  <span class="flex items-center gap-1 px-2 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium flex-shrink-0" title="A sincronizar com Google Drive">
+                    <span class="material-icons text-xs">sync</span>
+                    A sincronizar
+                  </span>
+                }
+
+                <!-- Actions -->
+                <a [href]="file.file_url" target="_blank"
+                  class="text-gray-400 hover:text-indigo-600 transition-colors flex-shrink-0" title="Descarregar">
+                  <span class="material-icons text-base">download</span>
+                </a>
+                <button type="button"
+                  (click)="confirmDeleteFile(file.id)"
+                  [disabled]="deletingFileId === file.id"
+                  class="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0 disabled:opacity-40"
+                  title="Eliminar">
+                  @if (deletingFileId === file.id) {
+                    <span class="material-icons text-base animate-spin">refresh</span>
+                  } @else {
+                    <span class="material-icons text-base">delete_outline</span>
+                  }
+                </button>
+
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-12 text-gray-400">
+            <span class="material-icons text-3xl mb-2 block">folder_open</span>
+            <p class="text-sm">Sem ficheiros anexados</p>
+            <p class="text-xs mt-1">Clique em "Anexar ficheiro" para adicionar</p>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- TAB: Design workspace -->
+  @if (activeTab === 'design') {
+    <div class="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-5">
+
+      <!-- ── LEFT: Brief + Assets + Prompt ── -->
+      <div class="space-y-4">
+
+        <!-- Brief summary -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Brief</p>
+          <p class="text-sm font-bold text-gray-900">{{ jobCard.title }}</p>
+          @if (jobCard.objective) {
+            <p class="text-xs text-gray-500 mt-1 leading-relaxed">{{ jobCard.objective }}</p>
+          }
+          @if (jobCard.items && jobCard.items.length > 0) {
+            <div class="mt-3 space-y-1.5 border-t border-gray-100 pt-3">
+              @for (item of jobCard.items; track item.id) {
+                <div class="flex items-center gap-2 text-xs text-gray-600">
+                  <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 flex-shrink-0"></span>
+                  <span class="font-medium">{{ item.quantity }}×</span>
+                  <span>{{ item.product_type }}</span>
+                  @if (item.size) { <span class="text-gray-400">· {{ item.size }}</span> }
+                  @if (item.material) { <span class="text-gray-400">· {{ item.material }}</span> }
+                </div>
+              }
+            </div>
+          }
+          @if (jobCard.client) {
+            <div class="mt-3 flex items-center gap-2 border-t border-gray-100 pt-3">
+              <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-600 flex-shrink-0">
+                {{ jobCard.client.name.charAt(0).toUpperCase() }}
+              </div>
+              <span class="text-xs text-gray-500">{{ jobCard.client.name }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Assets grid -->
+        @if (imageFiles.length > 0) {
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Activos</p>
+              <span class="text-[10px] text-gray-400">1º clique = logótipo · 2º = referência</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              @for (f of imageFiles; track f.id) {
+                <button type="button" (click)="toggleAsset(f)"
+                  class="relative rounded-lg overflow-hidden aspect-square bg-gray-50 border-2 transition-all hover:opacity-90"
+                  [class.border-violet-500]="assetSlot(f) === 'logo'"
+                  [class.border-blue-400]="assetSlot(f) === 'ref'"
+                  [class.border-gray-200]="assetSlot(f) === null"
+                  [title]="f.file_name">
+                  <img [src]="f.file_url" [alt]="f.file_name" class="w-full h-full object-cover" />
+                  @if (assetSlot(f) === 'logo') {
+                    <div class="absolute top-1 right-1 bg-violet-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">L</div>
+                  }
+                  @if (assetSlot(f) === 'ref') {
+                    <div class="absolute top-1 right-1 bg-blue-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">R</div>
+                  }
+                  <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1.5 py-1">
+                    <span class="text-[9px] text-white leading-none">{{ f.type_label }}</span>
+                  </div>
+                </button>
+              }
+            </div>
+            <!-- Asset slot indicators -->
+            <div class="flex gap-2 mt-3">
+              <div class="flex-1 rounded-lg px-3 py-2 text-xs border-2 flex items-center gap-2"
+                [class.border-violet-300]="selectedLogoFileId"
+                [class.bg-violet-50]="selectedLogoFileId"
+                [class.border-dashed]="!selectedLogoFileId"
+                [class.border-gray-200]="!selectedLogoFileId"
+                [class.text-gray-400]="!selectedLogoFileId"
+                [class.text-violet-700]="selectedLogoFileId">
+                <span class="material-icons text-sm">{{ selectedLogoFileId ? 'check_circle' : 'add_photo_alternate' }}</span>
+                Logótipo
+              </div>
+              <div class="flex-1 rounded-lg px-3 py-2 text-xs border-2 flex items-center gap-2"
+                [class.border-blue-300]="selectedReferenceFileId"
+                [class.bg-blue-50]="selectedReferenceFileId"
+                [class.border-dashed]="!selectedReferenceFileId"
+                [class.border-gray-200]="!selectedReferenceFileId"
+                [class.text-gray-400]="!selectedReferenceFileId"
+                [class.text-blue-700]="selectedReferenceFileId">
+                <span class="material-icons text-sm">{{ selectedReferenceFileId ? 'check_circle' : 'image_search' }}</span>
+                Referência
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Prompt -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-3">
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Prompt</p>
+            <button type="button" (click)="autoFillPrompt()"
+              class="flex items-center gap-1 text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors">
+              <span class="material-icons text-sm">auto_fix_high</span> Auto-preencher
+            </button>
+          </div>
+          <textarea
+            [(ngModel)]="designPrompt"
+            rows="5"
+            class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400 resize-none leading-relaxed"
+            placeholder="Descreva o design: paleta de cores, estilo, elementos, posicionamento...">
+          </textarea>
+        </div>
+
+        <!-- Generate button -->
+        <button type="button" (click)="generateDesign()" [disabled]="generatingDesign"
+          class="w-full py-3.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md"
+          [ngClass]="generatingDesign
+            ? 'bg-indigo-300 text-white cursor-not-allowed'
+            : 'bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-lg active:scale-[0.98]'">
+          @if (generatingDesign) {
+            <span class="material-icons text-base animate-spin">refresh</span>
+            A gerar com IA...
+          } @else {
+            <span class="material-icons text-base">auto_awesome</span>
+            Gerar Design com IA
+          }
+        </button>
+
+        @if (designError) {
+          <div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 flex items-start gap-2">
+            <span class="material-icons text-red-500 text-sm mt-0.5">error_outline</span>
+            <p class="text-sm text-red-700">{{ designError }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- ── RIGHT: Canvas + History ── -->
+      <div class="space-y-4">
+
+        <!-- Canvas card -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col" style="min-height: 500px">
+
+          @if (canvasImage) {
+            <!-- Image present -->
+            <div class="relative flex-1 bg-[#f8f8f8]" style="background-image: linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0">
+              <img [src]="canvasImage" alt="Design gerado"
+                class="w-full object-contain max-h-[520px] relative z-10" />
+
+              <!-- Floating action bar -->
+              <div class="absolute top-3 right-3 flex gap-2 z-20">
+                <button type="button" (click)="downloadDesign()"
+                  class="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 text-xs font-semibold text-gray-700 shadow hover:bg-white flex items-center gap-1.5 transition-all">
+                  <span class="material-icons text-sm">download</span> Descarregar
+                </button>
+                <button type="button" (click)="exportCmykPdf()" [disabled]="exportingPdf"
+                  class="rounded-lg px-3 py-2 text-xs font-semibold shadow flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  [ngClass]="exportingPdf ? 'bg-indigo-400 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white'">
+                  @if (exportingPdf) {
+                    <span class="material-icons text-sm animate-spin">refresh</span>
+                  } @else {
+                    <span class="material-icons text-sm">print</span>
+                  }
+                  PDF CMYK
+                </button>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/60">
+              <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-indigo-100 text-indigo-700">
+                  <span class="material-icons text-xs">auto_awesome</span>
+                  Gerado por IA
+                </span>
+                @if (currentDesignFile) {
+                  <span class="text-xs text-gray-400">v{{ currentDesignFile.version }} · {{ currentDesignFile.file_name }}</span>
+                }
+              </div>
+              <button type="button" (click)="generateDesign()" [disabled]="generatingDesign"
+                class="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium transition-colors disabled:opacity-40">
+                <span class="material-icons text-sm">refresh</span> Regenerar
+              </button>
+            </div>
+
+          } @else if (generatingDesign) {
+            <!-- Generating state -->
+            <div class="flex-1 flex flex-col items-center justify-center gap-5 p-10">
+              <div class="relative w-24 h-24">
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-100"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="material-icons text-3xl text-indigo-400">auto_awesome</span>
+                </div>
+              </div>
+              <div class="text-center space-y-1">
+                <p class="text-sm font-semibold text-gray-700">A IA está a criar o seu design</p>
+                <p class="text-xs text-gray-400">Isto pode demorar 20–40 segundos...</p>
+              </div>
+            </div>
+
+          } @else {
+            <!-- Empty canvas -->
+            <div class="flex-1 flex flex-col items-center justify-center gap-4 p-10 text-gray-300">
+              <div class="w-20 h-20 rounded-2xl bg-gray-100 flex items-center justify-center">
+                <span class="material-icons text-4xl text-gray-300">draw</span>
+              </div>
+              <div class="text-center space-y-1">
+                <p class="text-sm font-medium text-gray-400">Canvas em branco</p>
+                <p class="text-xs text-gray-400">Configure o prompt e clique em <strong>Gerar Design com IA</strong></p>
+              </div>
+              @if (imageFiles.length === 0) {
+                <div class="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-xs text-amber-700 text-center max-w-xs">
+                  <span class="material-icons text-sm align-middle mr-1">info</span>
+                  Carregue imagens de referência ou logótipos no separador <strong>Ficheiros</strong> para melhores resultados.
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Previous versions -->
+        @if (designFiles.length > 0) {
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-3">Versões anteriores</p>
+            <div class="flex gap-3 overflow-x-auto pb-1">
+              @for (f of designFiles; track f.id) {
+                <button type="button" (click)="loadDesignVersion(f)"
+                  class="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 bg-gray-50 transition-all hover:opacity-90"
+                  [class.border-indigo-500]="currentDesignFile?.id === f.id"
+                  [class.shadow-md]="currentDesignFile?.id === f.id"
+                  [class.border-gray-200]="currentDesignFile?.id !== f.id">
+                  <img [src]="f.file_url" [alt]="f.file_name" class="w-full h-full object-cover" />
+                  <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent px-1.5 py-1.5">
+                    <span class="text-[10px] text-white font-semibold">v{{ f.version }}</span>
+                  </div>
+                  @if (currentDesignFile?.id === f.id) {
+                    <div class="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center">
+                      <span class="material-icons text-white" style="font-size:10px">check</span>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Export info panel -->
+        @if (currentDesignFile) {
+          <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-5">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                <span class="material-icons text-indigo-600 text-base">print</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-indigo-900">Exportar para impressão</p>
+                <p class="text-xs text-indigo-600 mt-0.5 leading-relaxed">
+                  O botão <strong>PDF CMYK</strong> gera um ficheiro print-ready com conversão de cores para CMYK a 300 DPI, pronto para enviar à gráfica.
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+    </div>
+  }
+
+  <!-- TAB: Feedback -->
+  @if (activeTab === 'feedback') {
+    <div class="space-y-4">
+
+      <!-- Add feedback -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <h3 class="text-sm font-semibold text-gray-700 mb-3 flex items-center justify-between">
+          Adicionar Feedback / Comentário
+          <button (click)="showFeedbackPanel = !showFeedbackPanel" class="text-indigo-500 hover:text-indigo-700">
+            <span class="material-icons text-base">{{ showFeedbackPanel ? 'expand_less' : 'add_circle_outline' }}</span>
+          </button>
+        </h3>
+        @if (showFeedbackPanel) {
+          <form [formGroup]="feedbackForm" (ngSubmit)="submitFeedback()" class="space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="md:col-span-2">
+                <label class="block text-xs font-medium text-gray-600 mb-1">Comentário *</label>
+                <textarea
+                  formControlName="comment"
+                  rows="3"
+                  class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+                  placeholder="Descreva o feedback, pedido de alteração ou aprovação..."
+                ></textarea>
+              </div>
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Papel</label>
+                  <select formControlName="role" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    <option value="comercial">Comercial</option>
+                    <option value="designer">Designer</option>
+                    <option value="client">Cliente</option>
+                  </select>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" formControlName="is_approved" class="w-4 h-4 text-green-600 rounded" />
+                  <span class="text-sm text-gray-700">Marcar como aprovação</span>
+                </label>
+              </div>
+            </div>
+            <div class="flex justify-end gap-2">
+              <app-button variant="secondary" type="button" (click)="showFeedbackPanel = false">Cancelar</app-button>
+              <app-button variant="primary" type="submit" [loading]="addingFeedback">Adicionar</app-button>
+            </div>
+          </form>
+        }
+      </div>
+
+      <!-- Feedback timeline -->
+      <div class="space-y-3">
+        @if (jobCard.feedback && jobCard.feedback.length > 0) {
+          @for (fb of jobCard.feedback; track fb.id) {
+            <div
+              class="bg-white rounded-xl border shadow-sm p-4"
+              [class.border-green-200]="fb.is_approved"
+              [class.border-gray-100]="!fb.is_approved"
+            >
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">{{ fb.role_label }}</span>
+                  <span class="text-xs text-gray-400">v{{ fb.version }}</span>
+                  @if (fb.is_approved) {
+                    <span class="text-xs font-bold text-green-600 flex items-center gap-0.5">
+                      <span class="material-icons text-sm">check_circle</span> APROVADO
+                    </span>
+                  }
+                </div>
+                <span class="text-xs text-gray-400">{{ formatDate(fb.created_at) }} · {{ fb.author?.name }}</span>
+              </div>
+              <p class="text-sm text-gray-700 whitespace-pre-line">{{ fb.comment }}</p>
+            </div>
+          }
+        } @else {
+          <div class="text-center py-12 text-gray-400 bg-white rounded-xl border border-gray-100">
+            <span class="material-icons text-3xl mb-2">forum</span>
+            <p>Sem feedback registado</p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+}
+
+  @if (!loading && !jobCard) {
+    <div class="text-center py-20 text-gray-400">
+      <span class="material-icons text-4xl mb-2">error_outline</span>
+      <p>Job Card não encontrado.</p>
+      <button (click)="goBack()" class="mt-3 text-indigo-600 hover:text-indigo-800 text-sm font-medium">← Voltar à lista</button>
+    </div>
+  }
+
+  </div><!-- /container -->
+</div><!-- /job-card-detail-container -->

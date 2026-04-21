@@ -1,0 +1,27 @@
+.job-card-create {
+  .field {
+    @apply flex flex-col gap-1 text-sm text-gray-700;
+  }
+
+  .input {
+    @apply rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-sm
+           focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500;
+
+    &.ng-invalid.ng-touched {
+      @apply border-red-400 focus:border-red-500 focus:ring-red-500;
+    }
+  }
+
+  textarea.input {
+    @apply resize-none;
+  }
+
+  .error-msg {
+    @apply text-xs text-red-500 mt-0.5;
+  }
+
+  /* Item rows inside FormArray */
+  .item-block {
+    @apply rounded-lg border border-gray-100 bg-gray-50/80 p-4;
+  }
+}

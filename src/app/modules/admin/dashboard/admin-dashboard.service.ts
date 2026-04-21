@@ -12,6 +12,13 @@ export interface AdminDashboardStats {
   products_total: number;
   designs_total: number;
   categories_total: number;
+  // Job Cards
+  job_cards_total: number;
+  job_cards_active: number;
+  job_cards_urgent: number;
+  job_cards_overdue: number;
+  job_cards_in_design: number;
+  job_cards_in_approval: number;
 }
 
 @Injectable({

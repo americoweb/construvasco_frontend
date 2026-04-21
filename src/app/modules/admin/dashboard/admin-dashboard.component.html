@@ -18,6 +18,16 @@
         class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
         Lista de pedidos
       </a>
+      <a
+        routerLink="/admin/job-cards/create"
+        class="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700">
+        Novo Job Card
+      </a>
+      <a
+        routerLink="/admin/job-cards/kanban"
+        class="inline-flex items-center rounded-lg border border-indigo-300 bg-white px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
+        Kanban Jobs
+      </a>
     </div>
     @if (loading) {
       <p class="text-center text-gray-500 py-12">A carregar…</p>
@@ -74,7 +84,51 @@
             </svg>
           </div>
         </a>
+
+        <!-- Job Cards stat card -->
+        <a routerLink="/admin/job-cards/list" class="stat-card col-span-full sm:col-span-2 xl:col-span-1">
+          <div>
+            <p class="stat-label">Job Cards</p>
+            <p class="stat-value">{{ stats.job_cards_total }}</p>
+            <p class="stat-hint">
+              {{ stats.job_cards_active }} activos
+              @if (stats.job_cards_urgent > 0) {
+                · <span class="text-red-600 font-semibold">⚠️ {{ stats.job_cards_urgent }} urgentes</span>
+              }
+              @if (stats.job_cards_overdue > 0) {
+                · <span class="text-orange-600 font-semibold">⏱ {{ stats.job_cards_overdue }} em atraso</span>
+              }
+            </p>
+          </div>
+          <div class="stat-icon bg-indigo-100 text-indigo-700">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
+        </a>
       </div>
+
+      <!-- Job Cards detail row -->
+      @if (stats.job_cards_active > 0) {
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          <a routerLink="/admin/job-cards/kanban" class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:border-indigo-300 transition-colors">
+            <div class="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-lg font-bold">{{ stats.job_cards_in_design }}</div>
+            <div><p class="text-xs text-gray-400">Em Design</p></div>
+          </a>
+          <a routerLink="/admin/job-cards/kanban" class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex items-center gap-3 hover:border-indigo-300 transition-colors">
+            <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-lg font-bold">{{ stats.job_cards_in_approval }}</div>
+            <div><p class="text-xs text-gray-400">A Aguardar Aprovação</p></div>
+          </a>
+          <a routerLink="/admin/job-cards/list?priority_override=1" class="bg-white rounded-xl border border-red-100 shadow-sm p-4 flex items-center gap-3 hover:border-red-300 transition-colors">
+            <div class="w-9 h-9 rounded-lg bg-red-100 text-red-700 flex items-center justify-center text-lg font-bold">{{ stats.job_cards_urgent }}</div>
+            <div><p class="text-xs text-gray-400">Urgentes</p></div>
+          </a>
+          <a routerLink="/admin/job-cards/list" class="bg-white rounded-xl border border-orange-100 shadow-sm p-4 flex items-center gap-3 hover:border-orange-300 transition-colors">
+            <div class="w-9 h-9 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center text-lg font-bold">{{ stats.job_cards_overdue }}</div>
+            <div><p class="text-xs text-gray-400">Em Atraso</p></div>
+          </a>
+        </div>
+      }
     } @else {
       <p class="text-center text-gray-500 py-8">Não foi possível carregar as estatísticas.</p>
     }

@@ -17,7 +17,7 @@ export interface TableColumn {
   sortable?: boolean;
   width?: string;
   sticky?: boolean;
-  format?: (value: any) => string;
+  format?: (value: any, row?: any) => string;
   cellClass?: string;
 }
 
@@ -125,7 +125,7 @@ export class DataTableComponent {
 
   getCellValue(element: any, column: TableColumn): any {
     const value = this.getNestedProperty(element, column.key);
-    return column.format ? column.format(value) : value;
+    return column.format ? column.format(value, element) : value;
   }
 
   private getNestedProperty(obj: any, path: string): any {
