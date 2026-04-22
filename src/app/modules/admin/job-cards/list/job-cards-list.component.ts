@@ -54,6 +54,12 @@ export class JobCardsListComponent implements OnInit, OnDestroy {
       sortable: true
     },
     {
+      key: 'source',
+      label: 'Origem',
+      type: 'badge',
+      format: (v: any, row: JobCard) => row.order_id ? 'Online' : 'Walk-in'
+    },
+    {
       key: 'title',
       label: 'Título',
       sortable: true

@@ -229,6 +229,12 @@ export class DataTableComponent {
       if (lowerValue.includes('completo') || lowerValue.includes('completed') || lowerValue.includes('sucesso') || lowerValue.includes('success')) {
         return 'bg-blue-100 text-blue-800';
       }
+      if (lowerValue === 'online') {
+        return 'bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200';
+      }
+      if (lowerValue === 'walk-in') {
+        return 'bg-gray-100 text-gray-600 border border-gray-200';
+      }
     }
     
     // Default badge style

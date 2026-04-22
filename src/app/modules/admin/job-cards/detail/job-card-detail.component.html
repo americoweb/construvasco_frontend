@@ -184,6 +184,16 @@
           <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Objectivo</dt><dd class="text-gray-700">{{ jobCard.objective || '—' }}</dd></div>
           <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Descrição</dt><dd class="text-gray-700 whitespace-pre-line">{{ jobCard.description || '—' }}</dd></div>
           <div class="flex gap-2"><dt class="text-gray-400 w-28 flex-shrink-0">Notas</dt><dd class="text-gray-700">{{ jobCard.notes || '—' }}</dd></div>
+          @if (jobCard.order_id) {
+            <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+              <dt class="text-gray-400 w-28 flex-shrink-0">Origem</dt>
+              <dd class="font-medium text-indigo-600">
+                <a [routerLink]="['/admin/orders', jobCard.order_id]" class="hover:underline flex items-center gap-1 w-max">
+                  <span class="material-icons text-sm">shopping_cart</span> Pedido #{{ jobCard.order_id }} (Online)
+                </a>
+              </dd>
+            </div>
+          }
         </dl>
       </div>
 

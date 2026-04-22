@@ -90,6 +90,9 @@ export interface Order {
   is_pending?: boolean;
   is_delivered?: boolean;
   is_cancelled?: boolean;
+  job_card_id?: number;
+  job_card_number?: string;
+  job_card_status?: string;
   confirmed_at?: string;
   shipped_at?: string;
   delivered_at?: string;

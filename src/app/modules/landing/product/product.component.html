@@ -246,124 +246,125 @@
               </p>
             </div>
 
-            <!-- CTA -->
-            <div class="pc-cta-area">
-              <button
-                type="submit"
-                [disabled]="customizationForm.invalid || isGeneratingMockup"
-                class="pc-btn-generate"
-              >
-                @if (!isGeneratingMockup) {
-                  <svg class="pc-btn-icon" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                    <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
-                  </svg>
-                  Gerar Mockup
-                } @else {
-                  <span class="pc-btn-spinner"></span>
-                  {{ asyncStatusMessage || 'A gerar...' }}
-                }
-              </button>
-
-              <p class="pc-cta-hint">{{ ctaHintMessage }}</p>
-
-              @if (referencePreview && !isGeneratingMockup) {
+            @if (!mockupUrl) {
+              <!-- CTA -->
+              <div class="pc-cta-area">
                 <button
-                  type="button"
-                  (click)="useReferenceAsArt()"
-                  [disabled]="!canUseReferenceAsFinalArt"
-                  class="pc-btn-skip"
+                  type="submit"
+                  [disabled]="customizationForm.invalid || isGeneratingMockup"
+                  class="pc-btn-generate"
                 >
-                  <svg viewBox="0 0 20 20" fill="none" class="pc-btn-icon-sm">
-                    <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  Usar referência como arte final
+                  @if (!isGeneratingMockup) {
+                    <svg class="pc-btn-icon" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                      <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                    </svg>
+                    Gerar Mockup
+                  } @else {
+                    <span class="pc-btn-spinner"></span>
+                    {{ asyncStatusMessage || 'A gerar...' }}
+                  }
                 </button>
-              }
-            </div>
-
+  
+                <p class="pc-cta-hint">{{ ctaHintMessage }}</p>
+  
+                @if (referencePreview && !isGeneratingMockup) {
+                  <button
+                    type="button"
+                    (click)="useReferenceAsArt()"
+                    [disabled]="!canUseReferenceAsFinalArt"
+                    class="pc-btn-skip"
+                  >
+                    <svg viewBox="0 0 20 20" fill="none" class="pc-btn-icon-sm">
+                      <path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Usar referência como arte final
+                  </button>
+                }
+              </div>
+            } @else {
+              <!-- Cart section -->
+              <div class="pc-cta-area" style="padding: 0; background: var(--pc-bg);">
+                <div class="pc-cart-section" style="margin: 0; border-radius: 12px 12px 0 0; border: none; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);">
+                  <div class="pc-cart-header" style="background: var(--pc-surface); border-radius: 12px 12px 0 0;">
+                    <svg class="pc-cart-check-icon" viewBox="0 0 24 24" fill="none">
+                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 class="pc-cart-title">Design pronto!</h3>
+                  </div>
+  
+                  <div class="pc-qty-price-row" style="background: var(--pc-surface);">
+                    <div class="pc-qty-field">
+                      <label class="pc-qty-label">
+                        Quantidade
+                        <span class="pc-qty-min-note">(Mín: {{ product.min_quantity }})</span>
+                      </label>
+                      <input
+                        type="number"
+                        [ngModel]="quantity"
+                        (ngModelChange)="onQuantityInput($event)"
+                        (blur)="onQuantityChange()"
+                        [min]="product.min_quantity"
+                        inputmode="numeric"
+                        aria-label="Quantidade do pedido"
+                        class="pc-qty-input"
+                      />
+                    </div>
+                    <div class="pc-total-card">
+                      <span class="pc-total-label">Total</span>
+                      <span class="pc-total-value">{{ totalPrice.toFixed(2) }} MT</span>
+                    </div>
+                  </div>
+  
+                  @if (itemAddedToCart) {
+                    <div class="pc-success-banner" style="background: var(--pc-surface);">
+                      <svg class="pc-success-icon" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      <div class="pc-success-body">
+                        <p class="pc-success-msg">Produto adicionado ao carrinho!</p>
+                        <div class="pc-success-actions">
+                          <button (click)="goToCheckout()" class="pc-btn-checkout">Finalizar Compra</button>
+                          <button type="button" (click)="continueShopping()" class="pc-btn-continue">Continuar a Comprar</button>
+                        </div>
+                      </div>
+                    </div>
+                  } @else {
+                    <div class="pc-cart-actions" style="background: var(--pc-surface);">
+                      <button
+                        (click)="addToCart()"
+                        [disabled]="isAddingToCart || isGeneratingMockup"
+                        class="pc-btn-cart"
+                      >
+                        @if (!isAddingToCart) {
+                          <svg viewBox="0 0 24 24" fill="none" class="pc-btn-icon">
+                            <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 2.3A1 1 0 006 17h12M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                          Adicionar ao Carrinho
+                        } @else {
+                          <span class="pc-btn-spinner pc-btn-spinner--dark"></span>
+                          A adicionar...
+                        }
+                      </button>
+                      <button
+                        type="button"
+                        (click)="startOver()"
+                        [disabled]="isAddingToCart || isGeneratingMockup"
+                        class="pc-btn-redo"
+                      >
+                        Refazer
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
           </form>
 
           <!-- Testimonials -->
           <div class="pc-testimonials-wrap">
             <app-testimonial [testimonials]="testimonials" [productId]="product?.id"></app-testimonial>
           </div>
-
-          <!-- Cart section -->
-          @if (mockupUrl) {
-            <div class="pc-cart-section">
-              <div class="pc-cart-header">
-                <svg class="pc-cart-check-icon" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <h3 class="pc-cart-title">Design pronto!</h3>
-              </div>
-
-              <div class="pc-qty-price-row">
-                <div class="pc-qty-field">
-                  <label class="pc-qty-label">
-                    Quantidade
-                    <span class="pc-qty-min-note">(Mín: {{ product.min_quantity }})</span>
-                  </label>
-                  <input
-                    type="number"
-                    [ngModel]="quantity"
-                    (ngModelChange)="onQuantityInput($event)"
-                    (blur)="onQuantityChange()"
-                    [min]="product.min_quantity"
-                    inputmode="numeric"
-                    aria-label="Quantidade do pedido"
-                    class="pc-qty-input"
-                  />
-                </div>
-                <div class="pc-total-card">
-                  <span class="pc-total-label">Total</span>
-                  <span class="pc-total-value">{{ totalPrice.toFixed(2) }} MT</span>
-                </div>
-              </div>
-
-              @if (itemAddedToCart) {
-                <div class="pc-success-banner">
-                  <svg class="pc-success-icon" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  <div class="pc-success-body">
-                    <p class="pc-success-msg">Produto adicionado ao carrinho!</p>
-                    <div class="pc-success-actions">
-                      <button (click)="goToCheckout()" class="pc-btn-checkout">Finalizar Compra</button>
-                      <button (click)="continueShopping()" class="pc-btn-continue">Continuar a Comprar</button>
-                    </div>
-                  </div>
-                </div>
-              } @else {
-                <div class="pc-cart-actions">
-                  <button
-                    (click)="addToCart()"
-                    [disabled]="isAddingToCart || isGeneratingMockup"
-                    class="pc-btn-cart"
-                  >
-                    @if (!isAddingToCart) {
-                      <svg viewBox="0 0 24 24" fill="none" class="pc-btn-icon">
-                        <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.3 2.3A1 1 0 006 17h12M9 21a1 1 0 100-2 1 1 0 000 2zm10 0a1 1 0 100-2 1 1 0 000 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                      Adicionar ao Carrinho
-                    } @else {
-                      <span class="pc-btn-spinner pc-btn-spinner--dark"></span>
-                      A adicionar...
-                    }
-                  </button>
-                  <button
-                    (click)="startOver()"
-                    [disabled]="isAddingToCart || isGeneratingMockup"
-                    class="pc-btn-redo"
-                  >
-                    Refazer
-                  </button>
-                </div>
-              }
-            </div>
-          }
-
         </section>
       </div>
 
