@@ -213,6 +213,41 @@ export class UserService {
     );
   }
 
+  getTenantRoles(): Observable<ApiResponse<any>> {
+    return this.httpClient.get<ApiResponse<any>>(
+      this.configService.getApiUrl('tenants/roles')
+    );
+  }
+
+  assignRole(userId: string, roleValue: string): Observable<ApiResponse<any>> {
+    return this.httpClient.put<ApiResponse<any>>(
+      this.configService.getApiUrl(`tenants/users/${userId}/role`),
+      { role: roleValue }
+    );
+  }
+
+  removeUser(userId: string): Observable<ApiResponse<any>> {
+    return this.httpClient.delete<ApiResponse<any>>(
+      this.configService.getApiUrl(`tenants/users/${userId}`)
+    );
+  }
+
+  resendTenantInvitation(invitationId: string): Observable<ApiResponse<any>> {
+    return this.httpClient.post<ApiResponse<any>>(
+      this.configService.getApiUrl(`tenants/invitations/${invitationId}/resend`),
+      {}
+    );
+  }
+
+  bulkUploadUsersFromCsv(file: File): Observable<ApiResponse<any>> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.httpClient.post<ApiResponse<any>>(
+      this.configService.getApiUrl('tenants/users/bulk-upload'),
+      formData
+    );
+  }
+
   cancelTenantInvitation(invitationId: string): Observable<ApiResponse<any>> {
     return this.httpClient.delete<ApiResponse<any>>(
       this.configService.getApiUrl(`tenants/invitations/${invitationId}`)

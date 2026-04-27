@@ -56,6 +56,9 @@ export class SettingsTeamComponent implements OnInit, OnDestroy {
   
   teamMembers: TeamMember[] = [];
   invitations: TenantInvitation[] = [];
+  roles: Array<{ value: string; label: string; description: string }> = [];
+  isCurrentUserOwner = false;
+  currentUserId: string = '';
 
   columns: TableColumn[] = [
     {
@@ -181,8 +184,93 @@ export class SettingsTeamComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.checkCurrentUserRole();
+    this.loadRoles();
     this.fetchTeamMembers();
     this.fetchInvitations();
+  }
+
+  checkCurrentUserRole(): void {
+    this.userService.user$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((user) => {
+        if (user) {
+          this.currentUserId = user.id;
+          this.isCurrentUserOwner = this.userService.isOwner();
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  loadRoles(): void {
+    this.userService.getTenantRoles().subscribe({
+      next: (response) => {
+        const data = response?.data ?? response;
+        const list = Array.isArray(data) ? data : [];
+        this.roles = list
+          .filter((r: { name?: string }) => r.name !== 'super_admin')
+          .map((r: { name: string; value?: string; label: string; description?: string }) => ({
+            value: r.value ?? r.name,
+            label: r.label ?? r.name,
+            description: r.description ?? '',
+          }));
+        
+        // Update the form config
+        if (this.inviteFormConfig && this.inviteFormConfig.fields) {
+          const roleField = this.inviteFormConfig.fields.find(f => f.name === 'role');
+          if (roleField) {
+            roleField.options = this.roles;
+          }
+        }
+        
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading roles:', err);
+        this.notificationService.error('Falha ao carregar papéis');
+      },
+    });
+  }
+
+  getRoleLabel(roleValue: string): string {
+    const role = this.roles.find((r) => r.value === roleValue);
+    return role ? role.label : roleValue;
+  }
+
+  assignRole(userId: string, roleValue: string): void {
+    const memberToModify = this.teamMembers.find((m) => m.id === userId);
+    
+    // Prevent changes to owner role
+    if (memberToModify?.role.toLowerCase() === 'owner') {
+        this.notificationService.error('Não é permitido alterar a função de um proprietário');
+        this.fetchTeamMembers();
+        return;
+    }
+
+    // Prevent non-owners from changing roles
+    if (!this.isCurrentUserOwner) {
+        this.notificationService.error('Apenas proprietários podem alterar funções de usuários');
+        this.fetchTeamMembers();
+        return;
+    }
+
+    // Prevent assigning owner role
+    if (roleValue === 'owner') {
+        this.notificationService.error('Não é possível atribuir a função de proprietário através desta interface');
+        this.fetchTeamMembers();
+        return;
+    }
+
+    this.userService.assignRole(userId, roleValue).subscribe({
+        next: () => {
+            this.notificationService.success('Papel atribuído com sucesso');
+            this.fetchTeamMembers();
+        },
+        error: (error) => {
+            this.notificationService.error('Falha ao atribuir o papel');
+            this.fetchTeamMembers();
+        }
+    });
   }
 
   fetchTeamMembers(): void {
@@ -654,11 +742,50 @@ export class SettingsTeamComponent implements OnInit, OnDestroy {
   }
 
   onRemoveMember(member: TeamMember): void {
-    console.log('Removing member:', member);
+    // Prevent deleting owner if not an owner
+    if (member.role.toLowerCase() === 'owner' && !this.isCurrentUserOwner) {
+        this.notificationService.error('Você não tem permissão para remover um proprietário');
+        return;
+    }
+    
+    // Prevent deleting yourself
+    if (member.id === this.currentUserId) {
+        this.notificationService.warning('Você não pode remover a si mesmo da equipe');
+        return;
+    }
+
+    if (!confirm(`Tem certeza que deseja remover ${member.name} da equipe?`)) {
+        return;
+    }
+
+    this.userService.removeUser(member.id).subscribe({
+        next: () => {
+            this.notificationService.success('Membro removido com sucesso');
+            this.fetchTeamMembers();
+        },
+        error: () => {
+            this.notificationService.error('Falha ao remover membro da equipe');
+        }
+    });
   }
 
   onResendInvite(member: TeamMember): void {
-    console.log('Resending invite to:', member);
+    // Note: If member is just a TeamMember placeholder with "pending" status,
+    // we need to find the correct invitation ID.
+    // In this app, invitations are stored separately, so let's match identifier.
+    const invitation = this.invitations.find(inv => inv.identifier === member.email);
+    if (!invitation) return;
+
+    this.userService.resendTenantInvitation(invitation.id).subscribe({
+      next: () => {
+          this.notificationService.success('Convite reenviado com sucesso');
+      },
+      error: (error) => {
+          this.notificationService.error(
+              error?.error?.message || 'Falha ao reenviar convite'
+          );
+      }
+    });
   }
 
   getStatusColor(status: string): 'primary' | 'success' | 'warning' | 'danger' {

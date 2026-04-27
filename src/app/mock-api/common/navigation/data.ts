@@ -1,182 +1,135 @@
 /* eslint-disable */
 import { FuseNavigationItem } from '@fuse/components/navigation';
 
-export const defaultNavigation: FuseNavigationItem[] = [
+export const adminNavigation: FuseNavigationItem[] = [
     {
-        id   : 'dashboard',
+        id: 'dashboard',
         title: 'Dashboard',
-        type : 'basic',
-        icon : 'heroicons_outline:home',
-        link : '/dashboard'
+        type: 'basic',
+        icon: 'heroicons_outline:home',
+        link: '/admin/dashboard'
     },
     {
-        id   : 'candidates',
-        title: 'Candidates',
-        type : 'basic',
-        icon : 'heroicons_outline:users',
-        link : '/candidates'
+        id: 'orders',
+        title: 'Orders',
+        type: 'basic',
+        icon: 'heroicons_outline:document-text',
+        link: '/admin/orders'
     },
     {
-        id   : 'jobs',
-        title: 'Jobs',
-        type : 'basic',
-        icon : 'heroicons_outline:briefcase',
-        link : '/jobs'
+        id: 'job-cards',
+        title: 'Job Cards',
+        type: 'basic',
+        icon: 'heroicons_outline:briefcase',
+        link: '/admin/job-cards'
     },
     {
-        id   : 'interviews',
-        title: 'Interviews',
-        type : 'basic',
-        icon : 'heroicons_outline:calendar',
-        link : '/interviews'
+        id: 'designs',
+        title: 'Designs',
+        type: 'basic',
+        icon: 'heroicons_outline:paint-brush',
+        link: '/admin/designs'
     },
     {
-        id   : 'reports',
+        id: 'products',
+        title: 'Products',
+        type: 'basic',
+        icon: 'heroicons_outline:shopping-cart',
+        link: '/admin/products'
+    },
+    {
+        id: 'categories',
+        title: 'Categories',
+        type: 'basic',
+        icon: 'heroicons_outline:tag',
+        link: '/admin/categories'
+    },
+    {
+        id: 'staff',
+        title: 'Staff',
+        type: 'basic',
+        icon: 'heroicons_outline:users',
+        link: '/admin/staff'
+    },
+    {
+        id: 'reports',
         title: 'Reports',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-bar',
-        link : '/reports'
+        type: 'basic',
+        icon: 'heroicons_outline:chart-bar',
+        link: '/admin/reports'
     },
     {
-        id   : 'settings',
+        id: 'settings',
         title: 'Settings',
-        type : 'basic',
-        icon : 'heroicons_outline:cog-6-tooth',
-        link : '/settings'
+        type: 'basic',
+        icon: 'heroicons_outline:cog-6-tooth',
+        link: '/admin/settings'
     }
 ];
 
-export const compactNavigation: FuseNavigationItem[] = [
+export const receptionistNavigation: FuseNavigationItem[] = [
     {
-        id   : 'dashboard',
+        id: 'dashboard',
         title: 'Dashboard',
-        type : 'basic',
-        icon : 'heroicons_outline:home',
-        link : '/dashboard'
+        type: 'basic',
+        icon: 'heroicons_outline:home',
+        link: '/admin/dashboard'
     },
     {
-        id   : 'candidates',
-        title: 'Candidates',
-        type : 'basic',
-        icon : 'heroicons_outline:users',
-        link : '/candidates'
+        id: 'orders',
+        title: 'Orders',
+        type: 'basic',
+        icon: 'heroicons_outline:document-text',
+        link: '/admin/orders'
     },
     {
-        id   : 'jobs',
-        title: 'Jobs',
-        type : 'basic',
-        icon : 'heroicons_outline:briefcase',
-        link : '/jobs'
+        id: 'job-cards',
+        title: 'Job Cards',
+        type: 'basic',
+        icon: 'heroicons_outline:briefcase',
+        link: '/admin/job-cards'
     },
     {
-        id   : 'interviews',
-        title: 'Interviews',
-        type : 'basic',
-        icon : 'heroicons_outline:calendar',
-        link : '/interviews'
-    },
-    {
-        id   : 'reports',
-        title: 'Reports',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-bar',
-        link : '/reports'
-    },
-    {
-        id   : 'settings',
+        id: 'settings',
         title: 'Settings',
-        type : 'basic',
-        icon : 'heroicons_outline:cog-6-tooth',
-        link : '/settings'
+        type: 'basic',
+        icon: 'heroicons_outline:cog-6-tooth',
+        link: '/admin/settings'
     }
 ];
 
-export const futuristicNavigation: FuseNavigationItem[] = [
+export const designerNavigation: FuseNavigationItem[] = [
     {
-        id   : 'dashboard',
+        id: 'dashboard',
         title: 'Dashboard',
-        type : 'basic',
-        icon : 'heroicons_outline:home',
-        link : '/dashboard'
+        type: 'basic',
+        icon: 'heroicons_outline:home',
+        link: '/admin/dashboard'
     },
     {
-        id   : 'candidates',
-        title: 'Candidates',
-        type : 'basic',
-        icon : 'heroicons_outline:users',
-        link : '/candidates'
+        id: 'job-cards',
+        title: 'Job Cards',
+        type: 'basic',
+        icon: 'heroicons_outline:briefcase',
+        link: '/admin/job-cards'
     },
     {
-        id   : 'jobs',
-        title: 'Jobs',
-        type : 'basic',
-        icon : 'heroicons_outline:briefcase',
-        link : '/jobs'
+        id: 'designs',
+        title: 'Designs',
+        type: 'basic',
+        icon: 'heroicons_outline:paint-brush',
+        link: '/admin/designs'
     },
     {
-        id   : 'interviews',
-        title: 'Interviews',
-        type : 'basic',
-        icon : 'heroicons_outline:calendar',
-        link : '/interviews'
-    },
-    {
-        id   : 'reports',
-        title: 'Reports',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-bar',
-        link : '/reports'
-    },
-    {
-        id   : 'settings',
+        id: 'settings',
         title: 'Settings',
-        type : 'basic',
-        icon : 'heroicons_outline:cog-6-tooth',
-        link : '/settings'
+        type: 'basic',
+        icon: 'heroicons_outline:cog-6-tooth',
+        link: '/admin/settings'
     }
 ];
 
-export const horizontalNavigation: FuseNavigationItem[] = [
-    {
-        id   : 'dashboard',
-        title: 'Dashboard',
-        type : 'basic',
-        icon : 'heroicons_outline:home',
-        link : '/dashboard'
-    },
-    {
-        id   : 'candidates',
-        title: 'Candidates',
-        type : 'basic',
-        icon : 'heroicons_outline:users',
-        link : '/candidates'
-    },
-    {
-        id   : 'jobs',
-        title: 'Jobs',
-        type : 'basic',
-        icon : 'heroicons_outline:briefcase',
-        link : '/jobs'
-    },
-    {
-        id   : 'interviews',
-        title: 'Interviews',
-        type : 'basic',
-        icon : 'heroicons_outline:calendar',
-        link : '/interviews'
-    },
-    {
-        id   : 'reports',
-        title: 'Reports',
-        type : 'basic',
-        icon : 'heroicons_outline:chart-bar',
-        link : '/reports'
-    },
-    {
-        id   : 'settings',
-        title: 'Settings',
-        type : 'basic',
-        icon : 'heroicons_outline:cog-6-tooth',
-        link : '/settings'
-    }
-];
+export const defaultNavigation: FuseNavigationItem[] = adminNavigation;
+export const compactNavigation: FuseNavigationItem[] = adminNavigation;
+export const futuristicNavigation: FuseNavigationItem[] = adminNavigation;
+export const horizontalNavigation: FuseNavigationItem[] = adminNavigation;

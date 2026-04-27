@@ -9,7 +9,7 @@
       variant="primary"
       icon="person_add"
       (onClick)="onInviteMember()"
-      *ngIf="!showInviteForm">
+      *ngIf="!showInviteForm && isCurrentUserOwner">
       Convidar Membro
     </app-button>
   </div>
@@ -104,7 +104,7 @@
               <div class="flex items-center">
                 <app-avatar
                   [name]="member.name"
-                  [size]="40"
+                  [size]="16"
                   class="mr-3">
                 </app-avatar>
                 <div>
@@ -114,7 +114,19 @@
               </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
-              <div class="text-sm text-gray-900">{{ member.role }}</div>
+              <select
+                [value]="member.role"
+                (change)="assignRole(member.id, $any($event.target).value)"
+                [disabled]="member.role.toLowerCase() === 'owner' || !isCurrentUserOwner"
+                class="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                [ngClass]="{'bg-gray-100 cursor-not-allowed text-gray-500': member.role.toLowerCase() === 'owner' || !isCurrentUserOwner}">
+                <option *ngIf="member.role.toLowerCase() === 'owner'" value="Owner">
+                  Proprietário da Organização
+                </option>
+                <option *ngFor="let r of roles" [value]="r.value">
+                  {{ r.label }}
+                </option>
+              </select>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
               <div class="text-sm text-gray-500">
@@ -190,7 +202,7 @@
               <div class="flex items-center">
                 <app-avatar
                   [name]="invitation.identifier"
-                  [size]="40"
+                  [size]="16"
                   class="mr-3">
                 </app-avatar>
                 <div>

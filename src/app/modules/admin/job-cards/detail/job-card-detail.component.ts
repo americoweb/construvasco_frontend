@@ -11,6 +11,7 @@ import { PageHeaderComponent } from '../../../../shared/components/layout/page-h
 import { ButtonComponent } from '../../../../shared/components/ui/button/button.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/feedback/confirm-dialog/confirm-dialog.component';
 import { NotificationService } from '../../../../shared/components/feedback/notification.service';
+import { SecureImagePipe } from '../../../../shared/pipes/secure-image.pipe';
 
 import { JobCardService } from '../shared/job-card.service';
 import {
@@ -37,7 +38,8 @@ import {
     FormsModule,
     PageHeaderComponent,
     ButtonComponent,
-    MatDialogModule
+    MatDialogModule,
+    SecureImagePipe
   ],
   templateUrl: './job-card-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -61,6 +63,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
   showFeedbackPanel = false;
   showPriorityPanel = false;
   showUploadPanel   = false;
+  showAiPanel       = false;   // AI assistant panel (collapsible, secondary)
 
   // ── Design workspace ──────────────────────────────────────────────────────
   designPrompt       = '';
@@ -69,18 +72,29 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
   designStatus       = '';
   designError: string | null = null;
 
-  /** Data URL from the latest AI generation (shown immediately before the file URL is ready) */
+  /** Data URL from the latest AI generation */
   generatedImageData: string | null = null;
-  /** Persisted file URL (from JobCardFile once saved) */
+  /** Persisted file URL */
   generatedImageUrl: string | null = null;
   /** The JobCardFile record for the current canvas image */
   currentDesignFile: JobCardFile | null = null;
 
-  /** IDs of the two asset slots: logo and reference */
+  /** IDs of the two AI asset slots */
   selectedLogoFileId: number | null      = null;
   selectedReferenceFileId: number | null = null;
 
-  // File upload state
+  // ── Manual design upload (PRIMARY action) ─────────────────────────────────
+  designUploadFile:  File | null = null;
+  designUploadType:  JobCardFileType = JobCardFileType.DESIGN;
+  designUploadNotes  = '';
+  uploadingDesignFile = false;
+  readonly designUploadTypes: JobCardFileType[] = [
+    JobCardFileType.DESIGN,
+    JobCardFileType.PREVIEW,
+    JobCardFileType.FINAL,
+  ];
+
+  // General Files tab upload state
   uploadFile: File | null = null;
   uploadType: JobCardFileType = JobCardFileType.BRIEFING;
   uploadNotes = '';
@@ -89,6 +103,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
     JobCardFileType.DESIGN,
     JobCardFileType.FINAL,
   ];
+
   readonly fileTypeLabels: Record<JobCardFileType, string> = {
     [JobCardFileType.BRIEFING]:  'Briefing',
     [JobCardFileType.REFERENCE]: 'Referência',
@@ -459,8 +474,14 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
     this.generatedImageData = null;
     this.cdr.markForCheck();
 
+    // Build the full prompt: user-visible text + hidden product context
+    const hiddenContext = this.buildHiddenProductContext();
+    const fullPrompt    = this.designPrompt
+      ? `${this.designPrompt}\n\n${hiddenContext}`
+      : hiddenContext;
+
     this.service.generateDesign(this.jobCard.id, {
-      prompt:             this.designPrompt || undefined,
+      prompt:             fullPrompt,
       logo_file_id:       this.selectedLogoFileId,
       reference_file_id:  this.selectedReferenceFileId,
     }).subscribe({
@@ -469,9 +490,9 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
         this.generatedImageData = d.image_data;
         this.generatedImageUrl  = d.image_url;
         this.currentDesignFile  = d.file;
-        this.designPrompt       = d.prompt;
+        // Keep user-visible prompt clean (not the full hidden context)
+        if (this.designPrompt === '') this.designPrompt = d.prompt;
 
-        // Prepend new file to the job card file list
         if (this.jobCard && d.file) {
           this.jobCard = {
             ...this.jobCard,
@@ -481,13 +502,13 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
 
         this.generatingDesign = false;
         this.designStatus     = '';
-        this.notification.show({ type: 'success', message: 'Design gerado com sucesso!', title: 'Design' });
+        this.notification.show({ type: 'success', message: 'Conceito gerado!', title: 'IA' });
         this.cdr.markForCheck();
       },
       error: err => {
         this.generatingDesign = false;
         this.designStatus     = '';
-        this.designError      = err?.error?.message ?? 'Erro ao gerar design';
+        this.designError      = err?.error?.message ?? 'Erro ao gerar conceito';
         this.cdr.markForCheck();
       }
     });
@@ -552,4 +573,116 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
   goBack(): void { this.router.navigate(['/admin/job-cards/list']); }
 
   isOverrideFormActive(): boolean { return !!this.priorityForm.get('priority_override')?.value; }
+
+  // -------------------------------------------------------------------------
+  // Designer workflow helpers
+  // -------------------------------------------------------------------------
+
+  /**
+   * Returns a short print-format hint for a product type, shown in the specs card
+   * and silently injected into AI prompts.
+   */
+  printHint(productType: string): string {
+    const t = (productType ?? '').toLowerCase();
+    if (t.includes('cart') || t.includes('card') || t.includes('biz'))  return 'CMYK · 300DPI';
+    if (t.includes('banner') || t.includes('faixa'))                     return 'CMYK · 72DPI';
+    if (t.includes('camiseta') || t.includes('shirt') || t.includes('tshirt')) return 'RGB · 150DPI';
+    if (t.includes('caneca') || t.includes('mug'))                       return 'Sublimação';
+    if (t.includes('adesivo') || t.includes('sticker'))                  return 'CMYK · 300DPI';
+    if (t.includes('flyer') || t.includes('panfleto'))                   return 'CMYK · 300DPI';
+    if (t.includes('capa') || t.includes('cover'))                       return 'CMYK · 300DPI';
+    return 'CMYK · 300DPI';
+  }
+
+  /**
+   * One-line summary of product specs shown below the AI prompt field,
+   * so the designer knows what context is being injected automatically.
+   */
+  productHintSummary(): string {
+    const items = this.jobCard?.items;
+    if (!items?.length) return '';
+    return items.map(i => {
+      const parts = [i.product_type];
+      if (i.size)     parts.push(i.size);
+      if (i.material) parts.push(i.material);
+      return parts.join(' ');
+    }).join(' · ');
+  }
+
+  /**
+   * Builds the hidden technical context appended to AI generation prompts.
+   * Not shown to the user in the prompt field.
+   */
+  private buildHiddenProductContext(): string {
+    if (!this.jobCard) return '';
+    const lines: string[] = ['[TECHNICAL REQUIREMENTS - follow strictly]'];
+    const items = this.jobCard.items ?? [];
+    items.forEach(i => {
+      const spec: string[] = [`Product: ${i.product_type}`, `Quantity: ${i.quantity}`];
+      if (i.size)     spec.push(`Size: ${i.size}`);
+      if (i.material) spec.push(`Material: ${i.material}`);
+      spec.push(`Format: ${this.printHint(i.product_type)}`);
+      if (i.notes)    spec.push(`Notes: ${i.notes}`);
+      lines.push(spec.join(' | '));
+    });
+    if (this.jobCard.description) lines.push(`Brief: ${this.jobCard.description}`);
+    lines.push('Output: high-quality print-ready design, correct bleed and safe zones, professional result.');
+    return lines.join('\n');
+  }
+
+  // ── Manual design file upload ────────────────────────────────────────────
+
+  onDesignFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.designUploadFile = input.files?.[0] ?? null;
+    this.cdr.markForCheck();
+  }
+
+  onDesignDrop(event: DragEvent): void {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0];
+    if (file) {
+      this.designUploadFile = file;
+      this.cdr.markForCheck();
+    }
+  }
+
+  submitDesignUpload(): void {
+    if (!this.designUploadFile || !this.jobCard) return;
+    this.uploadingDesignFile = true;
+    this.cdr.markForCheck();
+
+    this.service.uploadFile(
+      this.jobCard.id,
+      this.designUploadFile,
+      this.designUploadType,
+      this.designUploadNotes || undefined
+    ).subscribe({
+      next: res => {
+        if (res.data && this.jobCard) {
+          this.jobCard = {
+            ...this.jobCard,
+            files: [res.data, ...(this.jobCard.files ?? [])]
+          };
+          // Auto-load on canvas if it's an image
+          if (res.data.mime_type?.startsWith('image/')) {
+            this.currentDesignFile  = res.data;
+            this.generatedImageUrl  = res.data.file_url;
+            this.generatedImageData = null;
+          }
+        }
+        this.designUploadFile  = null;
+        this.designUploadNotes = '';
+        this.uploadingDesignFile = false;
+        this.notification.show({ type: 'success', message: 'Design carregado com sucesso!', title: 'Design' });
+        this.cdr.markForCheck();
+      },
+      error: err => {
+        this.uploadingDesignFile = false;
+        const msg = err?.error?.message ?? 'Erro ao carregar design';
+        this.notification.show({ type: 'error', message: msg, title: 'Erro' });
+        this.cdr.markForCheck();
+      }
+    });
+  }
 }

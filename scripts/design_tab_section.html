@@ -1,0 +1,348 @@
+  <!-- TAB: Design workspace -->
+  @if (activeTab === 'design') {
+    <div class="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-5">
+
+      <!-- LEFT COLUMN -->
+      <div class="space-y-4">
+
+        <!-- Print Specs -->
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div class="px-5 pt-4 pb-3 border-b border-gray-100 flex items-center gap-2">
+            <span class="material-icons text-indigo-500 text-base">receipt_long</span>
+            <p class="text-xs font-semibold text-gray-700 uppercase tracking-widest">Especificações de Impressão</p>
+          </div>
+          <div class="px-5 py-4 space-y-3">
+            <div>
+              <p class="text-sm font-bold text-gray-900">{{ jobCard.title }}</p>
+              @if (jobCard.objective) {
+                <p class="text-xs text-gray-500 mt-0.5 leading-relaxed">{{ jobCard.objective }}</p>
+              }
+            </div>
+            @if (jobCard.items && jobCard.items.length > 0) {
+              <div class="space-y-2 border-t border-gray-100 pt-3">
+                @for (item of jobCard.items; track item.id) {
+                  <div class="rounded-lg bg-gray-50 border border-gray-200 px-3 py-2.5">
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <p class="text-xs font-semibold text-gray-800">{{ item.product_type }}</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5">
+                          Qtd: <strong>{{ item.quantity }}</strong>
+                          @if (item.size) { · Tam: <strong>{{ item.size }}</strong> }
+                          @if (item.material) { · Mat: <strong>{{ item.material }}</strong> }
+                        </p>
+                      </div>
+                      <span class="text-[10px] font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded shrink-0">
+                        {{ printHint(item.product_type) }}
+                      </span>
+                    </div>
+                    @if (item.notes) {
+                      <p class="text-[11px] text-gray-400 mt-1.5 italic">{{ item.notes }}</p>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            @if (jobCard.client) {
+              <div class="flex items-center gap-2 border-t border-gray-100 pt-3">
+                <div class="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-indigo-600 shrink-0">
+                  {{ jobCard.client.name.charAt(0).toUpperCase() }}
+                </div>
+                <span class="text-xs text-gray-500">{{ jobCard.client.name }}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded-full font-medium"
+                      [class.bg-amber-100]="jobCard.client_tier === 'vip'"
+                      [class.text-amber-700]="jobCard.client_tier === 'vip'"
+                      [class.bg-gray-100]="jobCard.client_tier !== 'vip'"
+                      [class.text-gray-500]="jobCard.client_tier !== 'vip'">
+                  {{ jobCard.client_tier_label }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- MANUAL UPLOAD (PRIMARY) -->
+        <div class="bg-white rounded-xl border-2 border-indigo-200 shadow-sm overflow-hidden">
+          <div class="px-5 pt-4 pb-3 border-b border-indigo-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-indigo-600 text-base">upload_file</span>
+              <p class="text-xs font-semibold text-indigo-900 uppercase tracking-widest">Carregar Arte / Design</p>
+            </div>
+            <span class="text-[10px] text-indigo-500 font-semibold bg-indigo-50 px-2 py-0.5 rounded-full">Acção principal</span>
+          </div>
+          <div class="px-5 py-4 space-y-3">
+            <div class="flex gap-2 flex-wrap">
+              @for (t of designUploadTypes; track t) {
+                <button type="button"
+                  (click)="designUploadType = t; cdr.markForCheck()"
+                  class="px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition-all"
+                  [ngClass]="designUploadType === t
+                    ? 'border-indigo-600 bg-indigo-600 text-white'
+                    : 'border-gray-200 bg-white text-gray-600 hover:border-indigo-300'">
+                  {{ fileTypeLabels[t] }}
+                </button>
+              }
+            </div>
+            <label
+              class="flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 cursor-pointer transition-colors"
+              [ngClass]="designUploadFile ? 'border-indigo-400 bg-indigo-50' : 'border-gray-300 bg-gray-50 hover:border-indigo-400 hover:bg-indigo-50/40'"
+              (dragover)="$event.preventDefault()"
+              (drop)="onDesignDrop($event)">
+              <span class="material-icons text-3xl" [class.text-indigo-500]="designUploadFile" [class.text-gray-400]="!designUploadFile">
+                {{ designUploadFile ? 'insert_drive_file' : 'cloud_upload' }}
+              </span>
+              @if (designUploadFile) {
+                <span class="text-sm font-semibold text-indigo-700">{{ designUploadFile.name }}</span>
+                <span class="text-xs text-gray-400">{{ formatFileSize(designUploadFile.size) }}</span>
+              } @else {
+                <span class="text-sm font-medium text-gray-600">Arrastar ficheiro aqui ou clicar para seleccionar</span>
+                <span class="text-xs text-gray-400">PDF · PNG · JPG · AI · PSD · SVG · EPS · TIFF — Máx 50 MB</span>
+              }
+              <input type="file" accept=".pdf,.png,.jpg,.jpeg,.ai,.psd,.svg,.eps,.webp,.tiff,.tif" class="hidden" (change)="onDesignFileSelected($event)" />
+            </label>
+            @if (designUploadFile) {
+              <input type="text" [(ngModel)]="designUploadNotes"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+                placeholder="Notas (ex: v2 com ajuste de cores, arte final aprovada...)" />
+            }
+            <div class="flex gap-3">
+              @if (designUploadFile) {
+                <button type="button"
+                  (click)="designUploadFile = null; designUploadNotes = ''; cdr.markForCheck()"
+                  class="flex-1 py-2 rounded-lg border border-gray-300 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
+                  Limpar
+                </button>
+              }
+              <button type="button"
+                (click)="submitDesignUpload()"
+                [disabled]="!designUploadFile || uploadingDesignFile"
+                class="flex-1 py-2.5 rounded-lg font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+                [ngClass]="!designUploadFile || uploadingDesignFile
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow hover:shadow-md active:scale-[0.98]'">
+                @if (uploadingDesignFile) {
+                  <span class="material-icons text-base animate-spin">refresh</span> A enviar...
+                } @else {
+                  <span class="material-icons text-base">publish</span> Enviar Design
+                }
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI ASSISTANT (SECONDARY, collapsible) -->
+        <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <button type="button"
+            (click)="showAiPanel = !showAiPanel; cdr.markForCheck()"
+            class="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 transition-colors">
+            <div class="flex items-center gap-2">
+              <span class="material-icons text-violet-500 text-base">auto_awesome</span>
+              <span class="text-xs font-semibold text-gray-700 uppercase tracking-widest">Assistente IA</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-600 font-medium">Opcional</span>
+            </div>
+            <span class="material-icons text-gray-400 text-base" [class.rotate-180]="showAiPanel">expand_more</span>
+          </button>
+          @if (showAiPanel) {
+            <div class="px-5 pb-5 space-y-4 border-t border-gray-100 pt-4">
+              @if (imageFiles.length > 0) {
+                <div>
+                  <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                    Activos — <span class="normal-case font-normal">1º clique = logótipo · 2º = referência</span>
+                  </p>
+                  <div class="grid grid-cols-4 gap-2">
+                    @for (f of imageFiles; track f.id) {
+                      <button type="button" (click)="toggleAsset(f)"
+                        class="relative rounded-lg overflow-hidden aspect-square bg-gray-50 border-2 transition-all hover:opacity-90"
+                        [class.border-violet-500]="assetSlot(f) === 'logo'"
+                        [class.border-blue-400]="assetSlot(f) === 'ref'"
+                        [class.border-gray-200]="assetSlot(f) === null"
+                        [title]="f.file_name">
+                        <img [src]="f.file_url | secureImage | async" [alt]="f.file_name" class="w-full h-full object-cover" />
+                        @if (assetSlot(f) === 'logo') {
+                          <div class="absolute top-0.5 right-0.5 bg-violet-600 text-white text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">L</div>
+                        }
+                        @if (assetSlot(f) === 'ref') {
+                          <div class="absolute top-0.5 right-0.5 bg-blue-500 text-white text-[8px] font-bold px-1 py-0.5 rounded-full leading-none">R</div>
+                        }
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent px-1 py-0.5">
+                          <span class="text-[8px] text-white leading-none">{{ f.type_label }}</span>
+                        </div>
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Prompt criativo</p>
+                  <button type="button" (click)="autoFillPrompt()"
+                    class="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 font-medium">
+                    <span class="material-icons text-sm">auto_fix_high</span> Auto-preencher
+                  </button>
+                </div>
+                <textarea [(ngModel)]="designPrompt" rows="4"
+                  class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:border-violet-400 focus:outline-none focus:ring-1 focus:ring-violet-400 resize-none leading-relaxed"
+                  placeholder="Descreva estilo, cores, elementos... As especificações técnicas do produto são incluídas automaticamente.">
+                </textarea>
+                @if (productHintSummary()) {
+                  <p class="mt-1.5 text-[10px] text-gray-400 flex items-start gap-1">
+                    <span class="material-icons text-xs shrink-0 mt-0.5">info_outline</span>
+                    Contexto técnico incluído: <em class="ml-0.5">{{ productHintSummary() }}</em>
+                  </p>
+                }
+              </div>
+              @if (designError) {
+                <div class="rounded-lg bg-red-50 border border-red-200 px-3 py-2 flex items-start gap-2">
+                  <span class="material-icons text-red-500 text-sm mt-0.5">error_outline</span>
+                  <p class="text-xs text-red-700">{{ designError }}</p>
+                </div>
+              }
+              <button type="button" (click)="generateDesign()" [disabled]="generatingDesign"
+                class="w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+                [ngClass]="generatingDesign ? 'bg-violet-300 text-white cursor-not-allowed' : 'bg-violet-600 hover:bg-violet-700 text-white shadow active:scale-[0.98]'">
+                @if (generatingDesign) {
+                  <span class="material-icons text-base animate-spin">refresh</span> A gerar...
+                } @else {
+                  <span class="material-icons text-base">auto_awesome</span> Gerar conceito com IA
+                }
+              </button>
+              <p class="text-[10px] text-gray-400 text-center leading-relaxed">
+                A IA gera um conceito visual inicial. O designer revê e aprova antes de ir para produção.
+              </p>
+            </div>
+          }
+        </div>
+
+      </div><!-- /left column -->
+
+      <!-- RIGHT COLUMN: Canvas + History -->
+      <div class="space-y-4">
+
+        <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden flex flex-col" style="min-height: 520px">
+          @if (canvasImage) {
+            <div class="relative flex-1 bg-[#f8f8f8]" style="background-image: linear-gradient(45deg,#eee 25%,transparent 25%),linear-gradient(-45deg,#eee 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#eee 75%),linear-gradient(-45deg,transparent 75%,#eee 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0">
+              <img [src]="canvasImage | secureImage | async" alt="Design actual" class="w-full object-contain max-h-[520px] relative z-10" />
+              <div class="absolute top-3 right-3 flex gap-2 z-20">
+                <button type="button" (click)="downloadDesign()"
+                  class="bg-white/95 backdrop-blur-sm rounded-lg px-3 py-2 text-xs font-semibold text-gray-700 shadow hover:bg-white flex items-center gap-1.5 transition-all">
+                  <span class="material-icons text-sm">download</span> Descarregar
+                </button>
+                <button type="button" (click)="exportCmykPdf()" [disabled]="exportingPdf"
+                  class="rounded-lg px-3 py-2 text-xs font-semibold shadow flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  [ngClass]="exportingPdf ? 'bg-indigo-400 text-white cursor-not-allowed' : 'bg-indigo-600 hover:bg-indigo-700 text-white'">
+                  @if (exportingPdf) { <span class="material-icons text-sm animate-spin">refresh</span> } @else { <span class="material-icons text-sm">print</span> }
+                  PDF CMYK
+                </button>
+              </div>
+            </div>
+            <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50/60">
+              <div class="flex items-center gap-3">
+                @if (currentDesignFile) {
+                  <span class="flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full"
+                        [class.bg-indigo-100]="currentDesignFile.notes !== 'Gerado por IA'"
+                        [class.text-indigo-700]="currentDesignFile.notes !== 'Gerado por IA'"
+                        [class.bg-violet-100]="currentDesignFile.notes === 'Gerado por IA'"
+                        [class.text-violet-700]="currentDesignFile.notes === 'Gerado por IA'">
+                    <span class="material-icons text-xs">{{ currentDesignFile.notes === 'Gerado por IA' ? 'auto_awesome' : 'design_services' }}</span>
+                    {{ currentDesignFile.notes === 'Gerado por IA' ? 'Conceito IA' : 'Design manual' }}
+                  </span>
+                  <span class="text-xs text-gray-400">v{{ currentDesignFile.version }} · {{ currentDesignFile.file_name }}</span>
+                }
+              </div>
+              @if (currentDesignFile?.notes === 'Gerado por IA') {
+                <button type="button" (click)="generateDesign()" [disabled]="generatingDesign"
+                  class="flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 font-medium disabled:opacity-40">
+                  <span class="material-icons text-sm">refresh</span> Regenerar
+                </button>
+              }
+            </div>
+          } @else if (generatingDesign) {
+            <div class="flex-1 flex flex-col items-center justify-center gap-5 p-10">
+              <div class="relative w-24 h-24">
+                <div class="absolute inset-0 rounded-full border-4 border-violet-100"></div>
+                <div class="absolute inset-0 rounded-full border-4 border-violet-600 border-t-transparent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="material-icons text-3xl text-violet-400">auto_awesome</span>
+                </div>
+              </div>
+              <div class="text-center">
+                <p class="text-sm font-semibold text-gray-700">A IA está a criar o conceito</p>
+                <p class="text-xs text-gray-400 mt-1">20–40 segundos…</p>
+              </div>
+            </div>
+          } @else {
+            <div class="flex-1 flex flex-col items-center justify-center gap-5 p-10">
+              <div class="w-24 h-24 rounded-2xl bg-gray-100 flex items-center justify-center">
+                <span class="material-icons text-5xl text-gray-300">design_services</span>
+              </div>
+              <div class="text-center max-w-xs">
+                <p class="text-sm font-semibold text-gray-500">Nenhum design carregado</p>
+                <p class="text-xs text-gray-400 mt-1 leading-relaxed">Carregue a arte do designer, ou use o Assistente IA para um conceito inicial.</p>
+              </div>
+              <div class="flex gap-3 flex-wrap justify-center">
+                <label class="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold cursor-pointer hover:bg-indigo-700 shadow">
+                  <span class="material-icons text-sm">upload_file</span> Carregar design
+                  <input type="file" class="hidden" accept=".pdf,.png,.jpg,.jpeg,.ai,.psd,.svg,.eps,.webp,.tiff,.tif" (change)="onDesignFileSelected($event)" />
+                </label>
+                <button type="button" (click)="showAiPanel = true; cdr.markForCheck()"
+                  class="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-violet-300 text-violet-700 text-xs font-semibold hover:bg-violet-50">
+                  <span class="material-icons text-sm">auto_awesome</span> Usar IA
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (designFiles.length > 0) {
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-3">
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-widest">Histórico de versões</p>
+              <span class="text-[10px] text-gray-400">{{ designFiles.length }} versão(ões)</span>
+            </div>
+            <div class="flex gap-3 overflow-x-auto pb-1">
+              @for (f of designFiles; track f.id) {
+                <button type="button" (click)="loadDesignVersion(f)"
+                  class="relative flex-shrink-0 w-24 rounded-xl overflow-hidden border-2 bg-gray-50 transition-all hover:opacity-90"
+                  [class.border-indigo-500]="currentDesignFile?.id === f.id"
+                  [class.shadow-md]="currentDesignFile?.id === f.id"
+                  [class.border-gray-200]="currentDesignFile?.id !== f.id">
+                  <div class="aspect-square">
+                    <img [src]="f.file_url | secureImage | async" [alt]="f.file_name" class="w-full h-full object-cover" />
+                  </div>
+                  <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-1.5 py-2">
+                    <span class="text-[10px] text-white font-bold block">v{{ f.version }}</span>
+                    <span class="text-[9px] text-white/70 block truncate">{{ f.notes === 'Gerado por IA' ? '✦ IA' : 'Manual' }}</span>
+                  </div>
+                  @if (currentDesignFile?.id === f.id) {
+                    <div class="absolute top-1.5 right-1.5 w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center">
+                      <span class="material-icons text-white" style="font-size:10px">check</span>
+                    </div>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (currentDesignFile) {
+          <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100 p-4">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-indigo-100 flex items-center justify-center shrink-0">
+                <span class="material-icons text-indigo-600 text-base">print</span>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-indigo-900">Pronto para impressão?</p>
+                <p class="text-xs text-indigo-600 mt-0.5 leading-relaxed">
+                  Use <strong>PDF CMYK</strong> para exportar o ficheiro print-ready (CMYK · 300 DPI).
+                  @if (currentDesignFile.notes === 'Gerado por IA') {
+                    <span class="block mt-1 text-violet-600">Conceito IA — reveja e aprove antes de enviar para produção.</span>
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+
+      </div><!-- /right column -->
+
+    </div>
+  }
