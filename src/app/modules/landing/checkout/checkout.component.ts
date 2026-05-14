@@ -16,13 +16,27 @@ import { AuthService } from '../../../core/auth/services/auth.service';
 import { UserService } from '../../../core/auth/services/user.service';
 import { AuthModalService } from '../../../shared/components/auth/auth-modal.service';
 import { User } from '../../../core/auth/models/user.interface';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-checkout-page',
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.scss'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, LandingHeaderComponent]
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    LandingHeaderComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatRadioModule,
+    MatSelectModule
+  ]
 })
 export class CheckoutPageComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput: ElementRef;
@@ -832,6 +846,18 @@ export class CheckoutPageComponent implements OnInit, OnDestroy {
       return 'Digite o número Emola (ex: 861234567 ou 871234567)';
     }
     return 'Digite o número de telefone';
+  }
+
+  /**
+   * Opens a chat with the business line and pre-fills the order reference (same number as landing footer).
+   */
+  getPostPaymentWhatsAppHref(): string {
+    const orderNo = this.orderResult?.order_number ?? '';
+    const msg = encodeURIComponent(
+      `Olá, equipa Construvasco. Concluí o pagamento do pedido ${orderNo}. Podem confirmar e indicar o próximo passo?`
+    );
+    const businessLine = '258846579067';
+    return `https://wa.me/${businessLine}?text=${msg}`;
   }
 }
 

@@ -15,9 +15,9 @@ export const environment: AppConfig = {
     multiTenant: true
   },
   app: {
-    name: 'Amazing (local)',
+    name: 'Construvasco (local)',
     version: '1.0.0-dev',
-    description: 'Amazing storefront — development'
+    description: 'Construvasco website and platform — development'
   },
   external: {
     sentry: {

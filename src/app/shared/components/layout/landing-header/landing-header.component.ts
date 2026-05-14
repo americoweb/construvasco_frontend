@@ -9,8 +9,8 @@ import { AuthModalService } from '../../auth/auth-modal.service';
 import { UserProfileDropdownComponent } from '../user-profile-dropdown/user-profile-dropdown.component';
 import { LoginModalComponent } from '../../auth/login-modal/login-modal.component';
 import { RegisterModalComponent } from '../../auth/register-modal/register-modal.component';
-import { ForgotPasswordModalComponent } from '../../auth/forgot-password-modal/forgot-password-modal.component';
 import { Subscription, takeUntil, Subject } from 'rxjs';
+import { NavigationEnd } from '@angular/router';
 
 @Component({
     selector: 'app-landing-header',
@@ -24,19 +24,20 @@ import { Subscription, takeUntil, Subject } from 'rxjs';
         CartPopupComponent,
         UserProfileDropdownComponent,
         LoginModalComponent,
-        RegisterModalComponent,
-        ForgotPasswordModalComponent
+        RegisterModalComponent
     ]
 })
 export class LandingHeaderComponent implements OnInit, OnDestroy {
     @Input() cartItemCount: number = 0;
     @Input() orderHistoryCount: number = 0;
 
-    navItemClasses = "text-gray-600 hover:text-indigo-600 transition-colors font-medium";
+    navItemClasses = "text-slate-600 hover:text-slate-900 transition-colors font-semibold text-xs tracking-[0.14em] uppercase";
     isHeaderLoading = true;
+    isScrolled = false;
+    currentUrl = '';
     isCartOpen = false;
     isAuthenticated = false;
-    currentModal: 'login' | 'register' | 'forgot-password' | null = null;
+    currentModal: 'login' | 'register' | null = null;
     isMobileMenuOpen = false;
     
     // Search
@@ -52,6 +53,7 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     private modalSubscription?: Subscription;
     private _unsubscribeAll = new Subject<void>();
     private headerLoadingTimeout?: ReturnType<typeof setTimeout>;
+    private scrollHandler?: () => void;
 
     constructor(
         private cartService: CartService,
@@ -62,6 +64,8 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit(): void {
+        this.currentUrl = this.router.url || '';
+
         this.headerLoadingTimeout = setTimeout(() => {
             this.isHeaderLoading = false;
             this.cdr.markForCheck();
@@ -90,16 +94,54 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this._unsubscribeAll))
             .subscribe(modal => {
                 this.currentModal = modal;
+                this.toggleBodyScrollLock(!!modal);
                 this.cdr.markForCheck();
             });
+
+        this.scrollHandler = () => {
+            const nextScrolled = window.scrollY > 24;
+            if (nextScrolled !== this.isScrolled) {
+                this.isScrolled = nextScrolled;
+                this.cdr.markForCheck();
+            }
+        };
+        window.addEventListener('scroll', this.scrollHandler, { passive: true });
+        this.scrollHandler();
+
+        this.router.events
+            .pipe(takeUntil(this._unsubscribeAll))
+            .subscribe((event) => {
+                if (event instanceof NavigationEnd) {
+                    this.currentUrl = event.urlAfterRedirects || event.url || '';
+                    this.cdr.markForCheck();
+                }
+            });
+    }
+
+    get useSolidHeader(): boolean {
+        return this.isScrolled || !this.isHomeRoute();
+    }
+
+    private isHomeRoute(): boolean {
+        const path = (this.currentUrl || '').split('?')[0];
+        return path === '/' || path === '';
     }
 
     ngOnDestroy(): void {
         if (this.headerLoadingTimeout) {
             clearTimeout(this.headerLoadingTimeout);
         }
+        if (this.scrollHandler) {
+            window.removeEventListener('scroll', this.scrollHandler);
+        }
+        this.toggleBodyScrollLock(false);
         this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
+    }
+
+    private toggleBodyScrollLock(lock: boolean): void {
+        if (typeof document === 'undefined') return;
+        document.body.style.overflow = lock ? 'hidden' : '';
     }
 
     openCart(): void {
@@ -130,10 +172,6 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
         this.authModalService.openLogin();
     }
 
-    switchToForgotPassword(): void {
-        this.authModalService.openForgotPassword();
-    }
-
     toggleMobileMenu(): void {
         this.isMobileMenuOpen = !this.isMobileMenuOpen;
     }
@@ -160,7 +198,7 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
         }
         const query = this.searchQuery.trim();
         if (query) {
-            this.router.navigate(['/produtos'], { 
+            this.router.navigate(['/produtos'], {
                 queryParams: { busca: query } 
             });
         }
@@ -172,11 +210,16 @@ export class LandingHeaderComponent implements OnInit, OnDestroy {
         }
         const query = this.mobileSearchQuery.trim();
         if (query) {
-            this.router.navigate(['/produtos'], { 
+            this.router.navigate(['/produtos'], {
                 queryParams: { busca: query } 
             });
             this.toggleMobileMenu(); // Close mobile menu after search
         }
+    }
+
+    goToRoute(path: string): void {
+        this.router.navigate([path]);
+        this.isMobileMenuOpen = false;
     }
 }
 

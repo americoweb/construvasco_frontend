@@ -15,6 +15,10 @@ import {
   PriceCalculationResponse,
   GenerateMockupRequest,
   GenerateMockupResponse,
+  GenerateHouseRequest,
+  GenerateHouseResponse,
+  GenerateFloorPlanRequest,
+  GenerateFloorPlanResponse,
   Design,
   CreateDesignRequest
 } from './product.types';
@@ -127,6 +131,26 @@ export class ProductService {
     return this.http.post<GenerateMockupResponse>(url, request).pipe(
       catchError(error => {
         console.error('Error generating mockup:', error);
+        throw error;
+      })
+    );
+  }
+
+  generateHouse(request: GenerateHouseRequest): Observable<GenerateHouseResponse> {
+    const url = this.configService.getApiUrl(API_ENDPOINTS.AI.HOUSE);
+    return this.http.post<GenerateHouseResponse>(url, request).pipe(
+      catchError(error => {
+        console.error('Error generating house render:', error);
+        throw error;
+      })
+    );
+  }
+
+  generateFloorPlan(request: GenerateFloorPlanRequest): Observable<GenerateFloorPlanResponse> {
+    const url = this.configService.getApiUrl(API_ENDPOINTS.AI.FLOORPLAN);
+    return this.http.post<GenerateFloorPlanResponse>(url, request).pipe(
+      catchError(error => {
+        console.error('Error generating floor plan:', error);
         throw error;
       })
     );

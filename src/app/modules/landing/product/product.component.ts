@@ -11,6 +11,10 @@ import { LandingHeaderComponent } from '../../../shared/components/layout/landin
 import { TestimonialComponent } from './testimonial/testimonial.component';
 import { BreadcrumbComponent, BreadcrumbItem } from '../../../shared/components/layout/breadcrumb/breadcrumb.component';
 import { ProductSizeSelectorComponent, SelectedSize } from './size-selector/size-selector.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-product',
@@ -25,7 +29,11 @@ import { ProductSizeSelectorComponent, SelectedSize } from './size-selector/size
     LandingHeaderComponent,
     TestimonialComponent,
     BreadcrumbComponent,
-    ProductSizeSelectorComponent
+    ProductSizeSelectorComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule
   ]
 })
 export class ProductComponent implements OnInit {
@@ -45,9 +53,14 @@ export class ProductComponent implements OnInit {
   referencePreview: string | null = null;
   useReferenceAsFinalArt: boolean = false;
   
+  isGeneratingHouse = false;
+  isGeneratingFloorPlan = false;
   isGeneratingMockup = false;
   asyncStatusMessage: string | null = null;
   mockupUrl: string | null = null;
+  houseImageUrl: string | null = null;
+  floorPlanImageUrl: string | null = null;
+  generationId: string | null = null;
   designId: number | null = null;
   
   quantity: number = 1;
@@ -80,7 +93,20 @@ export class ProductComponent implements OnInit {
       printAreaId: ['', Validators.required],
       designPrompt: ['', []], // Validation will be set dynamically based on logo
       logo: [null],
-      referenceImage: [null]
+      referenceImage: [null],
+      projectType: ['', Validators.required],
+      houseType: ['', Validators.required],
+      area: ['', [Validators.required, Validators.min(20)]],
+      width: ['', [Validators.required, Validators.min(2)]],
+      length: ['', [Validators.required, Validators.min(2)]],
+      floors: [1, [Validators.required, Validators.min(1)]],
+      rooms: [2, [Validators.required, Validators.min(1)]],
+      budget: ['', [Validators.required, Validators.min(50000)]],
+      deadline: ['', Validators.required],
+      architecturalStyle: ['', Validators.required],
+      terrainLocation: ['', Validators.required],
+      landInfo: ['', [Validators.required, Validators.minLength(10)]],
+      whatsapp: ['', [Validators.required, Validators.pattern(/^(84|85|86|87)[0-9]{7}$/)]]
     });
 
     // Update designPrompt validation when logo or reference changes
@@ -130,6 +156,18 @@ export class ProductComponent implements OnInit {
       return 'Selecione uma área de impressão para continuar.';
     }
 
+    if (!this.customizationForm.get('projectType')?.value) {
+      return 'Selecione o tipo de projeto.';
+    }
+
+    if (this.customizationForm.get('landInfo')?.invalid) {
+      return 'Adicione os dados do terreno para continuar.';
+    }
+
+    if (this.customizationForm.get('whatsapp')?.invalid) {
+      return 'Informe um WhatsApp válido para seguimento do projeto.';
+    }
+
     if (this.product.has_sizes && !this.selectedSize) {
       return 'Selecione um tamanho para continuar.';
     }
@@ -141,7 +179,15 @@ export class ProductComponent implements OnInit {
       }
     }
 
-    return 'Pronto para gerar o mockup.';
+    if (!this.houseImageUrl) {
+      return 'Pronto para gerar a imagem da casa.';
+    }
+
+    if (!this.floorPlanImageUrl) {
+      return 'Agora gere a planta com base no conceito da casa.';
+    }
+
+    return 'Casa e planta prontas para a próxima etapa.';
   }
 
   get canUseReferenceAsFinalArt(): boolean {
@@ -497,17 +543,17 @@ export class ProductComponent implements OnInit {
     });
   }
 
-  async generateMockup(): Promise<void> {
+  async generateHouse(): Promise<void> {
     this.submitAttempted = true;
 
     if (!this.product) {
-      this.error = 'Produto não encontrado.';
+      this.error = 'Projeto não encontrado.';
       return;
     }
 
     // Validate: either logo, reference, OR prompt (with min length if no logo/reference)
     if (!this.logoFile && !this.referenceFile && (!this.customizationForm.value.designPrompt || this.customizationForm.value.designPrompt.trim().length < 5)) {
-      this.error = 'Por favor, forneça um prompt (mínimo 5 caracteres), um logotipo ou uma imagem de referência.';
+      this.error = 'Por favor, forneça um prompt (mínimo 5 caracteres) ou uma imagem de referência.';
       return;
     }
 
@@ -520,16 +566,22 @@ export class ProductComponent implements OnInit {
 
     this.touchAllFormFields();
     this.isGeneratingMockup = true;
+    this.isGeneratingHouse = true;
     this.asyncStatusMessage = 'Processando ficheiros...';
     this.error = null;
     this.mockupUrl = null;
+    this.houseImageUrl = null;
+    this.floorPlanImageUrl = null;
+    this.generationId = null;
     this.itemAddedToCart = false;
 
     try {
+      const projectBrief = this.buildProjectBrief();
+
       // Prepare request
       const request: any = {
         product_id: this.product.id,
-        design_prompt: this.customizationForm.value.designPrompt,
+        design_prompt: projectBrief,
         color_id: this.customizationForm.value.colorId,
         print_area_id: this.customizationForm.value.printAreaId
       };
@@ -567,13 +619,14 @@ export class ProductComponent implements OnInit {
         print_area_id: request.print_area_id
       });
 
-      // Generate mockup
-      this.asyncStatusMessage = 'Gerando mockup...';
-      this.productService.generateMockup(request).subscribe({
+      // Generate house render (step 1)
+      this.asyncStatusMessage = 'Gerando imagem da casa...';
+      this.productService.generateHouse(request).subscribe({
         next: (response) => {
-          // Convert relative path to full URL if needed
-          const mockupPath = response.data.mockup_url;
-          this.mockupUrl = this.getFullImageUrl(mockupPath);
+          const housePath = response.data.house_image_url;
+          this.generationId = response.data.generation_id;
+          this.houseImageUrl = this.getFullImageUrl(housePath);
+          this.mockupUrl = this.houseImageUrl;
           
           // Reset quantity to MOQ after mockup generation
           if (this.product) {
@@ -581,32 +634,95 @@ export class ProductComponent implements OnInit {
             this.updateTotalPrice();
           }
           
-          // Create design record (store the original path from response)
+          // Create design record with house image
           this.asyncStatusMessage = 'Salvando design...';
-          this.createDesignRecord(mockupPath);
+          this.createDesignRecord(housePath);
         },
         error: (err) => {
-          this.error = err.error?.message || 'Erro ao gerar mockup. Por favor, tente novamente.';
+          this.error = err.error?.message || 'Erro ao gerar imagem da casa. Por favor, tente novamente.';
           this.asyncStatusMessage = null;
+          this.isGeneratingHouse = false;
           this.isGeneratingMockup = false;
-          console.error('Error generating mockup:', err);
+          console.error('Error generating house render:', err);
         }
       });
     } catch (err) {
       this.error = 'Erro ao processar imagens. Por favor, tente novamente.';
       this.asyncStatusMessage = null;
+      this.isGeneratingHouse = false;
+      this.isGeneratingMockup = false;
+    }
+  }
+
+  async generateFloorPlan(): Promise<void> {
+    this.submitAttempted = true;
+
+    if (!this.product || !this.houseImageUrl) {
+      this.error = 'Gere primeiro a imagem da casa.';
+      return;
+    }
+
+    if (!this.customizationForm.valid) {
+      this.touchAllFormFields();
+      this.focusFirstInvalidField();
+      this.error = 'Por favor, preencha todos os campos obrigatórios.';
+      return;
+    }
+
+    this.isGeneratingMockup = true;
+    this.isGeneratingFloorPlan = true;
+    this.asyncStatusMessage = 'Gerando planta...';
+    this.error = null;
+
+    try {
+      const request: any = {
+        product_id: this.product.id,
+        design_prompt: this.buildProjectBrief(),
+        color_id: this.customizationForm.value.colorId,
+        print_area_id: this.customizationForm.value.printAreaId,
+        generation_id: this.generationId || undefined,
+        house_image_url: this.houseImageUrl
+      };
+
+      if (this.referenceFile) {
+        const refBase64 = await this.productService.fileToBase64(this.referenceFile);
+        request.reference_image_base64 = refBase64;
+        request.reference_image_mime_type = this.referenceFile.type;
+      }
+
+      this.productService.generateFloorPlan(request).subscribe({
+        next: (response) => {
+          const floorPlanPath = response.data.floorplan_image_url;
+          this.generationId = response.data.generation_id;
+          this.floorPlanImageUrl = this.getFullImageUrl(floorPlanPath);
+          this.asyncStatusMessage = null;
+          this.isGeneratingFloorPlan = false;
+          this.isGeneratingMockup = false;
+        },
+        error: (err) => {
+          this.error = err.error?.message || 'Erro ao gerar planta. Por favor, tente novamente.';
+          this.asyncStatusMessage = null;
+          this.isGeneratingFloorPlan = false;
+          this.isGeneratingMockup = false;
+        }
+      });
+    } catch (err) {
+      this.error = 'Erro ao preparar os dados para gerar a planta.';
+      this.asyncStatusMessage = null;
+      this.isGeneratingFloorPlan = false;
       this.isGeneratingMockup = false;
     }
   }
 
   createDesignRecord(mockupUrl: string): void {
     if (!this.product) return;
+    const projectBrief = this.buildProjectBrief();
 
     const designRequest = {
       product_id: this.product.id,
       product_color_id: this.customizationForm.value.colorId,
       product_print_area_id: this.customizationForm.value.printAreaId,
-      prompt: this.customizationForm.value.designPrompt,
+      prompt: projectBrief,
       mockup_url: mockupUrl
     };
 
@@ -641,12 +757,14 @@ export class ProductComponent implements OnInit {
         }
 
         this.asyncStatusMessage = null;
+        this.isGeneratingHouse = false;
         this.isGeneratingMockup = false;
       },
       error: (err) => {
         console.error('Error creating design record:', err);
         // Don't show error to user, mockup was generated successfully
         this.asyncStatusMessage = null;
+        this.isGeneratingHouse = false;
         this.isGeneratingMockup = false;
       }
     });
@@ -735,7 +853,7 @@ export class ProductComponent implements OnInit {
       product_print_area_id: this.selectedPrintArea.id,
       quantity: this.quantity,
       unit_price: unitPrice,
-      design_prompt: this.customizationForm.value.designPrompt,
+      design_prompt: this.buildProjectBrief(),
       mockup_url: this.mockupUrl
     };
 
@@ -771,6 +889,9 @@ export class ProductComponent implements OnInit {
 
   startOver(): void {
     this.mockupUrl = null;
+    this.houseImageUrl = null;
+    this.floorPlanImageUrl = null;
+    this.generationId = null;
     this.designId = null;
     this.useReferenceAsFinalArt = false;
     this.itemAddedToCart = false;
@@ -820,6 +941,27 @@ export class ProductComponent implements OnInit {
     }
     // Use image_url for display (product image), not base_image_url
     return this.getFullImageUrl(this.product?.image_url || null);
+  }
+
+  private buildProjectBrief(): string {
+    const formValue = this.customizationForm.value;
+    const notes = (formValue.designPrompt || '').trim();
+
+    return [
+      `Projeto: ${formValue.projectType}`,
+      `Tipologia: ${formValue.houseType}`,
+      `Area: ${formValue.area} m2`,
+      `Dimensoes: ${formValue.width}m x ${formValue.length}m`,
+      `Pisos: ${formValue.floors}`,
+      `Quartos: ${formValue.rooms}`,
+      `Orcamento: ${formValue.budget} MT`,
+      `Prazo: ${formValue.deadline}`,
+      `Estilo: ${formValue.architecturalStyle}`,
+      `Localizacao: ${formValue.terrainLocation}`,
+      `Terreno: ${formValue.landInfo}`,
+      `WhatsApp: +258${formValue.whatsapp}`,
+      notes ? `Observacoes: ${notes}` : ''
+    ].filter(Boolean).join(' | ');
   }
 
   loadSizes(): void {

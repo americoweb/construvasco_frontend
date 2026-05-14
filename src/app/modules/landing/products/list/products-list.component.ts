@@ -292,7 +292,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
           feature.count = this.products.filter(p => p.is_new).length;
           break;
         case 'promocao':
-          feature.count = this.products.filter(p => !!p.discount_percentage).length;
+          feature.count = this.products.filter(p => p.is_featured).length;
           break;
         case 'personalizavel':
           feature.count = this.products.length; // All products are customizable
@@ -360,7 +360,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
       filtered = filtered.filter(p => p.is_new);
     }
     if (this.selectedFeatures.includes('promocao')) {
-      filtered = filtered.filter(p => !!p.discount_percentage);
+      filtered = filtered.filter(p => p.is_featured);
     }
     
     // Minimum quantity filter
@@ -632,7 +632,7 @@ export class ProductsListComponent implements OnInit, OnDestroy {
   navigateToProduct(product: ProductListItem): void {
     this.router.navigate(['/products', product.slug]);
   }
-  
+
   /**
    * Get pagination info for PaginationComponent
    */

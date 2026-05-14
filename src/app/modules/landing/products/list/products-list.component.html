@@ -1,9 +1,9 @@
-<div class="min-h-screen flex flex-col w-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+<div class="min-h-screen flex flex-col w-full bg-white font-sans">
   <app-landing-header [cartItemCount]="0" [orderHistoryCount]="0"></app-landing-header>
   
-  <main class="w-full flex-grow">
+  <main class="w-full flex-grow pt-20 sm:pt-24">
     <!-- Breadcrumb -->
-    <div class="bg-white border-b border-gray-200 py-4">
+    <div class="bg-white border-b border-slate-200 py-4">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <app-breadcrumb [items]="breadcrumbItems"></app-breadcrumb>
       </div>
@@ -82,63 +82,17 @@
                     (change)="onPriceRangeChange(range.id)"
                     class="w-4 h-4 text-purple-600"
                   />
-                  <span class="text-sm text-gray-700 flex-1">{{ range.label }}</span>
-                  <span class="text-xs text-gray-500">({{ range.count }})</span>
-                </label>
-              </div>
-            </div>
-            
-            <!-- Lead Time -->
-            <div class="mb-6 pb-6 border-b border-gray-200">
-              <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                Tempo de Entrega
-              </h4>
-              <div class="space-y-2">
-                <label 
-                  *ngFor="let time of filterConfig.leadTime"
-                  class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                >
-                  <input 
-                    type="checkbox"
-                    [checked]="selectedLeadTimes.includes(time.id)"
-                    (change)="onLeadTimeChange(time.id, $event)"
-                    class="w-4 h-4 text-green-600 rounded"
-                  />
-                  <span class="text-sm text-gray-700 flex-1">{{ time.label }}</span>
-                  <span class="text-xs text-gray-500">({{ time.count }})</span>
-                </label>
-              </div>
-            </div>
-            
-            <!-- Special Features -->
-            <div class="mb-6">
-              <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                <span class="w-2 h-2 bg-pink-500 rounded-full"></span>
-                Destaques
-              </h4>
-              <div class="space-y-2">
-                <label 
-                  *ngFor="let feature of filterConfig.features"
-                  class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-                >
-                  <input 
-                    type="checkbox"
-                    [checked]="selectedFeatures.includes(feature.id)"
-                    (change)="onFeatureChange(feature.id, $event)"
-                    class="w-4 h-4 text-pink-600 rounded"
-                  />
-                  <span class="text-sm text-gray-700 flex-1">{{ feature.label }}</span>
-                  <span class="text-xs text-gray-500">({{ feature.count }})</span>
+                  <span class="text-sm text-gray-700 flex-1 whitespace-nowrap overflow-hidden text-ellipsis">{{ range.label }}</span>
+                  <span class="text-xs text-gray-500 flex-shrink-0">({{ range.count }})</span>
                 </label>
               </div>
             </div>
             
             <!-- WhatsApp Help -->
             <div class="bg-green-50 rounded-xl p-4 border border-green-200">
-              <p class="text-sm text-gray-700 mb-3">
-                <strong>Não encontrou?</strong><br/>
-                Fale connosco directamente
+              <p class="text-sm text-gray-700 mb-3 leading-relaxed">
+                <strong class="block mb-1">Dúvidas antes de encomendar?</strong>
+                Depois do pagamento o processo segue no WhatsApp; também pode falar connosco agora para alinhar o tipo de obra.
               </p>
               <a 
                 [href]="getWhatsAppUrl()"
@@ -161,7 +115,7 @@
           <!-- Search Box -->
           <div class="bg-white rounded-xl shadow-sm hover:shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
             <app-search-box
-              [placeholder]="'Buscar produtos... (ex: cartões, banners, flyers)'"
+              [placeholder]="'Buscar projetos... (ex: residência, duplex, comercial)'"
               [value]="searchQuery"
               [debounceTime]="300"
               (search)="onSearchChange($event)"
@@ -174,7 +128,7 @@
             
             <!-- Results Count -->
             <div class="text-gray-700">
-              <span class="font-bold">{{ filteredProducts.length }}</span> produtos encontrados
+              <span class="font-bold">{{ filteredProducts.length }}</span> projetos encontrados
               <span *ngIf="hasActiveFilters" class="text-gray-500">
                 (filtrados de {{ products.length }})
               </span>
@@ -225,7 +179,7 @@
 
           <!-- Loading State -->
           <div *ngIf="isLoading" class="flex justify-center items-center py-16">
-            <app-loading type="spinner" size="lg" text="A carregar produtos..."></app-loading>
+            <app-loading type="spinner" size="lg" text="A carregar projetos..."></app-loading>
           </div>
 
           <!-- Product Grid/List -->
@@ -243,6 +197,7 @@
               *ngFor="let product of paginatedProducts"
               (click)="navigateToProduct(product)"
               class="group bg-white rounded-xl shadow-sm hover:shadow-md overflow-hidden cursor-pointer transform hover:-translate-y-2 transition-all duration-300 border-2 border-transparent hover:border-blue-500"
+              [attr.title]="product.name"
             >
               <!-- Image -->
               <div class="relative overflow-hidden aspect-square">
@@ -305,7 +260,7 @@
                 </div>
                 
                 <!-- Name -->
-                <h3 class="font-black text-sm sm:text-base lg:text-lg text-gray-900 mb-1 sm:mb-2 line-clamp-2">
+                <h3 class="font-black text-sm sm:text-base lg:text-lg text-gray-900 mb-1 sm:mb-2 line-clamp-2" [attr.title]="product.name">
                   {{ product.name }}
                 </h3>
                 
@@ -318,7 +273,7 @@
                 <div class="flex justify-between items-end mb-3 sm:mb-4">
                   <div>
                     <div class="text-[10px] sm:text-xs text-gray-500 mb-0.5 sm:mb-1">A partir de</div>
-                    <div class="font-black text-base sm:text-xl lg:text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    <div class="font-extrabold text-sm sm:text-base lg:text-lg text-slate-900" [attr.title]="product.price_formatted || (product.base_price | number:'1.0-0') + ' MT'">
                       {{ product.price_formatted || (product.base_price | number:'1.0-0') + ' MT' }}
                     </div>
                     <div class="text-[10px] sm:text-xs text-gray-500">
@@ -343,8 +298,8 @@
           <div *ngIf="!isLoading && filteredProducts.length === 0" class="py-16">
             <app-empty-state
               icon="search"
-              title="Nenhum produto encontrado"
-              message="Tente ajustar os filtros ou fazer uma nova busca"
+              title="Nenhum projeto encontrado"
+              message="Tente ajustar os filtros ou fale connosco no WhatsApp se precisar de um tipo de obra fora do catálogo."
               actionText="Limpar Filtros"
               (actionClick)="clearAllFilters()"
               size="lg"
@@ -467,54 +422,8 @@
                   (change)="onPriceRangeChange(range.id)"
                   class="w-4 h-4 text-purple-600"
                 />
-                <span class="text-sm text-gray-700 flex-1">{{ range.label }}</span>
-                <span class="text-xs text-gray-500">({{ range.count }})</span>
-              </label>
-            </div>
-          </div>
-          
-          <!-- Lead Time -->
-          <div class="mb-6 pb-6 border-b border-gray-200">
-            <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-              Tempo de Entrega
-            </h4>
-            <div class="space-y-2">
-              <label 
-                *ngFor="let time of filterConfig.leadTime"
-                class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-              >
-                <input 
-                  type="checkbox"
-                  [checked]="selectedLeadTimes.includes(time.id)"
-                  (change)="onLeadTimeChange(time.id, $event)"
-                  class="w-4 h-4 text-green-600 rounded"
-                />
-                <span class="text-sm text-gray-700 flex-1">{{ time.label }}</span>
-                <span class="text-xs text-gray-500">({{ time.count }})</span>
-              </label>
-            </div>
-          </div>
-          
-          <!-- Special Features -->
-          <div class="mb-6">
-            <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <span class="w-2 h-2 bg-pink-500 rounded-full"></span>
-              Destaques
-            </h4>
-            <div class="space-y-2">
-              <label 
-                *ngFor="let feature of filterConfig.features"
-                class="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors"
-              >
-                <input 
-                  type="checkbox"
-                  [checked]="selectedFeatures.includes(feature.id)"
-                  (change)="onFeatureChange(feature.id, $event)"
-                  class="w-4 h-4 text-pink-600 rounded"
-                />
-                <span class="text-sm text-gray-700 flex-1">{{ feature.label }}</span>
-                <span class="text-xs text-gray-500">({{ feature.count }})</span>
+                <span class="text-sm text-gray-700 flex-1 whitespace-nowrap overflow-hidden text-ellipsis">{{ range.label }}</span>
+                <span class="text-xs text-gray-500 flex-shrink-0">({{ range.count }})</span>
               </label>
             </div>
           </div>
@@ -532,7 +441,7 @@
             (click)="applyMobileFilters()"
             class="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-3 rounded-xl transition-all hover:from-blue-700 hover:to-purple-700 min-h-[44px]"
           >
-            Ver {{ filteredProducts.length }} Produtos
+            Ver {{ filteredProducts.length }} Projetos
           </button>
         </div>
       </div>

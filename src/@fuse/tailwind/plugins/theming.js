@@ -331,7 +331,7 @@ const theming = plugin.withOptions(
                             light: {
                                 'bg-app-bar': '#FFFFFF',
                                 'bg-card': '#FFFFFF',
-                                'bg-default': colors.slate[100],
+                                'bg-default': '#F8FAFC',
                                 'bg-dialog': '#FFFFFF',
                                 'bg-hover': chroma(colors.slate[400])
                                     .alpha(0.12)
@@ -349,8 +349,8 @@ const theming = plugin.withOptions(
                         },
                         foreground: {
                             light: {
-                                'text-default': colors.slate[800],
-                                'text-secondary': colors.slate[500],
+                                'text-default': '#0B1220',
+                                'text-secondary': '#475569',
                                 'text-hint': colors.slate[400],
                                 'text-disabled': colors.slate[400],
                                 border: colors.slate[200],

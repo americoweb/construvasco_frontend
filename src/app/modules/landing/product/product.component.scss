@@ -1,10 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
-
 // ─── Design tokens ───────────────────────────────────────────────────────────
 .pc-root {
-  --pc-bg:           #f8fafc;
+  --pc-bg:           #ffffff;
   --pc-surface:      #ffffff;
-  --pc-surface-2:    #f1f5f9;
+  --pc-surface-2:    #f8fafc;
   --pc-accent:       #2563eb;
   --pc-accent-glow:  rgba(37, 99, 235, 0.14);
   --pc-text:         #0f172a;
@@ -19,10 +17,15 @@
 // ─── Root shell ──────────────────────────────────────────────────────────────
 .pc-root {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 50%, #eef2ff 100%);
+  background: #ffffff;
   color: var(--pc-text);
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Montserrat', 'Inter', 'IBM Plex Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+.pc-root,
+.pc-root * {
+  font-family: 'Montserrat', 'Inter', 'IBM Plex Sans', sans-serif;
 }
 
 .dark .pc-root {
@@ -95,7 +98,7 @@
   background: #fee2e2;
   color: var(--pc-error);
   border-radius: 50%;
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 20px;
   margin: 0 auto 18px;
@@ -112,6 +115,10 @@
   width: 100%;
   max-width: none;
   margin: 0;
+}
+
+.pc-main--with-header {
+  padding-top: 80px;
 }
 
 // ─── Mobile hero image ───────────────────────────────────────────────────────
@@ -176,13 +183,22 @@
 
 // ─── Shared: Product name ────────────────────────────────────────────────────
 .pc-product-name {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
-  font-size: 1.5rem;
-  line-height: 1.15;
-  color: var(--pc-text);
-  margin: 0 0 10px;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  color: #1e293b;
+  margin: 0 0 12px;
   letter-spacing: -0.01em;
+}
+
+.pc-meta-kicker {
+  margin: 0 0 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
 }
 
 // ─── Shared: Price row ───────────────────────────────────────────────────────
@@ -193,18 +209,18 @@
   flex-wrap: wrap;
 }
 .pc-price-label {
-  font-size: 11px;
+  font-size: 0.72rem;
   color: var(--pc-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-weight: 700;
 }
 .pc-price-value {
-  font-family: 'Syne', sans-serif;
-  font-weight: 800;
-  font-size: 1.625rem;
-  color: var(--pc-accent);
-  letter-spacing: -0.02em;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: #334155;
+  letter-spacing: -0.01em;
 }
 .pc-min-qty-inline {
   font-size: 11px;
@@ -248,7 +264,7 @@
   flex-shrink: 0;
 }
 .pc-step-label {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 700;
   font-size: 0.875rem;
   color: var(--pc-text);
@@ -489,7 +505,7 @@
   gap: 9px;
   background: var(--pc-accent);
   color: #ffffff;
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 15px;
   letter-spacing: 0.04em;
@@ -593,7 +609,7 @@
   flex-shrink: 0;
 }
 .pc-cart-title {
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 1rem;
   color: var(--pc-text);
@@ -631,7 +647,7 @@
   font-size: 18px;
   font-weight: 700;
   color: var(--pc-text);
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   min-height: 48px;
   box-sizing: border-box;
   transition: border-color 0.15s;
@@ -656,7 +672,7 @@
 }
 .pc-total-value {
   display: block;
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 1.5rem;
   color: var(--pc-accent);
@@ -706,7 +722,7 @@
   gap: 8px;
   background: var(--pc-success);
   color: #fff;
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 800;
   font-size: 14px;
   text-transform: uppercase;
@@ -727,7 +743,7 @@
   width: 100%;
   background: var(--pc-accent);
   color: #fff;
-  font-family: 'Syne', sans-serif;
+  font-family: inherit;
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.03em;
@@ -796,6 +812,10 @@
 // ─── Desktop layout ───────────────────────────────────────────────────────────
 @media (min-width: 1024px) {
 
+  .pc-main--with-header {
+    padding-top: 92px;
+  }
+
   .pc-mobile-hero,
   .pc-mobile-meta {
     display: none !important;
@@ -842,11 +862,15 @@
   }
 
   .pc-product-meta-desk {
-    padding: 4px 0 0;
+    padding: 1rem 1rem 0.75rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
   }
 
   .pc-product-meta-desk .pc-product-name {
-    font-size: 2rem;
+    font-size: 1.55rem;
     margin-bottom: 12px;
   }
 
@@ -862,12 +886,12 @@
   }
 
   .pc-description {
-    margin-top: 18px;
-    font-size: 13px;
-    color: var(--pc-text-muted);
+    margin-top: 16px;
+    font-size: 0.84rem;
+    color: #475569;
     line-height: 1.65;
-    border-left: 2px solid rgba(245, 196, 0, 0.4);
-    padding-left: 14px;
+    border-left: 2px solid #f2c94c;
+    padding-left: 12px;
   }
 
   // ── Configurator ───────────────────────────────────────────────────────────

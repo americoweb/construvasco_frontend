@@ -11,15 +11,14 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   // Skip auth header for certain endpoints
   const skipAuthEndpoints = [
     '/auth/login',
-    '/auth/register', 
-    '/auth/forgot-password',
-    '/auth/reset-password'
+    '/auth/register',
+    '/auth/google',
   ];
-  
-  const shouldSkipAuth = skipAuthEndpoints.some(endpoint => 
+
+  const shouldSkipAuth = skipAuthEndpoints.some((endpoint) =>
     req.url.includes(endpoint)
   );
-  
+
   // Clone the request and add the authorization header if token exists
   if (token && !shouldSkipAuth) {
     const authReq = req.clone({

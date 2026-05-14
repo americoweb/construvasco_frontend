@@ -15,7 +15,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
-import { AuthService } from 'app/core/auth/auth.service';
+import { AuthService } from 'app/core/auth/services/auth.service';
 import { UserService } from 'app/core/user/user.service';
 
 @Component({
@@ -46,7 +46,7 @@ export class AuthUnlockSessionComponent implements OnInit {
     name: string;
     showAlert: boolean = false;
     unlockSessionForm: UntypedFormGroup;
-    private _email: string;
+    private _identifier: string;
 
     /**
      * Constructor
@@ -70,7 +70,7 @@ export class AuthUnlockSessionComponent implements OnInit {
         // Get the user's name
         this._userService.user$.subscribe((user) => {
             this.name = user.name;
-            this._email = user.email;
+            this._identifier = user?.email || '';
         });
 
         // Create the form
@@ -105,8 +105,8 @@ export class AuthUnlockSessionComponent implements OnInit {
         this.showAlert = false;
 
         this._authService
-            .unlockSession({
-                email: this._email ?? '',
+            .signIn({
+                identifier: this._identifier,
                 password: this.unlockSessionForm.get('password').value,
             })
             .subscribe(
@@ -147,3 +147,4 @@ export class AuthUnlockSessionComponent implements OnInit {
             );
     }
 }
+

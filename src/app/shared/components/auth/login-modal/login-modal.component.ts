@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize, delay } from 'rxjs/operators';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, take, takeUntil } from 'rxjs';
 
 // Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,12 +17,19 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 // Services
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { UserService } from '../../../../core/auth/services/user.service';
 
 // Models
 import { LoginCredentials } from '../../../../core/auth/models/auth.types';
 import { environment } from '../../../../../environments/environment';
+import {
+  ensureGoogleIdentityServicesInitialized,
+  registerGoogleCredentialHandler,
+  renderGoogleSignInButton,
+  unregisterGoogleCredentialHandler,
+} from '../../../../core/auth/google-identity-services';
 
-declare var google: any;
+declare let google: any;
 
 @Component({
   selector: 'app-login-modal',
@@ -46,7 +53,6 @@ export class LoginModalComponent implements OnInit, OnDestroy {
   @ViewChild('signInNgForm') signInNgForm!: NgForm;
   @Output() close = new EventEmitter<void>();
   @Output() switchToRegister = new EventEmitter<void>();
-  @Output() switchToForgotPassword = new EventEmitter<void>();
 
   signInForm!: FormGroup;
   isLoading = false;
@@ -56,19 +62,26 @@ export class LoginModalComponent implements OnInit, OnDestroy {
 
   private _unsubscribeAll = new Subject<void>();
 
+  private readonly onGoogleCredential = (response: { credential?: string }) => {
+    this.handleGoogleSignIn(response);
+  };
+
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private userService: UserService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.createForm();
+    registerGoogleCredentialHandler(this.onGoogleCredential);
     this.initializeGoogleSignIn();
   }
 
   ngOnDestroy(): void {
+    unregisterGoogleCredentialHandler(this.onGoogleCredential);
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
   }
@@ -103,24 +116,23 @@ export class LoginModalComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.notificationService.success('Bem-vindo de volta!');
-          this.closeModal();
-          
-          // Check user role and redirect accordingly
-          const user = response.user;
-          const userRole = user?.current_tenant_context?.role?.toLowerCase();
-          const isCustomer = !userRole || userRole === 'customer';
-          
-          if (response.must_change) {
-            this.router.navigate(['/auth/change-password']);
-          } else if (isCustomer) {
-            this.router.navigate(['/conta/dashboard']);
-          } else {
-            this.router.navigate(['/admin/dashboard']);
-          }
+          this.redirectByRoleWithFreshContext(response);
         },
         error: (error) => {
-          const err = error?.error || {};
-          this.errorMessage = err.message || 'Credenciais inválidas. Por favor, tente novamente.';
+          const body = error?.error;
+          const err = (typeof body === 'object' && body !== null ? body : {}) as {
+            message_pt?: string;
+            message?: string;
+            errors?: { identifier?: string[]; email?: string[] };
+          };
+          const msg =
+            err.message_pt ||
+            err.message ||
+            err.errors?.identifier?.[0] ||
+            err.errors?.email?.[0] ||
+            (typeof body === 'string' ? body : null) ||
+            'Credenciais inválidas. Por favor, tente novamente.';
+          this.errorMessage = msg;
           this.showError = true;
           this.signInForm.get('password')?.reset();
         }
@@ -160,14 +172,13 @@ export class LoginModalComponent implements OnInit, OnDestroy {
     this.switchToRegister.emit();
   }
 
-  onSwitchToForgotPassword(): void {
-    this.switchToForgotPassword.emit();
-  }
-
   /**
    * Initialize Google Identity Services
    */
   private initializeGoogleSignIn(): void {
+    if (!environment.googleClientId?.trim()) {
+      return;
+    }
     if (typeof google !== 'undefined' && google.accounts) {
       this.setupGoogleButton();
     } else {
@@ -193,18 +204,11 @@ export class LoginModalComponent implements OnInit, OnDestroy {
    */
   private setupGoogleButton(): void {
     try {
-      google.accounts.id.initialize({
-        client_id: environment.googleClientId,
-        callback: (response: any) => {
-          this.handleGoogleSignIn(response);
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
-      setTimeout(() => {
-        this.renderGoogleButton();
-      }, 300);
+      const ok = ensureGoogleIdentityServicesInitialized(environment.googleClientId);
+      if (!ok) {
+        return;
+      }
+      setTimeout(() => this.renderGoogleButton(), 300);
     } catch (error) {
       console.error('[Google Sign-In] Error initializing:', error);
     }
@@ -215,18 +219,11 @@ export class LoginModalComponent implements OnInit, OnDestroy {
    */
   renderGoogleButton(): void {
     const buttonContainer = document.getElementById('googleSignInButtonModal');
-    if (buttonContainer && !buttonContainer.hasChildNodes()) {
-      try {
-        google.accounts.id.renderButton(buttonContainer, {
-          theme: 'outline',
-          size: 'large',
-          text: 'signin_with',
-          width: '100%',
-          type: 'standard'
-        });
-      } catch (error) {
-        console.error('[Google Sign-In] Error rendering button:', error);
-      }
+    if (!buttonContainer) {
+      return;
+    }
+    if (!renderGoogleSignInButton(buttonContainer)) {
+      console.error('[Google Sign-In] Error rendering button');
     }
   }
 
@@ -248,17 +245,7 @@ export class LoginModalComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (authResponse) => {
             this.notificationService.success('Login com Google realizado com sucesso!');
-            this.closeModal();
-            
-            const user = authResponse.user;
-            const userRole = user?.current_tenant_context?.role?.toLowerCase();
-            const isCustomer = !userRole || userRole === 'customer';
-            
-            if (isCustomer) {
-              this.router.navigate(['/conta/dashboard']);
-            } else {
-              this.router.navigate(['/admin/dashboard']);
-            }
+            this.redirectByRoleWithFreshContext(authResponse);
           },
           error: (error) => {
             this.errorMessage = error?.error?.message || 'Erro ao fazer login com Google. Por favor, tente novamente.';
@@ -266,6 +253,34 @@ export class LoginModalComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  private redirectByRoleWithFreshContext(response: any): void {
+    if (response?.must_change) {
+      this.closeModal();
+      this.router.navigate(['/auth/change-password']);
+      return;
+    }
+
+    this.userService.getCurrentUser()
+      .pipe(take(1))
+      .subscribe({
+        next: (user) => this.redirectByRole(user?.current_tenant_context?.role),
+        error: () => this.redirectByRole(response?.user?.current_tenant_context?.role)
+      });
+  }
+
+  private redirectByRole(role: string | undefined): void {
+    const normalizedRole = (role || '').toLowerCase();
+    const isAdminUser = normalizedRole !== '' && normalizedRole !== 'customer';
+    this.closeModal();
+
+    if (isAdminUser) {
+      this.router.navigate(['/admin/dashboard']);
+      return;
+    }
+
+    this.router.navigate(['/conta/dashboard']);
   }
 }
 

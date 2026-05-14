@@ -34,17 +34,6 @@ export interface TokenPayload {
   permissions?: string[];
 }
 
-export interface ForgotPasswordRequest {
-  identifier: string;
-  type: 'email' | 'whatsapp';
-}
-
-export interface ResetPasswordRequest {
-  token: string;
-  password: string;
-  password_confirmation: string;
-}
-
 export interface ChangePasswordRequest {
   current_password: string;
   password: string;

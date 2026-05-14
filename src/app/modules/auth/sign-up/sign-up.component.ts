@@ -290,7 +290,7 @@ export class AuthSignUpComponent implements OnInit {
         this._authService.signUp(payload).subscribe(
             (response) => {
                 this.isLoading = false;
-                this._router.navigateByUrl('/confirmation-required');
+                this._router.navigateByUrl('/');
             },
             (response) => {
                 this.isLoading = false;

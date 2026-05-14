@@ -2,7 +2,6 @@ import { Component, ViewEncapsulation, OnInit, OnDestroy, AfterViewInit } from '
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
 import { HomeService, AISuggestionsResponse, Product, Suggestion, Category, Testimonial } from './home.service';
 import { CartService } from '../../../core/services/cart.service';
 import { ConfigService } from '../../../core/services/config.service';
@@ -10,8 +9,13 @@ import { LandingHeaderComponent } from '../../../shared/components/layout/landin
 import { LandingFooterComponent } from '../../../shared/components/layout/landing-footer/landing-footer.component';
 import { FuseSplashScreenService } from '@fuse/services/splash-screen';
 import { FuseLoadingService } from '@fuse/services/loading';
-
-declare var YT: any;
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 @Component({
     selector: 'landing-home',
@@ -22,11 +26,19 @@ declare var YT: any;
     imports: [
         CommonModule,
         FormsModule,
+        MatButtonModule,
+        MatCardModule,
+        MatIconModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatInputModule,
+        MatExpansionModule,
         LandingHeaderComponent,
         LandingFooterComponent
     ],
 })
 export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
+    heroBackgroundImage = 'https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=1920&h=1280&dpr=1';
     goal = '';
     budget = '';
     customGoal = '';
@@ -39,27 +51,52 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     isLoading = false;
     error: string | null = null;
     
-    // Common goals
+    // Common goals for project briefing assistant
     commonGoals = [
-        'Brindes para evento de empresa',
-        'Promoção de produto',
-        'Brinde corporativo',
-        'Evento de lançamento',
-        'Feira ou exposição',
-        'Aniversário da empresa',
-        'Campanha de marketing',
-        'Presente para clientes',
-        'Material para equipe',
+        'Construir casa de raiz',
+        'Remodelar casa existente',
+        'Projeto para residência T2/T3',
+        'Projeto com piscina e área de lazer',
+        'Projeto de moradia em terreno inclinado',
+        'Regularização de projeto e licenciamento',
         'Outro (especificar)'
     ];
     
     // Budget ranges
     budgetRanges = [
-        { label: 'Até 5K MT', value: 5000 },
-        { label: '5K - 15K MT', value: 15000 },
-        { label: '15K - 50K MT', value: 50000 },
-        { label: '50K+ MT', value: 100000 },
+        { label: 'Até 500 mil MT', value: 500000 },
+        { label: '500 mil - 1.5M MT', value: 1500000 },
+        { label: '1.5M - 5M MT', value: 5000000 },
+        { label: '5M+ MT', value: 10000000 },
         { label: 'Valor personalizado', value: 'custom' }
+    ];
+    /** Editorial cards; `productSlug` matches seeded catalog (`ConstructionProjectSeeder`). */
+    projectTypes: { id: number; name: string; image: string; area: string; productSlug: string }[] = [
+        { id: 1, name: 'Casa T2 Compacta', image: 'https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?auto=format&fit=crop&w=1200&q=80', area: '90-130m2', productSlug: 'casa-t2-compacta' },
+        { id: 2, name: 'Casa T3 Familiar', image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1200&q=80', area: '130-190m2', productSlug: 'casa-t3-familiar' },
+        { id: 3, name: 'Casa T4 Premium', image: 'https://images.unsplash.com/photo-1600607687644-c7171b42498f?auto=format&fit=crop&w=1200&q=80', area: '190-280m2', productSlug: 'casa-t4-premium' },
+        { id: 4, name: 'Moradia Duplex', image: 'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1200&q=80', area: '160-250m2', productSlug: 'moradia-duplex-moderna' },
+        { id: 5, name: 'Remodelacao Interior', image: 'https://images.unsplash.com/photo-1616137466211-f939a420be84?auto=format&fit=crop&w=1200&q=80', area: 'Sob avaliacao', productSlug: 'remodelacao-integral-casa' },
+        { id: 6, name: 'Casa em Terreno Inclinado', image: 'https://images.unsplash.com/photo-1575517111478-7f6afd0973db?auto=format&fit=crop&w=1200&q=80', area: '120-220m2', productSlug: 'moradia-geminada' },
+        { id: 7, name: 'Casa com Piscina', image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80', area: '180-300m2', productSlug: 'condominio-fechado-residencial' },
+        { id: 8, name: 'Projeto Comercial Leve', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80', area: '100-250m2', productSlug: 'loja-rua-premium' },
+        { id: 9, name: 'Anexo e Expansao', image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=80', area: '40-120m2', productSlug: 'ampliacao-de-moradia' }
+    ];
+    whyChooseUs = [
+        { title: 'Rede Tecnica Validada', description: 'Arquitetos e engenheiros com experiencia em normas locais e licenciamento.' },
+        { title: 'Briefing Inteligente', description: 'Convertemos requisitos tecnicos em proposta clara para acelerar decisoes.' },
+        { title: 'Acompanhamento Transparente', description: 'Depois do checkout, atualizacoes e briefing no WhatsApp; com login, o mesmo fluxo fica visivel na sua area.' },
+        { title: 'Compatibilizacao Inicial', description: 'Identificamos conflitos entre arquitetura, estrutura e instalacoes mais cedo.' },
+        { title: 'Orientacao de Orcamento', description: 'Solucoes tecnicas priorizadas pelo seu teto financeiro e cronograma.' },
+        { title: 'Suporte no WhatsApp', description: 'Apos o pagamento, e o canal principal para briefing, confirmacoes e fecho do projeto.' }
+    ];
+    faqItems = [
+        { question: 'Quanto tempo leva para receber a proposta inicial?', answer: 'Normalmente enviamos um direcionamento inicial em ate 48 horas apos receber o briefing completo.', isOpen: false },
+        { question: 'Posso enviar apenas fotos e medidas aproximadas?', answer: 'Sim. Quanto mais detalhe enviar, melhor. Tambem podemos começar com dados basicos e refinar em seguida.', isOpen: false },
+        { question: 'Vocês trabalham com projetos novos e remodelacao?', answer: 'Sim. Atendemos tanto casas de raiz quanto remodelacoes, anexos e ampliacoes.', isOpen: false },
+        { question: 'Como funciona o pagamento?', answer: 'No checkout escolhe M-Pesa, Emola ou comprovativo. Quando o pagamento estiver validado, a equipa continua consigo no WhatsApp com o briefing e os proximos passos.', isOpen: false },
+        { question: 'O WhatsApp e obrigatorio?', answer: 'Sim, no checkout indicamos o numero onde quer ser contactado. E o canal principal apos o pagamento: confirmacoes, perguntas tecnicas e acompanhamento ate a obra pronta.', isOpen: false },
+        { question: 'Preciso de conta para encomendar?', answer: 'Nao. Pode escolher o projeto, pagar como visitante e seguir tudo no WhatsApp. Criar conta e opcional para quem quiser ver o processo tambem na area do cliente.', isOpen: false }
     ];
     
     products: Product[] = [];
@@ -73,21 +110,11 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     isLoadingFeatured = false;
     currentYear = new Date().getFullYear();
     cartItemCount: number = 0;
-    showAIModal = false;
-    showAIAssistant = false;
-    aiStep = 1;
     whatsappNumber = '258846579067'; // Default placeholder, should be configured
-    portfolioImages: string[] = []; // Portfolio images for carousel
-    currentSlide = 0; // Current slide index (in terms of visible groups)
-    private carouselInterval: any; // Auto-play interval
-    private visibleImagesCount = 4; // Number of images visible at once (default for desktop)
+    featuredCurrentSlide = 0;
+    private featuredVisibleCount = 3;
     failedCategoryImages = new Set<number>(); // Track categories with failed image loads
-    showWhatsAppPrompt = false;
-    userInteracted = false;
     selectedProduct: Product | null = null;
-    showHelpMenu = false;
-    private ytPlayer: any;
-    private checkInterval: any;
 
     /** Placeholder slots for category / product / testimonial skeleton rows */
     readonly sectionSkeletonSlots = [0, 1, 2, 3, 4, 5];
@@ -97,7 +124,6 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
         private router: Router,
         private cartService: CartService,
         private configService: ConfigService,
-        private sanitizer: DomSanitizer,
         private fuseSplashScreen: FuseSplashScreenService,
         private fuseLoading: FuseLoadingService
     ) {}
@@ -109,29 +135,13 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loadFeaturedProducts();
         this.loadCategories();
         this.loadTestimonials();
-        this.loadPortfolioImages();
-        this.loadYouTubeAPI();
         // Subscribe to cart count
         this.cartService.getCartCount().subscribe(count => {
             this.cartItemCount = count;
         });
-        
-        // Track user interaction
-        this.trackUserInteraction();
-        
-        // Show WhatsApp prompt after 30 seconds if no interaction
-        setTimeout(() => {
-            if (!this.userInteracted) {
-                this.showWhatsAppPrompt = true;
-            }
-        }, 30000);
     }
     
     ngAfterViewInit(): void {
-        // Wait a bit for iframe to load, then initialize player
-        setTimeout(() => {
-            this.initializeYouTubePlayer();
-        }, 1000);
         // Update visible images count based on screen size
         this.updateVisibleImagesCount();
         window.addEventListener('resize', () => this.updateVisibleImagesCount());
@@ -139,116 +149,10 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.fuseLoading.setAutoMode(true);
-        if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-        }
-        if (this.carouselInterval) {
-            clearInterval(this.carouselInterval);
-        }
-        if (this.ytPlayer) {
-            try {
-                this.ytPlayer.destroy();
-            } catch (e) {
-                console.error('Error destroying YouTube player:', e);
-            }
-        }
     }
     
-    private trackUserInteraction(): void {
-        // Track clicks, scrolls, etc.
-        document.addEventListener('click', () => {
-            this.userInteracted = true;
-            this.showWhatsAppPrompt = false;
-        }, { once: true });
-        
-        document.addEventListener('scroll', () => {
-            this.userInteracted = true;
-        }, { once: true });
-    }
-
-    private loadYouTubeAPI(): void {
-        if ((window as any).YT && (window as any).YT.Player) {
-            return; // API already loaded
-        }
-
-        const tag = document.createElement('script');
-        tag.src = 'https://www.youtube.com/iframe_api';
-        const firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-
-    private initializeYouTubePlayer(): void {
-        if (typeof YT === 'undefined' || !YT.Player) {
-            // Wait for API to load
-            (window as any).onYouTubeIframeAPIReady = () => {
-                this.createPlayer();
-            };
-            return;
-        }
-
-        this.createPlayer();
-    }
-
-    private createPlayer(): void {
-        const container = document.getElementById('youtube-player');
-        if (!container) {
-            return;
-        }
-
-        try {
-            this.ytPlayer = new YT.Player('youtube-player', {
-                videoId: 'lgYbOKV5zI4',
-                playerVars: {
-                    autoplay: 1,
-                    loop: 1,
-                    playlist: 'lgYbOKV5zI4',
-                    mute: 1,
-                    controls: 0,
-                    showinfo: 0,
-                    rel: 0,
-                    iv_load_policy: 3,
-                    modestbranding: 1,
-                    playsinline: 1,
-                    enablejsapi: 1
-                },
-                events: {
-                    'onReady': (event: any) => {
-                        event.target.mute();
-                        event.target.playVideo();
-                        this.startTimeCheck();
-                    },
-                    'onStateChange': (event: any) => {
-                        if (event.data === YT.PlayerState.PLAYING) {
-                            this.startTimeCheck();
-                        }
-                    }
-                }
-            });
-        } catch (error) {
-            console.error('Error creating YouTube player:', error);
-        }
-    }
-
-    private startTimeCheck(): void {
-        if (this.checkInterval) {
-            clearInterval(this.checkInterval);
-        }
-
-        this.checkInterval = setInterval(() => {
-            if (this.ytPlayer && this.ytPlayer.getCurrentTime) {
-                try {
-                    const currentTime = this.ytPlayer.getCurrentTime();
-                    if (currentTime >= 29) {
-                        this.ytPlayer.seekTo(0, true);
-                    }
-                } catch (error) {
-                    // Player might not be ready yet
-                }
-            }
-        }, 500); // Check every 500ms
-    }
-
     onGoalSelect(selectedGoal: string): void {
+        this.error = null;
         if (selectedGoal === 'Outro (especificar)') {
             this.showCustomGoal = true;
             this.goal = '';
@@ -260,6 +164,7 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     onBudgetSelect(selectedBudget: number | string): void {
+        this.error = null;
         if (selectedBudget === 'custom') {
             this.showCustomBudget = true;
             this.budget = '';
@@ -268,6 +173,30 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
             this.showCustomBudget = false;
             this.customBudget = '';
         }
+    }
+
+    onCustomBudgetChange(): void {
+        this.error = null;
+    }
+
+    isBudgetRangeSelected(range: { label: string; value: number | string }): boolean {
+        if (range.value === 'custom') {
+            return this.showCustomBudget;
+        }
+        return !this.showCustomBudget && this.budget === String(range.value);
+    }
+
+    get budgetSelectionSummary(): string {
+        if (this.showCustomBudget) {
+            return this.customBudget
+                ? `Orçamento: ${this.customBudget} MT (personalizado)`
+                : 'Valor personalizado — digite o montante em MT.';
+        }
+        if (!this.budget) {
+            return '';
+        }
+        const r = this.budgetRanges.find((x) => String(x.value) === this.budget);
+        return r ? `Selecionado: ${r.label}` : '';
     }
 
     handleLogoFileChange(event: Event): void {
@@ -290,19 +219,32 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     async handleGetSuggestion(event: Event): Promise<void> {
         event.preventDefault();
-        
-        // Use custom values if shown, otherwise use selected values
-        const finalGoal = this.showCustomGoal ? this.customGoal : this.goal;
-        const finalBudget = this.showCustomBudget ? this.customBudget : this.budget;
-        
-        if (!finalGoal || !finalBudget) {
-            this.error = 'Por favor, preencha o objetivo e o orçamento.';
+
+        const finalGoal = (this.showCustomGoal ? this.customGoal : this.goal)?.trim() ?? '';
+        const finalBudgetRaw = this.showCustomBudget ? this.customBudget : this.budget;
+
+        if (!finalGoal) {
+            this.error = 'Por favor, escolha ou descreva o objetivo do projeto.';
             return;
         }
+        if (
+            finalBudgetRaw === '' ||
+            finalBudgetRaw === null ||
+            finalBudgetRaw === undefined
+        ) {
+            this.error = 'Por favor, selecione um intervalo de orçamento ou indique um valor em MT.';
+            return;
+        }
+        const budgetNum = Number(finalBudgetRaw);
+        if (!Number.isFinite(budgetNum) || budgetNum <= 0) {
+            this.error = 'Indique um orçamento válido (número maior que zero).';
+            return;
+        }
+
         this.isLoading = true;
         this.error = null;
         this.suggestions = null;
-        
+
         try {
             let logoImage: { data: string; mimeType: string; } | undefined = undefined;
             if (this.logoFile) {
@@ -312,7 +254,7 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
             const request: any = {
                 goal: finalGoal,
-                budget: Number(finalBudget),
+                budget: budgetNum,
                 max_suggestions: 5,
                 include_bundles: true
             };
@@ -328,14 +270,42 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
                     this.isLoading = false;
                 },
                 error: (err) => {
-                    this.error = err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.';
+                    this.error = this.getFriendlyAiError(err);
                     this.isLoading = false;
                 }
             });
         } catch (err) {
-            this.error = err instanceof Error ? err.message : 'Ocorreu um erro desconhecido.';
+            this.error = this.getFriendlyAiError(err);
             this.isLoading = false;
         }
+    }
+
+    private getFriendlyAiError(err: unknown): string {
+        const fallback = 'Não conseguimos gerar sugestões agora. Tente novamente em alguns segundos ou avance via WhatsApp.';
+
+        if (!err) return fallback;
+
+        const maybeAny = err as any;
+        const backendMessage = maybeAny?.error?.message;
+        const topMessage = maybeAny?.message;
+        const rawMessage = backendMessage || topMessage;
+
+        if (!rawMessage || typeof rawMessage !== 'string') {
+            return fallback;
+        }
+
+        const message = rawMessage.toLowerCase();
+        if (message.includes('network') || message.includes('failed to fetch') || message.includes('timeout')) {
+            return 'Estamos com instabilidade de conexão. Verifique a internet e tente novamente.';
+        }
+        if (message.includes('429') || message.includes('rate')) {
+            return 'Recebemos muitos pedidos ao mesmo tempo. Aguarde alguns segundos e tente de novo.';
+        }
+        if (message.includes('401') || message.includes('403')) {
+            return 'Seu acesso para este recurso expirou. Atualize a página e tente novamente.';
+        }
+
+        return rawMessage;
     }
 
     clearSuggestion(): void {
@@ -354,7 +324,7 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     handleCustomizeSuggestedProduct(product: any): void {
         if (!product.product_id && !product.productRef) {
             console.error("Missing product reference for suggestion", product);
-            this.error = "Não foi possível carregar os detalhes deste produto sugerido.";
+            this.error = "Não foi possível carregar os detalhes deste projeto sugerido.";
             return;
         }
         // Navigate to product page using product_id or find product by name
@@ -396,8 +366,7 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     scrollToStart(): void {
-        // Scroll to categories section
-        const element = document.querySelector('.max-w-7xl.mx-auto.px-4.py-12');
+        const element = document.getElementById('start-projects');
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -405,6 +374,25 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     navigateToProducts(): void {
         this.router.navigate(['/produtos']);
+    }
+
+    openProjectType(projectRef: number | string): void {
+        const selectedProject = typeof projectRef === 'number'
+            ? this.projectTypes.find((project) => project.id === projectRef)
+            : this.projectTypes.find((project) => project.name === projectRef);
+
+        const slug = selectedProject?.productSlug;
+        if (slug) {
+            this.router.navigate(['/products', slug]);
+            return;
+        }
+
+        const projectName = selectedProject?.name ?? String(projectRef);
+        this.router.navigate(['/produtos'], { queryParams: { busca: projectName } });
+    }
+
+    toggleFaq(index: number): void {
+        this.faqItems[index].isOpen = !this.faqItems[index].isOpen;
     }
 
     private loadProducts(): void {
@@ -492,45 +480,8 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
         });
     }
 
-    private loadPortfolioImages(): void {
-        // Load testimonial images from public folder
-        // Add more images by duplicating or adding more image files
-        const imageCount = 11; // We have images 1.jpg through 5.jpg
-        this.portfolioImages = [];
-        
-        // Load existing images
-        for (let i = 1; i <= imageCount; i++) {
-            this.portfolioImages.push(`/images/testimonial/${i}.jpg`);
-        }
-        
-        // Duplicate images to create a longer carousel (optional - remove if you add more actual images)
-        // This creates a seamless loop effect
-        const duplicateCount = Math.max(0, 8 - imageCount);
-        for (let i = 1; i <= duplicateCount && i <= imageCount; i++) {
-            this.portfolioImages.push(`/images/testimonial/${i}.jpg`);
-        }
-        
-        // Start auto-play carousel if we have images
-        if (this.portfolioImages.length > this.visibleImagesCount) {
-            this.startCarouselAutoPlay();
-        }
-    }
-
-    /**
-     * Start auto-play carousel
-     */
-    private startCarouselAutoPlay(): void {
-        // Auto-advance every 5 seconds
-        this.carouselInterval = setInterval(() => {
-            this.nextSlide();
-        }, 5000);
-    }
-
-    /**
-     * Get number of visible images based on screen size
-     */
-    getVisibleImagesCount(): number {
-        return this.visibleImagesCount;
+    getFeaturedVisibleCount(): number {
+        return this.featuredVisibleCount;
     }
 
     /**
@@ -540,75 +491,47 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
         if (typeof window !== 'undefined') {
             const width = window.innerWidth;
             if (width < 768) {
-                this.visibleImagesCount = 2; // Mobile: 2 images
+                this.featuredVisibleCount = 1;
             } else if (width < 1024) {
-                this.visibleImagesCount = 3; // Tablet: 3 images
+                this.featuredVisibleCount = 2;
             } else {
-                this.visibleImagesCount = 4; // Desktop: 4 images
+                this.featuredVisibleCount = 3;
             }
+
+            this.featuredCurrentSlide = Math.min(this.featuredCurrentSlide, this.getFeaturedMaxIndex());
         }
     }
 
-    /**
-     * Get maximum slide index
-     */
-    private getMaxSlideIndex(): number {
-        if (this.portfolioImages.length === 0) return 0;
-        const maxIndex = Math.max(0, this.portfolioImages.length - this.visibleImagesCount);
-        return maxIndex;
+    private getFeaturedMaxIndex(): number {
+        const total = this.projectTypes.slice(0, 6).length;
+        return Math.max(0, total - this.featuredVisibleCount);
     }
 
-    /**
-     * Navigate to next slide
-     */
-    nextSlide(): void {
-        if (this.portfolioImages.length === 0) return;
-        const maxIndex = this.getMaxSlideIndex();
-        this.currentSlide = this.currentSlide >= maxIndex ? 0 : this.currentSlide + 1;
-        this.resetCarouselAutoPlay();
+    nextFeaturedSlide(): void {
+        const maxIndex = this.getFeaturedMaxIndex();
+        this.featuredCurrentSlide = this.featuredCurrentSlide >= maxIndex ? 0 : this.featuredCurrentSlide + 1;
     }
 
-    /**
-     * Navigate to previous slide
-     */
-    previousSlide(): void {
-        if (this.portfolioImages.length === 0) return;
-        const maxIndex = this.getMaxSlideIndex();
-        this.currentSlide = this.currentSlide === 0 ? maxIndex : this.currentSlide - 1;
-        this.resetCarouselAutoPlay();
+    previousFeaturedSlide(): void {
+        const maxIndex = this.getFeaturedMaxIndex();
+        this.featuredCurrentSlide = this.featuredCurrentSlide === 0 ? maxIndex : this.featuredCurrentSlide - 1;
     }
 
-    /**
-     * Go to specific slide
-     */
-    goToSlide(index: number): void {
-        if (index >= 0 && index < this.portfolioImages.length) {
-            const maxIndex = this.getMaxSlideIndex();
-            this.currentSlide = Math.min(index, maxIndex);
-            this.resetCarouselAutoPlay();
-        }
-    }
-
-    /**
-     * Reset auto-play timer
-     */
-    private resetCarouselAutoPlay(): void {
-        if (this.carouselInterval) {
-            clearInterval(this.carouselInterval);
-        }
-        if (this.portfolioImages.length > 1) {
-            this.startCarouselAutoPlay();
+    goToFeaturedSlide(index: number): void {
+        const maxIndex = this.getFeaturedMaxIndex();
+        if (index >= 0 && index <= maxIndex) {
+            this.featuredCurrentSlide = index;
         }
     }
 
     private getDefaultCategories(): Category[] {
         return [
-            { id: 1, name: 'Cartões de Visita', slug: 'cartoes-visita', is_active: true, icon: '📇' },
-            { id: 2, name: 'Flyers & Folhetos', slug: 'flyers-folhetos', is_active: true, icon: '📄' },
-            { id: 3, name: 'Banners & Sinalização', slug: 'banners-sinalizacao', is_active: true, icon: '🎪' },
-            { id: 4, name: 'Brochuras', slug: 'brochuras', is_active: true, icon: '📘' },
-            { id: 5, name: 'Calendários', slug: 'calendarios', is_active: true, icon: '📅' },
-            { id: 6, name: 'Brindes Corporativos', slug: 'brindes-corporativos', is_active: true, icon: '🎁' }
+            { id: 1, name: 'Residências', slug: 'residencias', is_active: true, icon: '🏠' },
+            { id: 2, name: 'Remodelações', slug: 'remodelacoes', is_active: true, icon: '🛠️' },
+            { id: 3, name: 'Projetos Comerciais', slug: 'projetos-comerciais', is_active: true, icon: '🏢' },
+            { id: 4, name: 'Piscina e Lazer', slug: 'piscina-lazer', is_active: true, icon: '🏊' },
+            { id: 5, name: 'Anexos e Expansão', slug: 'anexos-expansao', is_active: true, icon: '📐' },
+            { id: 6, name: 'Legalização e Licenças', slug: 'legalizacao-licencas', is_active: true, icon: '📋' }
         ];
     }
 
@@ -644,84 +567,6 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
         ];
     }
 
-    openAIModal(): void {
-        this.showAIModal = true;
-        // Scroll to AI section if it exists
-        setTimeout(() => {
-            const element = document.getElementById('ai-suggestion-section');
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        }, 100);
-    }
-
-    closeAIModal(): void {
-        this.showAIModal = false;
-    }
-    
-    openAIAssistant(): void {
-        this.showAIAssistant = true;
-        this.aiStep = 1;
-        this.userInteracted = true;
-        this.showHelpMenu = false;
-    }
-    
-    closeAIAssistant(): void {
-        this.showAIAssistant = false;
-        this.aiStep = 1;
-    }
-    
-    toggleHelpMenu(): void {
-        this.showHelpMenu = !this.showHelpMenu;
-    }
-    
-    nextAIStep(): void {
-        if (this.aiStep < 4) {
-            this.aiStep++;
-        } else {
-            // Submit form
-            const event = new Event('submit');
-            this.handleGetSuggestion(event);
-        }
-    }
-    
-    previousAIStep(): void {
-        if (this.aiStep > 1) {
-            this.aiStep--;
-        }
-    }
-    
-    selectQuickGoal(goal: any): void {
-        this.goal = goal.value;
-        if (goal.showInput) {
-            this.showCustomGoal = true;
-            this.customGoal = '';
-        } else {
-            this.showCustomGoal = false;
-            this.nextAIStep();
-        }
-    }
-    
-    selectBudget(budget: any): void {
-        this.budget = budget.value.toString();
-        this.showCustomBudget = false;
-        this.nextAIStep();
-    }
-    
-    skipLogo(): void {
-        this.logoFile = null;
-        this.logoPreview = null;
-        this.nextAIStep();
-    }
-    
-    uploadLogo(): void {
-        // Trigger file input
-        const input = document.getElementById('logo-upload');
-        if (input) {
-            input.click();
-        }
-    }
-
     navigateToCategory(category: Category): void {
         // Navigate to category page or filter products
         if (category.slug) {
@@ -731,88 +576,54 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     openWhatsApp(context: string = 'help'): void {
         const messages: { [key: string]: string } = {
-            hero: 'Olá! Vi o site e gostaria de fazer um pedido.',
+            hero: 'Olá! Vi o site e gostaria de iniciar um projeto.',
             product: this.selectedProduct 
                 ? `Olá! Gostaria de saber mais sobre ${this.selectedProduct.name}`
-                : 'Olá! Gostaria de saber mais sobre um produto',
+                : 'Olá! Gostaria de saber mais sobre um projeto',
             cart: `Olá! Tenho ${this.cartItemCount} itens no carrinho e gostaria de finalizar o pedido`,
-            help: 'Olá! Preciso de ajuda para escolher um produto',
-            custom: 'Olá! Gostaria de fazer um pedido personalizado',
+            help: 'Olá! Preciso de ajuda para escolher um projeto',
+            custom: 'Olá! Gostaria de fazer um projeto personalizado',
             quote: 'Olá! Gostaria de receber um orçamento',
             urgent: 'Olá! Preciso de entrega urgente',
-            notFound: 'Olá! Não encontrei o produto que preciso',
-            human: 'Olá! Prefiro falar com alguém sobre meu pedido'
+            notFound: 'Olá! Não encontrei o tipo de projeto que preciso',
+            human: 'Olá! Prefiro falar com alguém sobre meu projeto'
         };
         
         const message = encodeURIComponent(messages[context] || messages.help);
         const url = `https://wa.me/${this.whatsappNumber}?text=${message}`;
         window.open(url, '_blank');
-        this.userInteracted = true;
-        this.showWhatsAppPrompt = false;
+        // no-op state updates removed from legacy prompt flow
     }
     
     getWhatsAppLink(context: string = 'help'): string {
         const messages: { [key: string]: string } = {
-            hero: 'Olá! Vi o site e gostaria de fazer um pedido.',
+            hero: 'Olá! Vi o site e gostaria de iniciar um projeto.',
             product: this.selectedProduct 
                 ? `Olá! Gostaria de saber mais sobre ${this.selectedProduct.name}`
-                : 'Olá! Gostaria de saber mais sobre um produto',
+                : 'Olá! Gostaria de saber mais sobre um projeto',
             cart: `Olá! Tenho ${this.cartItemCount} itens no carrinho e gostaria de finalizar o pedido`,
-            help: 'Olá! Preciso de ajuda para escolher um produto',
-            custom: 'Olá! Gostaria de fazer um pedido personalizado',
+            help: 'Olá! Preciso de ajuda para escolher um projeto',
+            custom: 'Olá! Gostaria de fazer um projeto personalizado',
             quote: 'Olá! Gostaria de receber um orçamento',
             urgent: 'Olá! Preciso de entrega urgente',
-            notFound: 'Olá! Não encontrei o produto que preciso',
-            human: 'Olá! Prefiro falar com alguém sobre meu pedido'
+            notFound: 'Olá! Não encontrei o tipo de projeto que preciso',
+            human: 'Olá! Prefiro falar com alguém sobre meu projeto'
         };
         
         const message = encodeURIComponent(messages[context] || messages.help);
         return `https://wa.me/${this.whatsappNumber}?text=${message}`;
     }
     
-    quickGoals = [
-        { icon: '🎉', label: 'Evento', value: 'Organizar um evento corporativo' },
-        { icon: '🏢', label: 'Escritório', value: 'Material para escritório' },
-        { icon: '🎁', label: 'Clientes', value: 'Brindes para clientes' },
-        { icon: '📢', label: 'Marketing', value: 'Campanha de marketing' },
-        { icon: '🎊', label: 'Abertura', value: 'Abertura de negócio' },
-        { icon: '💼', label: 'Outro', value: 'custom', showInput: true }
-    ];
-    
-    simpleBudgets = [
-        { 
-            icon: '🌱', 
-            label: 'Económico', 
-            range: '500 - 5,000 MT',
-            value: 2500,
-            description: 'Perfeito para começar'
-        },
-        { 
-            icon: '🚀', 
-            label: 'Médio', 
-            range: '5,000 - 20,000 MT',
-            value: 12500,
-            description: 'Mais vendido'
-        },
-        { 
-            icon: '⭐', 
-            label: 'Premium', 
-            range: '20,000 - 100,000 MT',
-            value: 50000,
-            description: 'Impacto máximo'
-        }
-    ];
-
     getCategoryIcon(category: Category): string {
         if (category.icon) return category.icon;
         // Default icons based on category name
         const iconMap: { [key: string]: string } = {
-            'cartões': '📇',
-            'flyers': '📄',
-            'banners': '🎪',
-            'brochuras': '📘',
-            'calendários': '📅',
-            'brindes': '🎁'
+            'resid': '🏠',
+            'remodel': '🛠️',
+            'comercial': '🏢',
+            'piscina': '🏊',
+            'anexo': '📐',
+            'licen': '📋'
         };
         const nameLower = category.name.toLowerCase();
         for (const key in iconMap) {
@@ -877,12 +688,12 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
     getCategoryPrice(category: Category): string {
         // Default prices for categories (can be enhanced with actual data)
         const priceMap: { [key: string]: string } = {
-            'cartões': '600 MT',
-            'flyers': '800 MT',
-            'banners': '1500 MT',
-            'brochuras': '1200 MT',
-            'calendários': '2000 MT',
-            'brindes': '1000 MT'
+            'resid': 'A partir de 350.000 MT',
+            'remodel': 'A partir de 120.000 MT',
+            'comercial': 'A partir de 500.000 MT',
+            'piscina': 'A partir de 180.000 MT',
+            'anexo': 'A partir de 90.000 MT',
+            'licen': 'Sob consulta'
         };
         const nameLower = category.name.toLowerCase();
         for (const key in priceMap) {
@@ -890,7 +701,7 @@ export class LandingHomeComponent implements OnInit, AfterViewInit, OnDestroy {
                 return priceMap[key];
             }
         }
-        return 'A partir de 600 MT';
+        return 'Sob avaliação técnica';
     }
 
     /**

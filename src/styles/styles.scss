@@ -2,4 +2,70 @@
 /*  @ Import/write your custom styles here.
 /*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
 /* ----------------------------------------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 @import 'ngx-toastr/toastr';    
+
+html,
+body {
+    font-family: 'Montserrat', 'Inter', 'IBM Plex Sans', sans-serif;
+}
+
+/* Corporate readability rhythm with generous vertical spacing */
+h1,
+h2,
+h3,
+h4 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    line-height: 1.5rem;
+}
+
+/* Buttons and labels should feel decisive and consistent */
+label,
+.mat-mdc-button-base,
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-fab,
+.mat-mdc-mini-fab,
+.mat-mdc-icon-button {
+    font-weight: 600 !important;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+    outline: 2px solid #0ea5a4;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Ensure landing component hosts occupy full viewport width */
+app-landing-header,
+app-landing-footer,
+landing-home-site,
+landing-services-page,
+landing-how-it-works-page,
+landing-portfolio-page,
+landing-about-page,
+landing-contact-page {
+    display: block;
+    width: 100%;
+}

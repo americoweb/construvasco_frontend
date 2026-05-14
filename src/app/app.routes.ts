@@ -55,18 +55,18 @@ export const routes: Route[] = [
             },
             {
                 path: 'forgot-password',
-                canActivate: [noAuthGuard],
-                loadComponent: () => import('./modules/auth/forgot-password/forgot-password.component').then(m => m.AuthForgotPasswordComponent)
+                redirectTo: 'sign-in',
+                pathMatch: 'full'
             },
             {
                 path: 'reset-password',
-                canActivate: [noAuthGuard],
-                loadComponent: () => import('./modules/auth/reset-password/reset-password.component').then(m => m.AuthResetPasswordComponent)
+                redirectTo: 'sign-in',
+                pathMatch: 'full'
             },
             {
                 path: 'redefinir-senha/:token',
-                canActivate: [noAuthGuard],
-                loadComponent: () => import('./modules/auth/reset-password/reset-password.component').then(m => m.AuthResetPasswordComponent)
+                redirectTo: 'sign-in',
+                pathMatch: 'full'
             },
         ]
     },

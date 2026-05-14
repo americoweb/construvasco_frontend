@@ -1,27 +1,61 @@
-# Fuse - Admin template and Starter project for Angular
+# Construvasco — Frontend (Angular)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli)
+SPA em **Angular 18** (base **Fuse**) para o site público, área de cliente, autenticação e backoffice administrativo da Construvasco. Comunica com a API **Laravel** (`/api`).
 
-## Development server
+## Documentação
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+| Documento | Conteúdo |
+|-----------|----------|
+| [docs/PRODUTO_E_VALOR.md](docs/PRODUTO_E_VALOR.md) | O que a plataforma resolve para a empresa e públicos-alvo |
+| [docs/ARQUITETURA_E_FLUXOS.md](docs/ARQUITETURA_E_FLUXOS.md) | Mapa de fluxos, rotas, guards e camadas |
+| [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md) | Ambiente local, variáveis, debugging |
+| [docs/INTEGRACAO_API.md](docs/INTEGRACAO_API.md) | Ligação ao backend e constantes de API |
 
-## Code scaffolding
+## Pré-requisitos
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Node.js compatível com Angular 18 (LTS recomendado)
+- npm (ou yarn)
+- API Laravel a correr (por defeito o frontend aponta para `http://127.0.0.1:8000/api` em desenvolvimento)
 
-## Build
+## Arranque rápido
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+```bash
+npm install
+npm start
+```
 
-## Running unit tests
+Abre `http://localhost:4200/` (ou a porta indicada pelo CLI).
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Build de produção:
 
-## Running end-to-end tests
+```bash
+npm run build:prod
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## Configuração da API e integrações
 
-## Further help
+- URLs e flags: [`src/environments/environment.ts`](src/environments/environment.ts) (dev) e [`src/environments/environment.prod.ts`](src/environments/environment.prod.ts) (substituído no build de produção via `angular.json`).
+- Resolução de URLs de API: [`src/app/core/services/config.service.ts`](src/app/core/services/config.service.ts).
+- Google Sign-In: `googleClientId` / `external.google.clientId` no `environment`; no Google Cloud Console, os **Authorized JavaScript origins** devem coincidir com o origin do browser (ex.: `http://localhost:4200`).
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Detalhes em [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md) e [docs/INTEGRACAO_API.md](docs/INTEGRACAO_API.md).
+
+## Estrutura do código (resumo)
+
+| Pasta | Função |
+|-------|--------|
+| `src/app/modules/landing/` | Site público: home, catálogo, produto, checkout |
+| `src/app/modules/auth/` | Páginas auth (sign-in, sign-up, change-password) |
+| `src/app/modules/account/` | Área cliente autenticada (`/conta/...`) |
+| `src/app/modules/admin/` | Backoffice (`/admin/...`) |
+| `src/app/core/` | Auth, guards, interceptors, serviços partilhados |
+| `src/app/shared/` | Componentes e constantes reutilizáveis |
+| `src/app/layout/` | Shell de layout (Fuse) |
+
+## Backend
+
+O repositório da API Laravel costuma viver lado a lado, por exemplo `../construvasco_laravel_v1`. Ver [docs/INTEGRACAO_API.md](docs/INTEGRACAO_API.md).
+
+## Licença e template
+
+O projeto deriva do template comercial **Fuse** (Angular). Respeitar a licença original do template onde aplicável; o código e a documentação específicos da Construvasco são da organização.

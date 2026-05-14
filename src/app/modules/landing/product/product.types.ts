@@ -119,6 +119,32 @@ export interface GenerateMockupResponse {
   message: string;
 }
 
+export interface GenerateHouseRequest extends GenerateMockupRequest {
+  project_context?: string;
+}
+
+export interface GenerateHouseResponse {
+  data: {
+    generation_id: string;
+    house_image_url: string;
+  };
+  message: string;
+}
+
+export interface GenerateFloorPlanRequest extends GenerateMockupRequest {
+  generation_id?: string;
+  house_image_url: string;
+  project_context?: string;
+}
+
+export interface GenerateFloorPlanResponse {
+  data: {
+    generation_id: string;
+    floorplan_image_url: string;
+  };
+  message: string;
+}
+
 export interface Design {
   id: number;
   uuid: string;

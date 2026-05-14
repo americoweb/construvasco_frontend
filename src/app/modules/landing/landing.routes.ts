@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { LandingHomeComponent } from './home/home.component';
 import { productsRoutes } from './products/products.routes';
 
 /**
@@ -9,22 +8,43 @@ import { productsRoutes } from './products/products.routes';
  * Route order matters: more specific routes should come before less specific ones
  */
 export const landingRoutes: Routes = [
-    // Home route (empty path - must be first with pathMatch: 'full')
     {
         path: '',
         pathMatch: 'full',
-        component: LandingHomeComponent,
-        data: {
-            layout: 'empty'
-        }
+        loadComponent: () =>
+            import('./home/home.component').then((m) => m.LandingHomeComponent),
+        data: { layout: 'empty' }
     },
-    // Landing redirect
     {
         path: 'landing',
         pathMatch: 'full',
         redirectTo: ''
     },
-    // Products list routes (produtos with category/subcategory)
+    {
+        path: 'servicos',
+        pathMatch: 'full',
+        redirectTo: 'produtos'
+    },
+    {
+        path: 'como-funciona',
+        pathMatch: 'full',
+        redirectTo: ''
+    },
+    {
+        path: 'portfolio',
+        pathMatch: 'full',
+        redirectTo: 'produtos'
+    },
+    {
+        path: 'sobre',
+        pathMatch: 'full',
+        redirectTo: ''
+    },
+    {
+        path: 'contacto',
+        pathMatch: 'full',
+        redirectTo: 'checkout'
+    },
     {
         path: 'produtos',
         loadComponent: () => {
@@ -35,14 +55,12 @@ export const landingRoutes: Routes = [
         },
         children: productsRoutes
     },
-    // Individual product detail route (more specific than produtos)
     {
         path: 'products/:slug',
         loadComponent: () => {
             return import('./product/product.component').then(m => m.ProductComponent);
         }
     },
-    // Checkout route
     {
         path: 'checkout',
         loadComponent: () => {

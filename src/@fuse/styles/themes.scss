@@ -13,20 +13,20 @@ $light-base: (
         /* slate.400 */ disabled-text: #94a3b8,
         /* slate.400 */ elevation: #000000,
         hint-text: #94a3b8,
-        /* slate.400 */ secondary-text: #64748b,
-        /* slate.500 */ icon: #64748b,
-        /* slate.500 */ icons: #64748b,
-        /* slate.500 */ mat-icon: #64748b,
-        /* slate.500 */ text: #1e293b,
-        /* slate.800 */ slider-min: #1e293b,
+        /* construvasco text secondary */ secondary-text: #475569,
+        /* construvasco text secondary */ icon: #475569,
+        /* construvasco text secondary */ icons: #475569,
+        /* construvasco text secondary */ mat-icon: #475569,
+        /* construvasco text default */ text: #0b1220,
+        /* construvasco text default */ slider-min: #0b1220,
         /* slate.800 */ slider-off: #cbd5e1,
         /* slate.300 */ slider-off-active: #94a3b8 /* slate.400 */,
     ),
     background: (
         status-bar: #cbd5e1,
         /* slate.300 */ app-bar: #ffffff,
-        background: #f1f5f9,
-        /* slate.100 */ hover: rgba(148, 163, 184, 0.12),
+        background: #f8fafc,
+        /* construvasco background */ hover: rgba(148, 163, 184, 0.12),
         /* slate.400 + opacity */ card: #ffffff,
         dialog: #ffffff,
         disabled-button: rgba(148, 163, 184, 0.38),
@@ -93,42 +93,42 @@ $dark-base: (
                 $font-family: theme('fontFamily.sans'),
                 $headline-1:
                     mat.m2-define-typography-level(
-                        1.875rem,
-                        2.25rem,
-                        800,
+                        3rem,
+                        3.5rem,
+                        700,
                         theme('fontFamily.sans')
                     ),
                 $headline-2:
                     mat.m2-define-typography-level(
-                        1.25rem,
-                        1.75rem,
+                        2.25rem,
+                        2.75rem,
                         700,
                         theme('fontFamily.sans')
                     ),
                 $headline-3:
                     mat.m2-define-typography-level(
-                        1.125rem,
                         1.75rem,
+                        2.25rem,
                         600,
                         theme('fontFamily.sans')
                     ),
                 $headline-4:
                     mat.m2-define-typography-level(
-                        0.875rem,
-                        1.25rem,
+                        1.375rem,
+                        1.875rem,
                         600,
                         theme('fontFamily.sans')
                     ),
                 $headline-5:
                     mat.m2-define-typography-level(
-                        0.875rem,
-                        1.5rem,
+                        1.125rem,
+                        1.75rem,
                         400,
                         theme('fontFamily.sans')
                     ),
                 $headline-6:
                     mat.m2-define-typography-level(
-                        0.875rem,
+                        1rem,
                         1.5rem,
                         400,
                         theme('fontFamily.sans')
@@ -136,7 +136,7 @@ $dark-base: (
                 $subtitle-1:
                     mat.m2-define-typography-level(
                         1rem,
-                        1.75rem,
+                        1.5rem,
                         400,
                         theme('fontFamily.sans')
                     ),
@@ -144,7 +144,7 @@ $dark-base: (
                     mat.m2-define-typography-level(
                         0.875rem,
                         1.25rem,
-                        600,
+                        400,
                         theme('fontFamily.sans')
                     ),
                 $body-1:
@@ -165,21 +165,21 @@ $dark-base: (
                     mat.m2-define-typography-level(
                         0.75rem,
                         1rem,
-                        400,
+                        500,
                         theme('fontFamily.sans')
                     ),
                 $button:
                     mat.m2-define-typography-level(
                         0.875rem,
-                        0.875rem,
-                        500,
+                        1.25rem,
+                        600,
                         theme('fontFamily.sans')
                     ),
                 $overline:
                     mat.m2-define-typography-level(
                         0.75rem,
-                        2rem,
-                        500,
+                        1rem,
+                        600,
                         theme('fontFamily.sans')
                     )
             ),

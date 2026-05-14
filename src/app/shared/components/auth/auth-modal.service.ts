@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-export type AuthModalType = 'login' | 'register' | 'forgot-password' | null;
+export type AuthModalType = 'login' | 'register' | null;
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +16,6 @@ export class AuthModalService {
 
   openRegister(): void {
     this._currentModal.next('register');
-  }
-
-  openForgotPassword(): void {
-    this._currentModal.next('forgot-password');
   }
 
   close(): void {

@@ -14,15 +14,15 @@ export class LandingFooterComponent {
 
   getWhatsAppLink(context: string = 'help'): string {
     const messages: { [key: string]: string } = {
-      help: 'Olá! Preciso de ajuda para escolher um produto',
-      hero: 'Olá! Vi o site e gostaria de fazer um pedido.',
-      product: 'Olá! Gostaria de saber mais sobre um produto',
-      cart: 'Olá! Tenho itens no carrinho e gostaria de finalizar o pedido',
-      custom: 'Olá! Gostaria de fazer um pedido personalizado',
+      help: 'Olá! Quero ajuda a escolher o tipo de projeto antes de encomendar.',
+      hero: 'Olá! Vi o site e quero alinhar um projeto de construção.',
+      product: 'Olá! Gostaria de saber mais sobre um projeto do catálogo',
+      cart: 'Olá! Tenho itens no carrinho e quero finalizar a encomenda',
+      custom: 'Olá! Gostaria de um projeto personalizado',
       quote: 'Olá! Gostaria de receber um orçamento',
-      urgent: 'Olá! Preciso de entrega urgente',
-      notFound: 'Olá! Não encontrei o produto que preciso',
-      human: 'Olá! Prefiro falar com alguém sobre meu pedido'
+      urgent: 'Olá! Tenho urgência no arranque do projeto',
+      notFound: 'Olá! Não encontrei no catálogo o tipo de obra que preciso',
+      human: 'Olá! Prefiro falar com alguém sobre o meu projeto'
     };
     
     const message = encodeURIComponent(messages[context] || messages.help);

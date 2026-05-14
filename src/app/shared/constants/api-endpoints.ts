@@ -104,6 +104,8 @@ export const API_ENDPOINTS = {
   AI: {
     SUGGESTIONS: 'v1/ai/suggestions',
     MOCKUP: 'v1/ai/mockup',
+    HOUSE: 'v1/ai/house',
+    FLOORPLAN: 'v1/ai/floorplan',
     REFINE: 'v1/ai/refine',
     HEALTH: 'v1/ai/health'
   },

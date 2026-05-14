@@ -1,30 +1,29 @@
 <div class="orders-container w-full">
-  <h1 class="text-3xl font-bold text-gray-900 mb-6">Meus Pedidos</h1>
+  <h1 class="text-3xl font-bold text-gray-900 mb-4">Meus Pedidos</h1>
 
   <!-- Filter Tabs -->
-  <div class="mb-6 border-b border-gray-200">
-    <div class="flex space-x-1 overflow-x-auto">
-      <button
-        *ngFor="let tab of tabs"
-        (click)="setActiveTab(tab.id)"
-        [class.border-b-2]="activeTab === tab.id"
-        [class.border-blue-600]="activeTab === tab.id"
-        [class.text-blue-600]="activeTab === tab.id"
-        [class.text-gray-600]="activeTab !== tab.id"
-        class="px-4 py-3 font-medium text-sm whitespace-nowrap hover:text-blue-600 transition-colors">
-        {{ tab.label }}
-      </button>
-    </div>
+  <div class="mb-4 orders-tabs-shell">
+    <mat-tab-group
+      [selectedIndex]="activeTabIndex"
+      (selectedIndexChange)="setActiveTabByIndex($event)"
+      animationDuration="180ms"
+      mat-stretch-tabs="false"
+    >
+      <mat-tab *ngFor="let tab of tabs" [label]="tab.label"></mat-tab>
+    </mat-tab-group>
   </div>
 
   <!-- Search Box -->
-  <div class="mb-6">
-    <input
-      type="text"
-      [(ngModel)]="searchTerm"
-      (ngModelChange)="filterOrders()"
-      placeholder="Buscar por número de pedido"
-      class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+  <div class="mb-5">
+    <mat-form-field appearance="outline" class="w-full md:w-96">
+      <mat-label>Buscar por número de pedido</mat-label>
+      <input
+        matInput
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="filterOrders()"
+        placeholder="Ex: PED-0001">
+    </mat-form-field>
   </div>
 
   <!-- Loading State -->

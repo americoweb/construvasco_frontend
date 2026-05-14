@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
@@ -7,12 +7,19 @@ import { finalize, delay } from 'rxjs/operators';
 // Services
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { UserService } from '../../../core/auth/services/user.service';
 
 // Models
 import { LoginCredentials } from '../../../core/auth/models/auth.types';
 import { environment } from '../../../../environments/environment';
+import {
+  ensureGoogleIdentityServicesInitialized,
+  registerGoogleCredentialHandler,
+  renderGoogleSignInButton,
+  unregisterGoogleCredentialHandler,
+} from '../../../core/auth/google-identity-services';
 
-declare var google: any;
+declare let google: any;
 
 @Component({
   selector: 'app-sign-in',
@@ -25,8 +32,12 @@ declare var google: any;
   templateUrl: './sign-in.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SignInComponent implements OnInit {
+export class SignInComponent implements OnInit, OnDestroy {
   @ViewChild('signInNgForm') signInNgForm!: NgForm;
+
+  private readonly onGoogleCredential = (response: { credential?: string }) => {
+    this.handleGoogleSignIn(response);
+  };
 
   signInForm!: FormGroup;
   isLoading = false;
@@ -41,14 +52,19 @@ export class SignInComponent implements OnInit {
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private userService: UserService,
     private router: Router,
     private activatedRoute: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.createForm();
-    // Initialize Google Sign-In when Google Identity Services is loaded
+    registerGoogleCredentialHandler(this.onGoogleCredential);
     this.initializeGoogleSignIn();
+  }
+
+  ngOnDestroy(): void {
+    unregisterGoogleCredentialHandler(this.onGoogleCredential);
   }
 
   private createForm(): void {
@@ -77,21 +93,7 @@ export class SignInComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          // Check user role and redirect accordingly
-          const user = response.user;
-          const userRole = user?.current_tenant_context?.role?.toLowerCase();
-          const isCustomer = !userRole || userRole === 'customer'; // Default to customer if no role
-          
-          if (response.must_change) {
-            this.router.navigate(['/auth/change-password']);
-          } else if (isCustomer) {
-            // Customers go to home page
-            this.router.navigate(['/']);
-          } else {
-            // Admins go to admin dashboard
-            const redirectUrl = this.activatedRoute.snapshot.queryParams['redirectUrl'] || '/admin/dashboard';
-            this.router.navigate([redirectUrl]);
-          }
+          this.redirectByRoleWithFreshContext(response);
         },
         error: (error) => {
           const err = error?.error || {};
@@ -140,6 +142,9 @@ export class SignInComponent implements OnInit {
    * Initialize Google Identity Services
    */
   private initializeGoogleSignIn(): void {
+    if (!environment.googleClientId?.trim()) {
+      return;
+    }
     console.log('[Google Sign-In] Initializing...');
     console.log('[Google Sign-In] Google API available:', typeof google !== 'undefined');
     console.log('[Google Sign-In] Client ID:', environment.googleClientId);
@@ -178,16 +183,10 @@ export class SignInComponent implements OnInit {
   private setupGoogleButton(): void {
     try {
       console.log('[Google Sign-In] Setting up button...');
-      
-      google.accounts.id.initialize({
-        client_id: environment.googleClientId,
-        callback: (response: any) => {
-          console.log('[Google Sign-In] Callback received:', response ? 'Success' : 'Failed');
-          this.handleGoogleSignIn(response);
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
+
+      if (!ensureGoogleIdentityServicesInitialized(environment.googleClientId)) {
+        return;
+      }
 
       // Try One Tap first (better UX)
       console.log('[Google Sign-In] Attempting One Tap...');
@@ -222,22 +221,15 @@ export class SignInComponent implements OnInit {
    */
   renderGoogleButton(): void {
     const buttonContainer = document.getElementById('googleSignInButton');
-    if (buttonContainer && !buttonContainer.hasChildNodes()) {
-      console.log('[Google Sign-In] Rendering button in container...');
-      try {
-        google.accounts.id.renderButton(buttonContainer, {
-          theme: 'outline',
-          size: 'large',
-          text: 'signin_with',
-          width: '100%',
-          type: 'standard'
-        });
-        console.log('[Google Sign-In] Button rendered successfully');
-      } catch (error) {
-        console.error('[Google Sign-In] Error rendering button:', error);
-      }
+    if (!buttonContainer) {
+      console.warn('[Google Sign-In] Button container not found');
+      return;
+    }
+    console.log('[Google Sign-In] Rendering button in container...');
+    if (renderGoogleSignInButton(buttonContainer)) {
+      console.log('[Google Sign-In] Button rendered successfully');
     } else {
-      console.warn('[Google Sign-In] Button container not found or already has content');
+      console.error('[Google Sign-In] Error rendering button');
     }
   }
 
@@ -289,29 +281,32 @@ export class SignInComponent implements OnInit {
    * Handle successful authentication
    */
   private handleSuccessfulAuth(authResponse: any): void {
-    console.log('[Google Sign-In] Handling successful auth, checking role...');
-    console.log('[Google Sign-In] Auth response data:', authResponse);
-    
-    // Check user role and redirect accordingly
-    const user = authResponse.user;
-    const userRole = user?.current_tenant_context?.role?.toLowerCase();
-    const isCustomer = !userRole || userRole === 'customer'; // Default to customer if no role
-    
-    console.log('[Google Sign-In] User role check:', {
-      isCustomer,
-      role: user?.current_tenant_context?.role
+    this.redirectByRoleWithFreshContext(authResponse);
+  }
+
+  private redirectByRoleWithFreshContext(response: any): void {
+    if (response?.must_change) {
+      this.router.navigate(['/auth/change-password']);
+      return;
+    }
+
+    this.userService.getCurrentUser().subscribe({
+      next: (user) => this.redirectByRole(user?.current_tenant_context?.role),
+      error: () => this.redirectByRole(response?.user?.current_tenant_context?.role)
     });
-    
-    if (isCustomer) {
-      // Customers go to home page
-      console.log('[Google Sign-In] User is customer, redirecting to home page');
-      this.router.navigate(['/']);
-    } else {
-      // Admins go to admin dashboard
-      console.log('[Google Sign-In] User is admin, redirecting to admin dashboard');
+  }
+
+  private redirectByRole(role: string | undefined): void {
+    const normalizedRole = (role || '').toLowerCase();
+    const isAdminUser = normalizedRole !== '' && normalizedRole !== 'customer';
+
+    if (isAdminUser) {
       const redirectUrl = this.activatedRoute.snapshot.queryParams['redirectUrl'] || '/admin/dashboard';
       this.router.navigate([redirectUrl]);
+      return;
     }
+
+    this.router.navigate(['/']);
   }
 
   /**

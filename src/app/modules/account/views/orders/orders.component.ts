@@ -1,14 +1,16 @@
 import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { OrderService } from '../../../../modules/admin/orders/shared/order.service';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule, MatTabsModule, MatFormFieldModule, MatInputModule],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,6 +30,11 @@ export class OrdersComponent implements OnInit, OnDestroy {
     { id: 'concluido', label: 'Concluído' },
     { id: 'cancelado', label: 'Cancelado' }
   ];
+
+  get activeTabIndex(): number {
+    const idx = this.tabs.findIndex(tab => tab.id === this.activeTab);
+    return idx >= 0 ? idx : 0;
+  }
 
   private _unsubscribeAll = new Subject<void>();
 
@@ -69,6 +76,13 @@ export class OrdersComponent implements OnInit, OnDestroy {
   setActiveTab(tabId: string): void {
     this.activeTab = tabId;
     this.filterOrders();
+  }
+
+  setActiveTabByIndex(index: number): void {
+    const tab = this.tabs[index];
+    if (tab) {
+      this.setActiveTab(tab.id);
+    }
   }
 
   filterOrders(): void {

@@ -35,7 +35,7 @@ export class InstagramService {
   private readonly oEmbedUrl = 'https://api.instagram.com/oembed';
 
   // List of Instagram Reel URLs to display
-  // Replace these with your actual Instagram Reel URLs from 'amazing_brindes' account
+  // Replace these with your actual Instagram Reel URLs from the Construvasco account
   private readonly reelUrls: string[] = [
     // Example format: 'https://www.instagram.com/reel/ABC123xyz/'
     // Add your actual reel URLs here

@@ -1,13 +1,17 @@
 <div class="account-sidebar h-full flex flex-col">
   <!-- User Profile Section -->
-  <div class="p-6 border-b border-gray-200">
+  <div class="p-4 border-b border-gray-200">
     <div class="flex flex-col items-center text-center">
-      <app-profile-photo [size]="120" [user]="user"></app-profile-photo>
-      <h2 class="mt-4 text-xl font-bold text-gray-900">{{ user?.name || 'Usuário' }}</h2>
-      <p class="mt-1 text-sm text-gray-500">{{ user?.email || user?.identifier || '' }}</p>
+      <app-profile-photo [size]="88" [user]="user"></app-profile-photo>
+      <h2 class="mt-2 mb-0 text-base font-bold leading-[1.1] text-slate-900 max-w-[190px] truncate" [attr.title]="user?.name || 'Usuário'">
+        {{ user?.name || 'Usuário' }}
+      </h2>
+      <p class="mt-0.5 mb-0 text-[11px] leading-[1.1] text-slate-500 truncate max-w-[190px]" [attr.title]="user?.email || user?.identifier || ''">
+        {{ user?.email || user?.identifier || '' }}
+      </p>
       <button
         (click)="navigateToEditProfile()"
-        class="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors">
+        class="mt-2 px-3 py-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors">
         Editar Perfil
       </button>
     </div>

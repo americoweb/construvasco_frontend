@@ -13,8 +13,6 @@ import {
   LoginCredentials, 
   RegisterData, 
   AuthResponse, 
-  ForgotPasswordRequest, 
-  ResetPasswordRequest,
   ChangePasswordRequest,
   RefreshTokenResponse,
   TokenPayload 
@@ -170,37 +168,6 @@ export class AuthService {
       catchError(error => {
         this.logger.error('Token refresh failed', error);
         this.signOut();
-        return throwError(() => error);
-      })
-    );
-  }
-
-  // Password management
-  forgotPassword(request: ForgotPasswordRequest): Observable<any> {
-    return this.httpClient.post(
-      this.configService.getApiUrl('auth/reset-password'), 
-      request
-    ).pipe(
-      tap(() => {
-        this.notificationService.success('Password reset instructions sent!');
-      }),
-      catchError(error => {
-        this.logger.error('Forgot password failed', error);
-        return throwError(() => error);
-      })
-    );
-  }
-
-  resetPassword(request: ResetPasswordRequest): Observable<any> {
-    return this.httpClient.post(
-      this.configService.getApiUrl('auth/reset-password'), 
-      request
-    ).pipe(
-      tap(() => {
-        this.notificationService.success('Password reset successful! Please sign in.');
-      }),
-      catchError(error => {
-        this.logger.error('Reset password failed', error);
         return throwError(() => error);
       })
     );

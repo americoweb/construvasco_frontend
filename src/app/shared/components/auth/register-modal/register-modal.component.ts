@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, NgForm, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize, delay } from 'rxjs/operators';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, take, takeUntil } from 'rxjs';
 
 // Angular Material
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,10 +16,17 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 // Services
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { UserService } from '../../../../core/auth/services/user.service';
 
 // Models
 import { RegisterData } from '../../../../core/auth/models/auth.types';
 import { environment } from '../../../../../environments/environment';
+import {
+  ensureGoogleIdentityServicesInitialized,
+  registerGoogleCredentialHandler,
+  renderGoogleSignInButton,
+  unregisterGoogleCredentialHandler,
+} from '../../../../core/auth/google-identity-services';
 
 declare var google: any;
 
@@ -53,20 +60,26 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
   showError = false;
 
   private _unsubscribeAll = new Subject<void>();
+  private readonly onGoogleCredential = (response: { credential?: string }) => {
+    this.handleGoogleSignUp(response);
+  };
 
   constructor(
     private formBuilder: FormBuilder,
     private authService: AuthService,
     private notificationService: NotificationService,
+    private userService: UserService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.createForm();
+    registerGoogleCredentialHandler(this.onGoogleCredential);
     this.initializeGoogleSignIn();
   }
 
   ngOnDestroy(): void {
+    unregisterGoogleCredentialHandler(this.onGoogleCredential);
     this._unsubscribeAll.next();
     this._unsubscribeAll.complete();
   }
@@ -123,22 +136,23 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (response) => {
           this.notificationService.success(`Bem-vindo, ${response.user.name}!`);
-          this.closeModal();
-          
-          // Auto-login after registration
-          const user = response.user;
-          const userRole = user?.current_tenant_context?.role?.toLowerCase();
-          const isCustomer = !userRole || userRole === 'customer';
-          
-          if (isCustomer) {
-            this.router.navigate(['/conta/dashboard']);
-          } else {
-            this.router.navigate(['/admin/dashboard']);
-          }
+          this.redirectByRoleWithFreshContext(response);
         },
         error: (error) => {
-          const err = error?.error || {};
-          this.errorMessage = err.message || 'Erro ao criar conta. Por favor, tente novamente.';
+          const body = error?.error;
+          const err = (typeof body === 'object' && body !== null ? body : {}) as {
+            message_pt?: string;
+            message?: string;
+            errors?: { identifier?: string[]; email?: string[]; name?: string[] };
+          };
+          this.errorMessage =
+            err.message_pt ||
+            err.message ||
+            err.errors?.identifier?.[0] ||
+            err.errors?.email?.[0] ||
+            err.errors?.name?.[0] ||
+            (typeof body === 'string' ? body : null) ||
+            'Erro ao criar conta. Por favor, tente novamente.';
           this.showError = true;
         }
       });
@@ -193,6 +207,9 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
    * Initialize Google Identity Services
    */
   private initializeGoogleSignIn(): void {
+    if (!environment.googleClientId?.trim()) {
+      return;
+    }
     if (typeof google !== 'undefined' && google.accounts) {
       this.setupGoogleButton();
     } else {
@@ -218,15 +235,10 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
    */
   private setupGoogleButton(): void {
     try {
-      google.accounts.id.initialize({
-        client_id: environment.googleClientId,
-        callback: (response: any) => {
-          this.handleGoogleSignUp(response);
-        },
-        auto_select: false,
-        cancel_on_tap_outside: true
-      });
-
+      const ok = ensureGoogleIdentityServicesInitialized(environment.googleClientId);
+      if (!ok) {
+        return;
+      }
       setTimeout(() => {
         this.renderGoogleButton();
       }, 300);
@@ -240,18 +252,11 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
    */
   renderGoogleButton(): void {
     const buttonContainer = document.getElementById('googleSignUpButtonModal');
-    if (buttonContainer && !buttonContainer.hasChildNodes()) {
-      try {
-        google.accounts.id.renderButton(buttonContainer, {
-          theme: 'outline',
-          size: 'large',
-          text: 'signup_with',
-          width: '100%',
-          type: 'standard'
-        });
-      } catch (error) {
-        console.error('[Google Sign-Up] Error rendering button:', error);
-      }
+    if (!buttonContainer) {
+      return;
+    }
+    if (!renderGoogleSignInButton(buttonContainer, { text: 'signup_with' })) {
+      console.error('[Google Sign-Up] Error rendering button');
     }
   }
 
@@ -273,17 +278,7 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (authResponse) => {
             this.notificationService.success(`Bem-vindo, ${authResponse.user.name}!`);
-            this.closeModal();
-            
-            const user = authResponse.user;
-            const userRole = user?.current_tenant_context?.role?.toLowerCase();
-            const isCustomer = !userRole || userRole === 'customer';
-            
-            if (isCustomer) {
-              this.router.navigate(['/conta/dashboard']);
-            } else {
-              this.router.navigate(['/admin/dashboard']);
-            }
+            this.redirectByRoleWithFreshContext(authResponse);
           },
           error: (error) => {
             this.errorMessage = error?.error?.message || 'Erro ao criar conta com Google. Por favor, tente novamente.';
@@ -291,6 +286,28 @@ export class RegisterModalComponent implements OnInit, OnDestroy {
           }
         });
     }
+  }
+
+  private redirectByRoleWithFreshContext(response: any): void {
+    this.userService.getCurrentUser()
+      .pipe(take(1))
+      .subscribe({
+        next: (user) => this.redirectByRole(user?.current_tenant_context?.role),
+        error: () => this.redirectByRole(response?.user?.current_tenant_context?.role)
+      });
+  }
+
+  private redirectByRole(role: string | undefined): void {
+    const normalizedRole = (role || '').toLowerCase();
+    const isAdminUser = normalizedRole !== '' && normalizedRole !== 'customer';
+    this.closeModal();
+
+    if (isAdminUser) {
+      this.router.navigate(['/admin/dashboard']);
+      return;
+    }
+
+    this.router.navigate(['/conta/dashboard']);
   }
 }
 

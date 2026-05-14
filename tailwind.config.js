@@ -12,7 +12,8 @@ const generatePalette = require(
  * Tailwind-like color palettes automatically
  */
 const customPalettes = {
-    brand: generatePalette('#2196F3'),
+    brand: generatePalette('#0F172A'),
+    secondary: generatePalette('#B68D40'),
 };
 
 /**
@@ -22,12 +23,25 @@ const themes = {
     // Default theme is required for theming system to work correctly!
     default: {
         primary: {
-            ...colors.indigo,
-            DEFAULT: colors.indigo[600],
+            50: '#F8FAFC',
+            100: '#E2E8F0',
+            200: '#CBD5E1',
+            300: '#94A3B8',
+            400: '#64748B',
+            500: '#475569',
+            600: '#334155',
+            700: '#1E293B',
+            800: '#0F172A',
+            900: '#0B1220',
+            DEFAULT: '#1E293B',
         },
         accent: {
-            ...colors.slate,
-            DEFAULT: colors.slate[800],
+            ...colors.teal,
+            DEFAULT: '#0EA5A4',
+        },
+        secondary: {
+            ...customPalettes.secondary,
+            DEFAULT: '#B68D40',
         },
         warn: {
             ...colors.red,
@@ -41,6 +55,14 @@ const themes = {
     // theme and will extend it with their given configuration.
     brand: {
         primary: customPalettes.brand,
+        accent: {
+            ...colors.teal,
+            DEFAULT: '#0EA5A4',
+        },
+        secondary: {
+            ...customPalettes.secondary,
+            DEFAULT: '#B68D40',
+        },
     },
     teal: {
         primary: {
@@ -72,20 +94,28 @@ const config = {
     theme: {
         fontSize: {
             xs: '0.625rem',
-            sm: '0.75rem',
-            md: '0.8125rem',
-            base: '0.875rem',
-            lg: '1rem',
-            xl: '1.125rem',
-            '2xl': '1.25rem',
-            '3xl': '1.5rem',
-            '4xl': '2rem',
+            sm: ['0.875rem', '1.25rem'],
+            md: ['1rem', '1.5rem'],
+            base: ['1rem', '1.5rem'],
+            lg: ['1.125rem', '1.75rem'],
+            xl: ['1.375rem', '1.875rem'],
+            '2xl': ['1.75rem', '2.25rem'],
+            '3xl': ['2.25rem', '2.75rem'],
+            '4xl': ['3rem', '3.5rem'],
             '5xl': '2.25rem',
             '6xl': '2.5rem',
             '7xl': '3rem',
             '8xl': '4rem',
             '9xl': '6rem',
             '10xl': '8rem',
+            h1: ['3rem', { lineHeight: '3.5rem', fontWeight: '700' }],
+            h2: ['2.25rem', { lineHeight: '2.75rem', fontWeight: '700' }],
+            h3: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '600' }],
+            h4: ['1.375rem', { lineHeight: '1.875rem', fontWeight: '600' }],
+            'body-l': ['1.125rem', { lineHeight: '1.75rem', fontWeight: '400' }],
+            body: ['1rem', { lineHeight: '1.5rem', fontWeight: '400' }],
+            small: ['0.875rem', { lineHeight: '1.25rem', fontWeight: '400' }],
+            caption: ['0.75rem', { lineHeight: '1rem', fontWeight: '500' }],
         },
         screens: {
             sm: '600px',
@@ -104,7 +134,7 @@ const config = {
                 0: '0 0 auto',
             },
             fontFamily: {
-                sans: `"Inter var", ${defaultTheme.fontFamily.sans.join(',')}`,
+                sans: `"Montserrat", "Inter", "IBM Plex Sans", ${defaultTheme.fontFamily.sans.join(',')}`,
                 mono: `"IBM Plex Mono", ${defaultTheme.fontFamily.mono.join(',')}`,
             },
             opacity: {

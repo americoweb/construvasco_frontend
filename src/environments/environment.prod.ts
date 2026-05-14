@@ -4,9 +4,9 @@ import { AppConfig } from '../app/core/models/app-config.interface';
 export const environment: AppConfig = {
   production: true,
   apiURL: {
-    root: 'https://api.amazing.co.mz/api',
-    auth: 'https://api.amazing.co.mz/api',
-    uploads: 'https://api.amazing.co.mz/uploads'
+    root: 'https://api.construvasco.co.mz/api',
+    auth: 'https://api.construvasco.co.mz/api',
+    uploads: 'https://api.construvasco.co.mz/uploads'
   },
   features: {
     aiEnabled: true,
@@ -15,9 +15,9 @@ export const environment: AppConfig = {
     multiTenant: true
   },
   app: {
-    name: 'Amazing',
+    name: 'Construvasco',
     version: '1.0.0',
-    description: 'Amazing storefront'
+    description: 'Construvasco website and platform'
   },
   external: {
     sentry: {

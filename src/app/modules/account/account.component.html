@@ -4,12 +4,12 @@
   <!-- Desktop Layout: Sidebar + Content -->
   <div class="hidden md:flex flex-1">
     <!-- Sidebar -->
-    <aside class="w-64 bg-white border-r border-gray-200 min-h-screen sticky top-0">
+    <aside class="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 self-start overflow-hidden">
       <app-account-sidebar></app-account-sidebar>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-8">
+    <main class="flex-1 p-5 lg:p-6">
       <router-outlet (activate)="onRouteActivate($event)" (deactivate)="onRouteDeactivate($event)"></router-outlet>
     </main>
   </div>
@@ -71,6 +71,5 @@
     </nav>
   </div>
   
-  <app-landing-footer></app-landing-footer>
 </div>
 
