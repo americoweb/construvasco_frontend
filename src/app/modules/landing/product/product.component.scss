@@ -19,13 +19,13 @@
   min-height: 100vh;
   background: #ffffff;
   color: var(--pc-text);
-  font-family: 'Montserrat', 'Inter', 'IBM Plex Sans', sans-serif;
+  font-family: 'Inter var', ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .pc-root,
 .pc-root * {
-  font-family: 'Montserrat', 'Inter', 'IBM Plex Sans', sans-serif;
+  font-family: 'Inter var', ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark .pc-root {

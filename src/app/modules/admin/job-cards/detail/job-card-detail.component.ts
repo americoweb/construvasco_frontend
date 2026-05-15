@@ -2,7 +2,7 @@ import {
   Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -14,6 +14,9 @@ import { NotificationService } from '../../../../shared/components/feedback/noti
 import { SecureImagePipe } from '../../../../shared/pipes/secure-image.pipe';
 
 import { JobCardService } from '../shared/job-card.service';
+import { OrderService } from '../../orders/shared/order.service';
+import { Order } from '../../orders/shared/order.types';
+import { OrderDetailPanelComponent } from '../../orders/components/order-detail-panel/order-detail-panel.component';
 import {
   JobCard,
   JobCardFile,
@@ -34,12 +37,14 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     ReactiveFormsModule,
     FormsModule,
     PageHeaderComponent,
     ButtonComponent,
     MatDialogModule,
-    SecureImagePipe
+    SecureImagePipe,
+    OrderDetailPanelComponent,
   ],
   templateUrl: './job-card-detail.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -47,7 +52,7 @@ import {
 export class JobCardDetailComponent implements OnInit, OnDestroy {
   jobCard: JobCard | null = null;
   loading = true;
-  activeTab: 'info' | 'items' | 'files' | 'feedback' | 'design' = 'info';
+  activeTab: 'info' | 'pedido' | 'items' | 'files' | 'feedback' | 'design' = 'info';
 
   statusForm!: FormGroup;
   feedbackForm!: FormGroup;
@@ -151,6 +156,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private service: JobCardService,
+    private orderService: OrderService,
     private fb: FormBuilder,
     private dialog: MatDialog,
     private notification: NotificationService,
@@ -160,11 +166,18 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.buildForms();
 
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      if (!this.jobCard || this.loading) return;
+      this.applyTabFromQuery();
+      this.cdr.markForCheck();
+    });
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.service.getJobCardDetail(id).subscribe({
       next: res => {
-        this.jobCard = res.data ?? null;
+        this.applyJobCardPayload(res.data ?? null);
         this.loading = false;
+        this.applyTabFromQuery();
         this.cdr.markForCheck();
       },
       error: () => {
@@ -178,6 +191,62 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private applyJobCardPayload(payload: JobCard | null): void {
+    if (!payload) {
+      this.jobCard = null;
+      return;
+    }
+    const prevOrder = this.jobCard?.order;
+    const prevOrderId = this.jobCard?.order_id;
+    this.jobCard = {
+      ...payload,
+      order:
+        payload.order ??
+        (payload.order_id != null && payload.order_id === prevOrderId ? prevOrder : undefined),
+    };
+  }
+
+  private applyTabFromQuery(): void {
+    if (!this.jobCard) return;
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    const allowed: Array<typeof this.activeTab> = ['info', 'pedido', 'items', 'design', 'files', 'feedback'];
+    if (!tab || !allowed.includes(tab as typeof this.activeTab)) {
+      this.activeTab = 'info';
+      return;
+    }
+    if (tab === 'pedido' && !this.jobCard.order_id) {
+      this.activeTab = 'info';
+      return;
+    }
+    this.activeTab = tab as typeof this.activeTab;
+    if (tab === 'pedido' && this.jobCard.order_id && !this.jobCard.order) {
+      this.fetchLinkedOrder();
+    }
+  }
+
+  fetchLinkedOrder(): void {
+    if (!this.jobCard?.order_id) return;
+    this.orderService.getOrderWithDetails(this.jobCard.order_id).subscribe({
+      next: (r) => {
+        if (r.data && this.jobCard) {
+          this.jobCard = { ...this.jobCard, order: r.data };
+          this.cdr.markForCheck();
+        }
+      },
+      error: () => {
+        this.notification.show({ type: 'error', message: 'Erro ao carregar pedido ligado', title: 'Erro' });
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  onLinkedOrderUpdated(next: Order): void {
+    if (this.jobCard) {
+      this.jobCard = { ...this.jobCard, order: next };
+      this.cdr.markForCheck();
+    }
   }
 
   private buildForms(): void {
@@ -225,13 +294,29 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
     return this.generatedImageData ?? this.generatedImageUrl;
   }
 
-  setTab(t: 'info' | 'items' | 'files' | 'feedback' | 'design'): void {
+  setTab(raw: string): void {
+    const tabs: Array<'info' | 'pedido' | 'items' | 'files' | 'feedback' | 'design'> = [
+      'info', 'pedido', 'items', 'design', 'files', 'feedback',
+    ];
+    if (!tabs.includes(raw as (typeof tabs)[number])) return;
+    let t = raw as typeof this.activeTab;
+    if (t === 'pedido' && !this.jobCard?.order_id) {
+      t = 'info';
+    }
     this.activeTab = t;
-    // Auto-fill prompt when entering design tab
+    if (t === 'pedido' && this.jobCard?.order_id && !this.jobCard.order) {
+      this.fetchLinkedOrder();
+    }
+    const tabParam = t === 'info' ? null : t;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { tab: tabParam },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
     if (t === 'design' && !this.designPrompt) {
       this.autoFillPrompt();
     }
-    // Load the latest design file into canvas if none active
     if (t === 'design' && !this.currentDesignFile && this.designFiles.length) {
       this.loadDesignVersion(this.designFiles[0]);
     }
@@ -250,7 +335,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
     const { status, notes } = this.statusForm.value;
     this.service.updateStatus(this.jobCard.id, status as JobCardStatus, notes).subscribe({
       next: res => {
-        this.jobCard = res.data ?? this.jobCard;
+        if (res.data) this.applyJobCardPayload(res.data);
         this.showStatusPanel = false;
         this.statusForm.reset({ status: '', notes: '' });
         this.updatingStatus = false;
@@ -306,7 +391,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
 
     this.service.updatePriority(this.jobCard.id, this.priorityForm.value).subscribe({
       next: res => {
-        this.jobCard = res.data ?? this.jobCard;
+        if (res.data) this.applyJobCardPayload(res.data);
         this.showPriorityPanel = false;
         this.updatingPriority = false;
         this.notification.show({ type: 'success', message: 'Prioridade actualizada', title: 'Sucesso' });
@@ -325,7 +410,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
     if (!this.jobCard) return;
     this.service.removeOverride(this.jobCard.id).subscribe({
       next: res => {
-        this.jobCard = res.data ?? this.jobCard;
+        if (res.data) this.applyJobCardPayload(res.data);
         this.notification.show({ type: 'success', message: 'Override removido', title: 'Sucesso' });
         this.cdr.markForCheck();
       }
@@ -350,7 +435,7 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
       if (result?.confirmed && this.jobCard) {
         this.service.cancel(this.jobCard.id).subscribe({
           next: res => {
-            this.jobCard = res.data ?? this.jobCard;
+            if (res.data) this.applyJobCardPayload(res.data);
             this.notification.show({ type: 'success', message: 'Job Card cancelado', title: 'Sucesso' });
             this.cdr.markForCheck();
           }
@@ -380,7 +465,8 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
           if (res.data && this.jobCard) {
             this.jobCard = {
               ...this.jobCard,
-              files: [res.data, ...(this.jobCard.files ?? [])]
+              files: [res.data, ...(this.jobCard.files ?? [])],
+              order: this.jobCard.order,
             };
           }
           this.uploadFile  = null;
@@ -409,7 +495,8 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
         if (this.jobCard) {
           this.jobCard = {
             ...this.jobCard,
-            files: (this.jobCard.files ?? []).filter(f => f.id !== fileId)
+            files: (this.jobCard.files ?? []).filter(f => f.id !== fileId),
+            order: this.jobCard.order,
           };
         }
         this.deletingFileId = null;
@@ -496,7 +583,8 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
         if (this.jobCard && d.file) {
           this.jobCard = {
             ...this.jobCard,
-            files: [d.file, ...(this.jobCard.files ?? [])]
+            files: [d.file, ...(this.jobCard.files ?? [])],
+            order: this.jobCard.order,
           };
         }
 
@@ -662,7 +750,8 @@ export class JobCardDetailComponent implements OnInit, OnDestroy {
         if (res.data && this.jobCard) {
           this.jobCard = {
             ...this.jobCard,
-            files: [res.data, ...(this.jobCard.files ?? [])]
+            files: [res.data, ...(this.jobCard.files ?? [])],
+            order: this.jobCard.order,
           };
           // Auto-load on canvas if it's an image
           if (res.data.mime_type?.startsWith('image/')) {

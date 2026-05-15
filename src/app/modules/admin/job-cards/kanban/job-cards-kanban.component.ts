@@ -6,9 +6,14 @@ import { Router } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { Subject, takeUntil } from 'rxjs';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
 
 import { PageHeaderComponent } from '../../../../shared/components/layout/page-header/page-header.component';
-import { ButtonComponent } from '../../../../shared/components/ui/button/button.component';
 import { NotificationService } from '../../../../shared/components/feedback/notification.service';
 
 import { JobCardService } from '../shared/job-card.service';
@@ -39,10 +44,16 @@ interface KanbanColumn {
     CommonModule,
     DragDropModule,
     PageHeaderComponent,
-    ButtonComponent,
-    MatDialogModule
+    MatDialogModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatDividerModule,
+    MatTooltipModule,
+    MatChipsModule,
   ],
   templateUrl: './job-cards-kanban.component.html',
+  styleUrls: ['./job-cards-kanban.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class JobCardsKanbanComponent implements OnInit, OnDestroy {
@@ -58,13 +69,13 @@ export class JobCardsKanbanComponent implements OnInit, OnDestroy {
 
   pageHeaderActions = [
     {
-      label: 'Vista Lista',
+      label: 'Vista lista',
       icon: 'list',
       variant: 'secondary' as const,
       callback: () => this.router.navigate(['/admin/job-cards/list'])
     },
     {
-      label: 'Novo Job Card',
+      label: 'Nova ficha',
       icon: 'add',
       variant: 'primary' as const,
       callback: () => this.router.navigate(['/admin/job-cards/create'])

@@ -3,12 +3,15 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { MatDialogModule } from '@angular/material/dialog';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 
 import { PageHeaderComponent } from '../../../../shared/components/layout/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/ui/button/button.component';
-import { ModalComponent } from '../../../../shared/components/feedback/modal/modal.component';
 import { NotificationService } from '../../../../shared/components/feedback/notification.service';
 import { ConfigService } from '../../../../core/services/config.service';
 import { API_ENDPOINTS } from '../../../../shared/constants/api-endpoints';
@@ -37,8 +40,10 @@ interface ItemMeta {
     RouterLink,
     PageHeaderComponent,
     ButtonComponent,
-    ModalComponent,
-    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
   ],
   templateUrl: './job-card-create.component.html',
   styleUrls: ['./job-card-create.component.scss'],

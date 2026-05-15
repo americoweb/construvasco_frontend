@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             order.status === 'pending'
           ).length;
           
-          // TODO: Load saved designs and addresses count from API when available
+          // TODO: contagem de projectos/documentos e endereços quando API existir
           // For now, set to 0
           this.stats.savedDesigns = 0;
           this.stats.addresses = 0;

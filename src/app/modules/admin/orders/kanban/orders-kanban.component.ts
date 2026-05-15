@@ -190,16 +190,22 @@ export class OrdersKanbanComponent implements OnInit, OnDestroy {
 
   canTransitionTo(currentStatus: OrderStatus, newStatus: OrderStatus): boolean {
     // Basic validation - can be enhanced with backend validation
-    const validTransitions: Record<OrderStatus, OrderStatus[]> = {
-      [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+    const validTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
+      [OrderStatus.PENDING]: [OrderStatus.TRIAGED, OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+      [OrderStatus.TRIAGED]: [OrderStatus.ASSIGNED, OrderStatus.CANCELLED],
+      [OrderStatus.ASSIGNED]: [OrderStatus.IN_DESIGN, OrderStatus.CANCELLED],
+      [OrderStatus.IN_DESIGN]: [OrderStatus.AWAITING_CLIENT, OrderStatus.CANCELLED],
+      [OrderStatus.AWAITING_CLIENT]: [OrderStatus.IN_DESIGN, OrderStatus.APPROVED, OrderStatus.CANCELLED],
+      [OrderStatus.APPROVED]: [OrderStatus.IN_EXECUTION, OrderStatus.CANCELLED],
+      [OrderStatus.IN_EXECUTION]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
       [OrderStatus.CONFIRMED]: [OrderStatus.IN_PRODUCTION, OrderStatus.CANCELLED],
       [OrderStatus.IN_PRODUCTION]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
-      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
       [OrderStatus.DELIVERED]: [],
-      [OrderStatus.CANCELLED]: []
+      [OrderStatus.CANCELLED]: [],
     };
 
-    return validTransitions[currentStatus]?.includes(newStatus) || false;
+    return validTransitions[currentStatus]?.includes(newStatus) ?? false;
   }
 
   getStatusFromContainer(containerId: string): OrderStatus {
@@ -297,13 +303,19 @@ export class OrdersKanbanComponent implements OnInit, OnDestroy {
   }
 
   getStatusColor(status: OrderStatus): string {
-    const colors: Record<OrderStatus, string> = {
+    const colors: Partial<Record<OrderStatus, string>> = {
       [OrderStatus.PENDING]: 'yellow',
+      [OrderStatus.TRIAGED]: 'blue',
+      [OrderStatus.ASSIGNED]: 'indigo',
+      [OrderStatus.IN_DESIGN]: 'purple',
+      [OrderStatus.AWAITING_CLIENT]: 'orange',
+      [OrderStatus.APPROVED]: 'teal',
+      [OrderStatus.IN_EXECUTION]: 'cyan',
       [OrderStatus.CONFIRMED]: 'blue',
       [OrderStatus.IN_PRODUCTION]: 'orange',
       [OrderStatus.SHIPPED]: 'purple',
       [OrderStatus.DELIVERED]: 'green',
-      [OrderStatus.CANCELLED]: 'red'
+      [OrderStatus.CANCELLED]: 'red',
     };
     return colors[status] || 'gray';
   }

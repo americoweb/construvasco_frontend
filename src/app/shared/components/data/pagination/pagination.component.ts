@@ -1,101 +1,58 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { FormsModule } from '@angular/forms';
+import { MatPaginatorModule, PageEvent, MatPaginatorIntl } from '@angular/material/paginator';
+import { PaginationInfo } from '../../../../core/models/api.types';
+import { AppMatPaginatorIntl } from './app-mat-paginator-intl';
 
-export interface PaginationInfo {
-  current_page: number;
-  per_page: number;
-  total: number;
-  last_page: number;
-  from?: number;
-  to?: number;
-}
+export type { PaginationInfo };
 
 @Component({
   selector: 'app-pagination',
   standalone: true,
-  imports: [
-    CommonModule,
-    MatIconModule,
-    MatButtonModule,
-    MatSelectModule,
-    FormsModule
-  ],
+  imports: [CommonModule, MatPaginatorModule],
+  providers: [{ provide: MatPaginatorIntl, useClass: AppMatPaginatorIntl }],
   templateUrl: './pagination.component.html',
   styleUrls: ['./pagination.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaginationComponent {
   @Input() pagination: PaginationInfo = {
     current_page: 1,
     per_page: 10,
     total: 0,
-    last_page: 1
+    last_page: 1,
   };
-  @Input() pageSizeOptions = [10, 25, 50, 100];
+  @Input() pageSizeOptions: number[] = [10, 25, 50, 100];
   @Input() showPageSize = true;
+  /** Mantido por compatibilidade; o MatPaginator mostra sempre o intervalo. */
   @Input() showInfo = true;
+  /** Já não usado (paginação é a do Material). */
   @Input() maxVisiblePages = 5;
 
   @Output() pageChange = new EventEmitter<number>();
   @Output() pageSizeChange = new EventEmitter<number>();
 
-  get visiblePages(): number[] {
-    const pages: number[] = [];
-    const start = Math.max(1, this.pagination.current_page - Math.floor(this.maxVisiblePages / 2));
-    const end = Math.min(this.pagination.last_page, start + this.maxVisiblePages - 1);
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i);
+  /** pageIndex 0-based, coerente com total e last_page da API. */
+  get safePageIndex(): number {
+    const total = this.pagination.total ?? 0;
+    if (total <= 0) {
+      return 0;
     }
-    
-    return pages;
+    const lastPage = Math.max(1, this.pagination.last_page || 1);
+    const maxIndex = lastPage - 1;
+    const idx = (this.pagination.current_page ?? 1) - 1;
+    return Math.max(0, Math.min(idx, maxIndex));
   }
 
-  get showEllipsisBefore(): boolean {
-    return this.visiblePages[0] > 1;
-  }
-
-  get showEllipsisAfter(): boolean {
-    return this.visiblePages[this.visiblePages.length - 1] < this.pagination.last_page;
-  }
-
-  get startItem(): number {
-    return this.pagination.from || ((this.pagination.current_page - 1) * this.pagination.per_page + 1);
-  }
-
-  get endItem(): number {
-    return this.pagination.to || Math.min(this.pagination.current_page * this.pagination.per_page, this.pagination.total);
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.pagination.last_page && page !== this.pagination.current_page) {
-      this.pageChange.emit(page);
+  onMatPage(event: PageEvent): void {
+    const sizeChanged = event.pageSize !== this.pagination.per_page;
+    if (sizeChanged) {
+      this.pageSizeChange.emit(event.pageSize);
+      return;
     }
-  }
-
-  goToFirstPage(): void {
-    this.goToPage(1);
-  }
-
-  goToLastPage(): void {
-    this.goToPage(this.pagination.last_page);
-  }
-
-  goToPreviousPage(): void {
-    this.goToPage(this.pagination.current_page - 1);
-  }
-
-  goToNextPage(): void {
-    this.goToPage(this.pagination.current_page + 1);
-  }
-
-  onPageSizeChange(newSize: number): void {
-    if (newSize !== this.pagination.per_page) {
-      this.pageSizeChange.emit(newSize);
+    const newPage = event.pageIndex + 1;
+    if (newPage !== this.pagination.current_page) {
+      this.pageChange.emit(newPage);
     }
   }
 }

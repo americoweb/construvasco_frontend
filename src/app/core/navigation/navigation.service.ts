@@ -47,6 +47,7 @@ export class NavigationService {
                 if (userRole === 'receptionist') {
                     baseDefault = receptionistNavigation;
                 } else if (userRole === 'designer') {
+                    // API role "designer" = operação técnica (MAPA); menu sem módulo de gráfica até o SRS formalizar "técnico".
                     baseDefault = designerNavigation;
                 } else if (!userRole || userRole === 'admin') {
                     // Make admin the default fallback for non-customer roles

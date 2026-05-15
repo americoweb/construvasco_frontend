@@ -3,11 +3,13 @@
   <app-loading *ngIf="loading" type="skeleton" [rows]="5"></app-loading>
 
   <!-- Table -->
-  <div *ngIf="!loading && data.length > 0" class="overflow-x-auto">
-    <table mat-table [dataSource]="dataSource" matSort 
-           (matSortChange)="onSortChange($event)"
-           class="w-full">
-
+  <div *ngIf="!loading && data.length > 0" class="data-table-scroll">
+    <table
+      mat-table
+      [dataSource]="dataSource"
+      matSort
+      (matSortChange)="onSortChange($event)"
+      class="w-full">
       <!-- Selection Column -->
       <ng-container matColumnDef="select" *ngIf="selectable">
         <th mat-header-cell *matHeaderCellDef class="w-12">
@@ -27,19 +29,21 @@
       </ng-container>
 
       <!-- Dynamic Columns -->
-      <ng-container *ngFor="let column of columns; trackBy: trackByIndex" 
-                    [matColumnDef]="column.key">
-        <th mat-header-cell *matHeaderCellDef 
-            [mat-sort-header]="column.sortable ? column.key : null"
-            [style.width]="column.width"
-            [class.sticky]="column.sticky">
+      <ng-container *ngFor="let column of columns; trackBy: trackByIndex" [matColumnDef]="column.key">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          [mat-sort-header]="column.sortable ? column.key : null"
+          [style.width]="column.width"
+          [class.sticky]="column.sticky">
           {{ column.label }}
         </th>
-        <td mat-cell *matCellDef="let element" 
-            [style.width]="column.width"
-            [ngClass]="column.cellClass"
-            [class.sticky]="column.sticky">
-          
+        <td
+          mat-cell
+          *matCellDef="let element"
+          [style.width]="column.width"
+          [ngClass]="column.cellClass"
+          [class.sticky]="column.sticky">
           <!-- Text Type -->
           <span *ngIf="!column.type || column.type === 'text'">
             {{ getCellValue(element, column) }}
@@ -47,42 +51,42 @@
 
           <!-- Date Type -->
           <span *ngIf="column.type === 'date'">
-            {{ getCellValue(element, column) | date:'MMM dd, yyyy' }}
+            {{ getCellValue(element, column) | date : 'dd/MM/yyyy' : undefined : 'pt' }}
           </span>
 
           <!-- Badge Type -->
-          <span *ngIf="column.type === 'badge'" 
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                [ngClass]="getBadgeClass(getCellValue(element, column), element)">
+          <span *ngIf="column.type === 'badge'" class="app-badge" [ngClass]="getBadgeClass(getCellValue(element, column), element)">
             {{ getCellValue(element, column) }}
           </span>
 
           <!-- Avatar Type -->
           <div *ngIf="column.type === 'avatar'" class="flex items-center">
-            <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mr-3">
-              <span class="text-sm font-medium text-gray-600">
-                {{ getInitials(getCellValue(element, column)) }}
-              </span>
+            <div class="app-avatar">
+              <span>{{ getInitials(getCellValue(element, column)) }}</span>
             </div>
             <span>{{ getCellValue(element, column) }}</span>
           </div>
 
           <!-- Color Type -->
           <div *ngIf="column.type === 'color'" class="flex items-center gap-2">
-            <div class="w-6 h-6 rounded border border-gray-300 flex-shrink-0" 
-                 [style.background-color]="getCellValue(element, column) || '#FFFFFF'">
+            <div
+              class="w-6 h-6 rounded border flex-shrink-0"
+              style="border-color: var(--app-border)"
+              [style.background-color]="getCellValue(element, column) || '#FFFFFF'">
             </div>
             <span class="text-sm">{{ getCellValue(element, column) || '-' }}</span>
           </div>
 
           <!-- Image/Thumbnail Type -->
           <div *ngIf="column.type === 'image'" class="flex items-center">
-            <img *ngIf="getCellValue(element, column)" 
-                 [src]="getCellValue(element, column)" 
-                 [alt]="element.name || 'Image'"
-                 class="w-12 h-12 object-cover rounded border border-gray-200"
-                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect width=\'48\' height=\'48\' fill=\'%23f3f4f6\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-size=\'20\'%3ENo Image%3C/text%3E%3C/svg%3E'">
-            <span *ngIf="!getCellValue(element, column)" class="text-sm text-gray-400">-</span>
+            <img
+              *ngIf="getCellValue(element, column)"
+              [src]="getCellValue(element, column)"
+              [alt]="element.name || 'Image'"
+              class="w-12 h-12 object-cover rounded border"
+              style="border-color: var(--app-border)"
+              onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'48\' height=\'48\'%3E%3Crect width=\'48\' height=\'48\' fill=\'%23f3f4f6\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-size=\'20\'%3ENo Image%3C/text%3E%3C/svg%3E'" />
+            <span *ngIf="!getCellValue(element, column)" class="text-sm" style="color: var(--app-muted-foreground)">-</span>
           </div>
 
           <!-- Custom Type -->
@@ -94,17 +98,17 @@
 
       <!-- Actions Column -->
       <ng-container matColumnDef="actions" *ngIf="actions.length > 0">
-        <th mat-header-cell *matHeaderCellDef class="w-20">Actions</th>
+        <th mat-header-cell *matHeaderCellDef class="w-20 actions-header">Acções</th>
         <td mat-cell *matCellDef="let element" class="w-20">
-          <button mat-icon-button [matMenuTriggerFor]="actionsMenu"
-                  (click)="$event.stopPropagation()">
+          <button mat-icon-button [matMenuTriggerFor]="actionsMenu" (click)="$event.stopPropagation()">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #actionsMenu="matMenu">
-            <button *ngFor="let action of actions"
-                    mat-menu-item
-                    [disabled]="!shouldShowAction(action, element)"
-                    (click)="executeAction(action, element, $event)">
+            <button
+              *ngFor="let action of actions"
+              mat-menu-item
+              [disabled]="!shouldShowAction(action, element)"
+              (click)="executeAction(action, element, $event)">
               <mat-icon *ngIf="action.icon" [color]="action.color">{{ action.icon }}</mat-icon>
               <span>{{ action.label }}</span>
             </button>
@@ -112,18 +116,15 @@
         </td>
       </ng-container>
 
-      <!-- Header and Row Definitions -->
       <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"
-          class="hover:bg-gray-50 cursor-pointer transition-colors"
-          (click)="onRowClick(row)"></tr>
+      <tr
+        mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="data-table-row-clickable"
+        (click)="onRowClick(row)"></tr>
     </table>
   </div>
 
-  <!-- Empty State -->
-  <app-empty-state 
-    *ngIf="!loading && data.length === 0"
-    [title]="emptyMessage"
-    [icon]="emptyIcon">
+  <app-empty-state *ngIf="!loading && data.length === 0" [title]="emptyMessage" [icon]="emptyIcon">
   </app-empty-state>
 </div>

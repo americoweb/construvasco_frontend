@@ -12,7 +12,6 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { OrderService } from '../shared/order.service';
 import { Order, OrderStatus, PaymentStatus } from '../shared/order.types';
 import { PaginationInfo } from '../../../../core/models/api.types';
-import { ButtonComponent } from '../../../../shared/components/ui/button/button.component';
 
 @Component({
   selector: 'app-orders-list',
@@ -23,8 +22,7 @@ import { ButtonComponent } from '../../../../shared/components/ui/button/button.
     DataTableComponent,
     DataFiltersComponent,
     PaginationComponent,
-    MatDialogModule,
-    ButtonComponent
+    MatDialogModule
   ],
   templateUrl: './orders-list.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -58,7 +56,7 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     },
     { key: 'formatted_total', label: 'Total', sortable: false, format: (value: string) => value || '-' },
     { key: 'total_items', label: 'Itens', sortable: true },
-    { key: 'created_at', label: 'Data', sortable: true, format: (value: string) => this.formatDate(value) }
+    { key: 'created_at', label: 'Data', type: 'date', sortable: true }
   ];
 
   actions: TableAction[] = [
@@ -267,27 +265,21 @@ export class OrdersListComponent implements OnInit, OnDestroy {
   }
 
   getStatusLabel(status: OrderStatus): string {
-    const labels: Record<OrderStatus, string> = {
+    const labels: Partial<Record<OrderStatus, string>> = {
       [OrderStatus.PENDING]: 'Pendente',
+      [OrderStatus.TRIAGED]: 'Triado',
+      [OrderStatus.ASSIGNED]: 'Atribuído',
+      [OrderStatus.IN_DESIGN]: 'Em Projeto',
+      [OrderStatus.AWAITING_CLIENT]: 'Aguardando Cliente',
+      [OrderStatus.APPROVED]: 'Aprovado',
+      [OrderStatus.IN_EXECUTION]: 'Em Execução',
       [OrderStatus.CONFIRMED]: 'Confirmado',
       [OrderStatus.IN_PRODUCTION]: 'Em Produção',
       [OrderStatus.SHIPPED]: 'Enviado',
       [OrderStatus.DELIVERED]: 'Entregue',
-      [OrderStatus.CANCELLED]: 'Cancelado'
+      [OrderStatus.CANCELLED]: 'Cancelado',
     };
     return labels[status] || status;
-  }
-
-  getStatusColor(status: OrderStatus): string {
-    const colors: Record<OrderStatus, string> = {
-      [OrderStatus.PENDING]: 'yellow',
-      [OrderStatus.CONFIRMED]: 'blue',
-      [OrderStatus.IN_PRODUCTION]: 'orange',
-      [OrderStatus.SHIPPED]: 'purple',
-      [OrderStatus.DELIVERED]: 'green',
-      [OrderStatus.CANCELLED]: 'red'
-    };
-    return colors[status] || 'gray';
   }
 
   getPaymentStatusLabel(status: PaymentStatus): string {
@@ -300,24 +292,5 @@ export class OrdersListComponent implements OnInit, OnDestroy {
     return labels[status] || status;
   }
 
-  getPaymentStatusColor(status: PaymentStatus): string {
-    const colors: Record<PaymentStatus, string> = {
-      [PaymentStatus.PENDING]: 'yellow',
-      [PaymentStatus.PAID]: 'green',
-      [PaymentStatus.FAILED]: 'red',
-      [PaymentStatus.REFUNDED]: 'gray'
-    };
-    return colors[status] || 'gray';
-  }
-
-  formatDate(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
 }
 

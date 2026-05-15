@@ -1,4 +1,50 @@
 .settings-container {
-  max-width: 1200px;
+  width: 100%;
+  max-width: none;
 }
 
+.settings-page__title {
+  @apply text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl;
+}
+
+.settings-page__subtitle {
+  @apply mt-1 text-sm text-slate-600 md:text-base;
+}
+
+.settings-card {
+  @apply rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm;
+}
+
+.settings-card__title {
+  @apply text-lg font-semibold text-slate-900 mb-4;
+}
+
+.settings-form {
+  @apply flex flex-col gap-1 max-w-3xl;
+}
+
+.settings-checkboxes {
+  @apply flex flex-col gap-3 mb-4;
+}
+
+.settings-address-card {
+  @apply relative rounded-xl border border-slate-200 bg-slate-50/50 p-4;
+}
+
+.settings-empty-icon {
+  width: 3rem;
+  height: 3rem;
+  font-size: 3rem;
+  color: rgb(203 213 225);
+}
+
+.settings-btn-icon {
+  font-size: 1.125rem;
+  height: 1.125rem;
+  width: 1.125rem;
+  margin-right: 0.25rem;
+}
+
+:host ::ng-deep .settings-form .mat-mdc-form-field {
+  width: 100%;
+}

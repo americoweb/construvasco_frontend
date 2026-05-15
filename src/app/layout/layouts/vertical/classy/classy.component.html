@@ -33,12 +33,12 @@
             </div>
             <div class="mt-4 flex w-full flex-col items-center justify-center">
                 <div
-                    class="w-full overflow-hidden text-ellipsis whitespace-nowrap text-center font-medium leading-normal"
+                    class="w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-sm font-medium leading-snug"
                 >
                     {{ user.name }}
                 </div>
                 <div
-                    class="text-secondary mt-0.5 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-md font-medium leading-normal"
+                    class="text-secondary mt-0.5 w-full overflow-hidden text-ellipsis whitespace-nowrap text-center text-xs font-normal leading-snug"
                 >
                     {{ user.identifier }}
                 </div>
@@ -71,16 +71,6 @@
             <fuse-fullscreen class="hidden md:block"></fuse-fullscreen>
             <search [appearance]="'bar'"></search>
             <shortcuts></shortcuts>
-            <messages></messages>
-            <button
-                class="lg:hidden"
-                mat-icon-button
-                (click)="quickChat.toggle()"
-            >
-                <mat-icon
-                    [svgIcon]="'heroicons_outline:chat-bubble-left-right'"
-                ></mat-icon>
-            </button>
         </div>
     </div>
 
@@ -100,4 +90,4 @@
 </div>
 
 <!-- Quick chat -->
-<quick-chat #quickChat="quickChat"></quick-chat>
+<!-- <quick-chat #quickChat="quickChat"></quick-chat> -->

@@ -1,14 +1,16 @@
-<div class="settings-container w-full">
-  <h1 class="text-3xl font-bold text-gray-900 mb-8">Definições</h1>
+<div class="settings-container w-full min-w-0">
+  <header class="mb-8">
+    <h1 class="settings-page__title">Definições</h1>
+    <p class="settings-page__subtitle">Perfil, endereços, segurança e preferências da sua conta.</p>
+  </header>
 
   <!-- Informações Pessoais -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Informações Pessoais</h2>
-    
-    <!-- Profile Photo -->
+  <section class="settings-card mb-6">
+    <h2 class="settings-card__title">Informações pessoais</h2>
+
     <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-2">Foto de Perfil</label>
-      <div class="flex items-center gap-4">
+      <span class="text-sm font-medium text-slate-700 block mb-2">Foto de perfil</span>
+      <div class="flex flex-wrap items-center gap-4">
         <app-profile-photo [size]="120" [user]="user"></app-profile-photo>
         <div>
           <input
@@ -17,233 +19,244 @@
             (change)="onFileSelected($event)"
             class="hidden"
             id="photo-upload">
-          <label
-            for="photo-upload"
-            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 cursor-pointer inline-block">
-            Alterar Foto
-          </label>
-          <p class="text-xs text-gray-500 mt-2">JPG, PNG ou WebP (máx. 2MB)</p>
+          <button mat-stroked-button type="button" (click)="openPhotoPicker()">
+            <mat-icon class="settings-btn-icon">photo_camera</mat-icon>
+            Alterar foto
+          </button>
+          <p class="text-xs text-slate-500 mt-2">JPG, PNG ou WebP (máx. 2MB)</p>
         </div>
         <button
           *ngIf="selectedFile"
+          mat-flat-button
+          color="primary"
+          type="button"
           (click)="uploadPhoto()"
-          [disabled]="isUploadingPhoto"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-          {{ isUploadingPhoto ? 'Enviando...' : 'Salvar' }}
+          [disabled]="isUploadingPhoto">
+          {{ isUploadingPhoto ? 'A enviar…' : 'Guardar foto' }}
         </button>
       </div>
     </div>
 
-    <!-- Profile Form -->
-    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-        <input formControlName="name" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="settings-form">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Nome completo</mat-label>
+        <input matInput formControlName="name" type="text" />
+        @if (profileForm.get('name')?.invalid && profileForm.get('name')?.touched) {
+          <mat-error>O nome é obrigatório</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>E-mail</mat-label>
+        <input matInput [value]="user?.email || user?.identifier || ''" type="email" disabled />
+        <mat-hint>Contacte o suporte para alterar</mat-hint>
+      </mat-form-field>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4">
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>Telefone</mat-label>
+          <input matInput formControlName="phone" type="tel" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>WhatsApp</mat-label>
+          <input matInput formControlName="whatsapp" type="tel" />
+        </mat-form-field>
       </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input [value]="user?.email || user?.identifier || ''" type="email" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100">
-        <p class="text-xs text-gray-500 mt-1">Contacte suporte para alterar</p>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
-          <input formControlName="phone" type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
-          <input formControlName="whatsapp" type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-        </div>
-      </div>
+
       <button
+        mat-flat-button
+        color="primary"
         type="submit"
-        [disabled]="isSavingProfile || profileForm.invalid"
-        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-        {{ isSavingProfile ? 'Salvando...' : 'Guardar' }}
+        [disabled]="isSavingProfile || profileForm.invalid">
+        {{ isSavingProfile ? 'A guardar…' : 'Guardar perfil' }}
       </button>
     </form>
-  </div>
+  </section>
 
   <!-- Endereços -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-    <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold text-gray-900">Endereços</h2>
+  <section class="settings-card mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+      <h2 class="settings-card__title mb-0">Endereços</h2>
       <button
+        mat-flat-button
+        color="primary"
+        type="button"
         (click)="addNewAddress()"
-        *ngIf="!showAddressForm"
-        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-        + Adicionar
+        *ngIf="!showAddressForm">
+        <mat-icon>add</mat-icon>
+        Adicionar
       </button>
     </div>
 
-    <!-- Address Form -->
-    <div *ngIf="showAddressForm" class="mb-6 pb-6 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">
-        {{ editingAddress ? 'Editar Endereço' : 'Novo Endereço' }}
+    <div *ngIf="showAddressForm" class="mb-6 pb-6 border-b border-slate-200">
+      <h3 class="text-lg font-semibold text-slate-900 mb-4">
+        {{ editingAddress ? 'Editar endereço' : 'Novo endereço' }}
       </h3>
-      <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Morada</label>
-          <input formControlName="address" type="text" placeholder="Rua, número, bairro" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
+      <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" class="settings-form">
+        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+          <mat-label>Morada</mat-label>
+          <input matInput formControlName="address" type="text" placeholder="Rua, número, bairro" />
+          @if (addressForm.get('address')?.invalid && addressForm.get('address')?.touched) {
+            <mat-error>Obrigatório</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Cidade</mat-label>
+            <input matInput formControlName="city" type="text" />
+            @if (addressForm.get('city')?.invalid && addressForm.get('city')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Província</mat-label>
+            <mat-select formControlName="province">
+              <mat-option value="">Selecione</mat-option>
+              <mat-option *ngFor="let prov of provinces" [value]="prov">{{ prov }}</mat-option>
+            </mat-select>
+            @if (addressForm.get('province')?.invalid && addressForm.get('province')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
+          </mat-form-field>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-            <input formControlName="city" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Província</label>
-            <select formControlName="province" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-              <option value="">Selecione</option>
-              <option *ngFor="let prov of provinces" [value]="prov">{{ prov }}</option>
-            </select>
-          </div>
-        </div>
-        <div>
-          <label class="flex items-center gap-2">
-            <input formControlName="is_primary" type="checkbox" class="w-4 h-4">
-            <span class="text-sm text-gray-700">Endereço principal</span>
-          </label>
-        </div>
-        <div class="flex gap-4">
-          <button 
-            type="submit" 
-            [disabled]="addressForm.invalid"
-            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+
+        <mat-checkbox formControlName="is_primary" color="primary">
+          Endereço principal
+        </mat-checkbox>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button mat-flat-button color="primary" type="submit" [disabled]="addressForm.invalid">
             Guardar
           </button>
-          <button 
-            type="button" 
-            (click)="cancelAddressForm()" 
-            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+          <button mat-stroked-button type="button" (click)="cancelAddressForm()">
             Cancelar
           </button>
         </div>
       </form>
     </div>
 
-    <!-- Addresses List -->
-    <div *ngIf="addresses.length === 0 && !showAddressForm" class="text-center py-8 text-gray-500">
-      <p>Nenhum endereço cadastrado</p>
+    <div *ngIf="addresses.length === 0 && !showAddressForm" class="text-center py-8 text-slate-500">
+      <mat-icon class="settings-empty-icon">location_off</mat-icon>
+      <p class="mt-2">Nenhum endereço registado</p>
     </div>
 
     <div *ngIf="addresses.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-      <div *ngFor="let address of addresses" class="border border-gray-200 rounded-lg p-4 relative">
+      <div *ngFor="let address of addresses" class="settings-address-card">
         <div *ngIf="address.is_primary" class="absolute top-2 right-2">
-          <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded">Principal</span>
+          <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Principal</span>
         </div>
-        <div class="space-y-2">
-          <p class="font-medium text-gray-900">{{ address.address }}</p>
-          <p class="text-sm text-gray-600">{{ address.city }}, {{ address.province }}</p>
+        <div class="space-y-2 pr-16">
+          <p class="font-medium text-slate-900">{{ address.address }}</p>
+          <p class="text-sm text-slate-600">{{ address.city }}, {{ address.province }}</p>
         </div>
-        <div class="mt-4 flex gap-2">
-          <button
-            (click)="editAddress(address)"
-            class="px-3 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded">
-            Editar
-          </button>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button mat-button color="primary" type="button" (click)="editAddress(address)">Editar</button>
           <button
             *ngIf="!address.is_primary"
-            (click)="setAsPrimary(address)"
-            class="px-3 py-1 text-sm text-gray-600 hover:bg-gray-50 rounded">
-            Definir como principal
+            mat-button
+            type="button"
+            (click)="setAsPrimary(address)">
+            Definir principal
           </button>
-          <button
-            (click)="deleteAddress(address)"
-            class="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded">
-            Excluir
-          </button>
+          <button mat-button color="warn" type="button" (click)="deleteAddress(address)">Excluir</button>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- Alterar Senha -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Alterar Senha</h2>
-    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Senha Actual</label>
-        <input formControlName="current_password" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Nova Senha</label>
-        <input formControlName="password" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-        <p class="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Nova Senha</label>
-        <input formControlName="password_confirmation" type="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-      </div>
+  <section class="settings-card mb-6">
+    <h2 class="settings-card__title">Alterar senha</h2>
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="settings-form">
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Senha actual</mat-label>
+        <input matInput formControlName="current_password" type="password" autocomplete="current-password" />
+        @if (passwordForm.get('current_password')?.invalid && passwordForm.get('current_password')?.touched) {
+          <mat-error>Obrigatório</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Nova senha</mat-label>
+        <input matInput formControlName="password" type="password" autocomplete="new-password" />
+        <mat-hint>Mínimo 8 caracteres</mat-hint>
+        @if (passwordForm.get('password')?.invalid && passwordForm.get('password')?.touched) {
+          <mat-error>Senha inválida (mín. 8 caracteres)</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+        <mat-label>Confirmar nova senha</mat-label>
+        <input matInput formControlName="password_confirmation" type="password" autocomplete="new-password" />
+        @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('password_confirmation')?.touched) {
+          <mat-error>As senhas não coincidem</mat-error>
+        }
+      </mat-form-field>
+
       <button
+        mat-flat-button
+        color="primary"
         type="submit"
-        [disabled]="isChangingPassword || passwordForm.invalid"
-        class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
-        {{ isChangingPassword ? 'Actualizando...' : 'Actualizar Senha' }}
+        [disabled]="isChangingPassword || passwordForm.invalid">
+        {{ isChangingPassword ? 'A actualizar…' : 'Actualizar senha' }}
       </button>
     </form>
-  </div>
+  </section>
 
   <!-- Preferências de Comunicação -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Preferências de Comunicação</h2>
-    <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()" class="space-y-3">
-      <label class="flex items-center gap-2">
-        <input formControlName="email_promotions" type="checkbox" class="w-4 h-4">
-        <span class="text-sm text-gray-700">Receber emails de promoções</span>
-      </label>
-      <label class="flex items-center gap-2">
-        <input formControlName="sms_updates" type="checkbox" class="w-4 h-4">
-        <span class="text-sm text-gray-700">Receber SMS de actualizações de pedidos</span>
-      </label>
-      <label class="flex items-center gap-2">
-        <input formControlName="whatsapp_notifications" type="checkbox" class="w-4 h-4">
-        <span class="text-sm text-gray-700">Receber notificações WhatsApp</span>
-      </label>
-      <label class="flex items-center gap-2">
-        <input formControlName="weekly_newsletter" type="checkbox" class="w-4 h-4">
-        <span class="text-sm text-gray-700">Newsletter semanal</span>
-      </label>
-      <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-        Guardar Preferências
-      </button>
+  <section class="settings-card mb-6">
+    <h2 class="settings-card__title">Preferências de comunicação</h2>
+    <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()" class="settings-form">
+      <div class="settings-checkboxes">
+        <mat-checkbox formControlName="email_promotions" color="primary">
+          Receber e-mails de promoções
+        </mat-checkbox>
+        <mat-checkbox formControlName="sms_updates" color="primary">
+          Receber SMS de actualizações de pedidos
+        </mat-checkbox>
+        <mat-checkbox formControlName="whatsapp_notifications" color="primary">
+          Receber notificações WhatsApp
+        </mat-checkbox>
+        <mat-checkbox formControlName="weekly_newsletter" color="primary">
+          Newsletter semanal
+        </mat-checkbox>
+      </div>
+      <button mat-flat-button color="primary" type="submit">Guardar preferências</button>
     </form>
-  </div>
+  </section>
 
   <!-- Idioma e Região -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Idioma e Região</h2>
-    <form [formGroup]="preferencesForm" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Idioma</label>
-        <select formControlName="language" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-          <option *ngFor="let lang of languages" [value]="lang.code">{{ lang.name }}</option>
-        </select>
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Moeda</label>
-        <select formControlName="currency" class="w-full px-4 py-2 border border-gray-300 rounded-lg">
-          <option *ngFor="let curr of currencies" [value]="curr.code">{{ curr.name }}</option>
-        </select>
-      </div>
+  <section class="settings-card mb-6">
+    <h2 class="settings-card__title">Idioma e região</h2>
+    <form [formGroup]="preferencesForm" class="settings-form">
+      <mat-form-field appearance="outline" class="w-full md:max-w-xs" subscriptSizing="dynamic">
+        <mat-label>Idioma</mat-label>
+        <mat-select formControlName="language">
+          <mat-option *ngFor="let lang of languages" [value]="lang.code">{{ lang.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="w-full md:max-w-xs" subscriptSizing="dynamic">
+        <mat-label>Moeda</mat-label>
+        <mat-select formControlName="currency">
+          <mat-option *ngFor="let curr of currencies" [value]="curr.code">{{ curr.name }}</mat-option>
+        </mat-select>
+      </mat-form-field>
     </form>
-  </div>
+  </section>
 
   <!-- Conta -->
-  <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
-    <h2 class="text-xl font-bold text-gray-900 mb-4">Conta</h2>
-    <div class="space-y-4">
-      <button
-        (click)="exportData()"
-        class="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-        Exportar Meus Dados
+  <section class="settings-card">
+    <h2 class="settings-card__title">Conta</h2>
+    <div class="flex flex-wrap gap-3">
+      <button mat-stroked-button type="button" (click)="exportData()">
+        <mat-icon>download</mat-icon>
+        Exportar meus dados
       </button>
-      <button
-        (click)="deleteAccount()"
-        class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-        Eliminar Minha Conta
+      <button mat-flat-button color="warn" type="button" (click)="deleteAccount()">
+        <mat-icon>delete_forever</mat-icon>
+        Eliminar minha conta
       </button>
     </div>
-  </div>
+  </section>
 </div>
-

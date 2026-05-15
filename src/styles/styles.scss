@@ -2,12 +2,17 @@
 /*  @ Import/write your custom styles here.
 /*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
 /* ----------------------------------------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
-@import 'ngx-toastr/toastr';    
+@import 'ngx-toastr/toastr';
+@import './app-design-tokens';
 
+/* Same stack as Amazing (tailwind `fontFamily.sans` + Material typography). */
 html,
 body {
-    font-family: 'Montserrat', 'Inter', 'IBM Plex Sans', sans-serif;
+    font-family: 'Inter var', ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+    font-feature-settings: 'salt';
 }
 
 /* Corporate readability rhythm with generous vertical spacing */

@@ -1,132 +1,117 @@
 /* eslint-disable */
 import { FuseNavigationItem } from '@fuse/components/navigation';
 
+/**
+ * Navegação admin alinhada ao domínio Construvasco Digital (MAPA + protótipo).
+ * Legado gráfica (Designs, Products, Categories, Reports) removido do menu.
+ * Papel `designer` na API = operação técnica; menu sem módulo "Designs" até o SRS formalizar.
+ */
 export const adminNavigation: FuseNavigationItem[] = [
-    {
-        id: 'dashboard',
-        title: 'Dashboard',
-        type: 'basic',
-        icon: 'heroicons_outline:home',
-        link: '/admin/dashboard'
-    },
-    {
-        id: 'orders',
-        title: 'Orders',
-        type: 'basic',
-        icon: 'heroicons_outline:document-text',
-        link: '/admin/orders'
-    },
-    {
-        id: 'job-cards',
-        title: 'Job Cards',
-        type: 'basic',
-        icon: 'heroicons_outline:briefcase',
-        link: '/admin/job-cards'
-    },
-    {
-        id: 'designs',
-        title: 'Designs',
-        type: 'basic',
-        icon: 'heroicons_outline:paint-brush',
-        link: '/admin/designs'
-    },
-    {
-        id: 'products',
-        title: 'Products',
-        type: 'basic',
-        icon: 'heroicons_outline:shopping-cart',
-        link: '/admin/products'
-    },
-    {
-        id: 'categories',
-        title: 'Categories',
-        type: 'basic',
-        icon: 'heroicons_outline:tag',
-        link: '/admin/categories'
-    },
-    {
-        id: 'staff',
-        title: 'Staff',
-        type: 'basic',
-        icon: 'heroicons_outline:users',
-        link: '/admin/staff'
-    },
-    {
-        id: 'reports',
-        title: 'Reports',
-        type: 'basic',
-        icon: 'heroicons_outline:chart-bar',
-        link: '/admin/reports'
-    },
-    {
-        id: 'settings',
-        title: 'Settings',
-        type: 'basic',
-        icon: 'heroicons_outline:cog-6-tooth',
-        link: '/admin/settings'
-    }
+  {
+    id: 'dashboard',
+    title: 'Painel',
+    type: 'basic',
+    icon: 'heroicons_outline:home',
+    link: '/admin/dashboard',
+  },
+  {
+    id: 'orders',
+    title: 'Pedidos',
+    type: 'basic',
+    icon: 'heroicons_outline:document-text',
+    link: '/admin/orders',
+  },
+  {
+    id: 'job-cards',
+    title: 'Fichas de projecto',
+    type: 'basic',
+    icon: 'heroicons_outline:rectangle-stack',
+    link: '/admin/job-cards',
+  },
+  {
+    id: 'finances',
+    title: 'Finanças',
+    type: 'basic',
+    icon: 'heroicons_outline:banknotes',
+    link: '/admin/financas',
+  },
+  {
+    id: 'staff',
+    title: 'Equipa',
+    type: 'basic',
+    icon: 'heroicons_outline:users',
+    link: '/admin/staff',
+  },
+  {
+    id: 'settings',
+    title: 'Configurações',
+    type: 'basic',
+    icon: 'heroicons_outline:cog-6-tooth',
+    link: '/admin/settings',
+  },
 ];
 
 export const receptionistNavigation: FuseNavigationItem[] = [
-    {
-        id: 'dashboard',
-        title: 'Dashboard',
-        type: 'basic',
-        icon: 'heroicons_outline:home',
-        link: '/admin/dashboard'
-    },
-    {
-        id: 'orders',
-        title: 'Orders',
-        type: 'basic',
-        icon: 'heroicons_outline:document-text',
-        link: '/admin/orders'
-    },
-    {
-        id: 'job-cards',
-        title: 'Job Cards',
-        type: 'basic',
-        icon: 'heroicons_outline:briefcase',
-        link: '/admin/job-cards'
-    },
-    {
-        id: 'settings',
-        title: 'Settings',
-        type: 'basic',
-        icon: 'heroicons_outline:cog-6-tooth',
-        link: '/admin/settings'
-    }
+  {
+    id: 'dashboard',
+    title: 'Painel',
+    type: 'basic',
+    icon: 'heroicons_outline:home',
+    link: '/admin/dashboard',
+  },
+  {
+    id: 'orders',
+    title: 'Pedidos',
+    type: 'basic',
+    icon: 'heroicons_outline:document-text',
+    link: '/admin/orders',
+  },
+  {
+    id: 'job-cards',
+    title: 'Fichas de projecto',
+    type: 'basic',
+    icon: 'heroicons_outline:rectangle-stack',
+    link: '/admin/job-cards',
+  },
+  {
+    id: 'settings',
+    title: 'Configurações',
+    type: 'basic',
+    icon: 'heroicons_outline:cog-6-tooth',
+    link: '/admin/settings',
+  },
 ];
 
+/** Operadores técnicos (role API `designer`): pedidos + fichas, sem finanças globais. */
 export const designerNavigation: FuseNavigationItem[] = [
-    {
-        id: 'dashboard',
-        title: 'Dashboard',
-        type: 'basic',
-        icon: 'heroicons_outline:home',
-        link: '/admin/dashboard'
-    },
-    {
-        id: 'job-cards',
-        title: 'Job Cards',
-        type: 'basic',
-        icon: 'heroicons_outline:briefcase',
-        link: '/admin/job-cards'
-    },
-    {
-        id: 'designs',
-        title: 'Designs',
-        type: 'basic',
-        icon: 'heroicons_outline:paint-brush',
-        link: '/admin/designs'
-    },
-    {
-        id: 'settings',
-        title: 'Settings',
-        type: 'basic',
-        icon: 'heroicons_outline:cog-6-tooth',
-        link: '/admin/settings'
-    }
+  {
+    id: 'dashboard',
+    title: 'Painel',
+    type: 'basic',
+    icon: 'heroicons_outline:home',
+    link: '/admin/dashboard',
+  },
+  {
+    id: 'orders',
+    title: 'Pedidos',
+    type: 'basic',
+    icon: 'heroicons_outline:document-text',
+    link: '/admin/orders',
+  },
+  {
+    id: 'job-cards',
+    title: 'Fichas de projecto',
+    type: 'basic',
+    icon: 'heroicons_outline:rectangle-stack',
+    link: '/admin/job-cards',
+  },
+  {
+    id: 'settings',
+    title: 'Configurações',
+    type: 'basic',
+    icon: 'heroicons_outline:cog-6-tooth',
+    link: '/admin/settings',
+  },
 ];
 
 export const defaultNavigation: FuseNavigationItem[] = adminNavigation;

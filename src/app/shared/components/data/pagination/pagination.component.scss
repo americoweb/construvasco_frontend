@@ -1,22 +1,32 @@
-.pagination-container {
-  .mat-mdc-select {
-    min-width: 60px;
+.app-pagination-bar {
+  border-top: 1px solid var(--app-border, #e2e8f0);
+  background: var(--app-surface, #fff);
+
+  .mat-mdc-paginator {
+    background: transparent;
+    border-radius: 0 0 var(--app-radius-lg, 1rem) var(--app-radius-lg, 1rem);
   }
 
-  .mat-mdc-button {
-    min-width: 40px;
-    
-    &.bg-blue-600 {
-      background-color: #2563eb;
-      color: white;
-      
-      &:hover {
-        background-color: #1d4ed8;
-      }
+  .mat-mdc-paginator-container {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0.25rem;
+    min-height: 3.25rem;
+  }
+
+  .mat-mdc-paginator-range-label {
+    font-size: 0.8125rem;
+    color: var(--app-muted-foreground, #64748b);
+    margin: 0 0.5rem;
+  }
+
+  .mat-mdc-icon-button {
+    color: var(--app-foreground-secondary, #475569);
+  }
+
+  &--compact-info {
+    .mat-mdc-paginator-range-label {
+      display: none;
     }
-  }
-
-  .mat-mdc-icon-button[disabled] {
-    opacity: 0.5;
   }
 }

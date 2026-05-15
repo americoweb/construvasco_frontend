@@ -12,9 +12,12 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PageHeaderComponent } from '../../../../shared/components/layout/page-header/page-header.component';
 import { ButtonComponent } from '../../../../shared/components/ui/button/button.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { NotificationService } from '../../../../shared/components/feedback/notification.service';
 import { OrderService } from '../shared/order.service';
 import { CreateOrderPayload, CreateOrderLinePayload } from '../shared/order.types';
@@ -28,7 +31,16 @@ import {
 @Component({
   selector: 'app-admin-order-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PageHeaderComponent, ButtonComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    PageHeaderComponent,
+    ButtonComponent,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+  ],
   templateUrl: './admin-order-create.component.html',
   styleUrls: ['./admin-order-create.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

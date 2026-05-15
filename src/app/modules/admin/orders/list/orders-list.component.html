@@ -13,9 +13,9 @@
     (refresh)="onRefresh()">
   </app-page-header>
 
-  <div class="container mx-auto px-4 py-6">
+  <div class="container mx-auto px-4 py-3">
     <!-- Filters -->
-    <div class="mb-4">
+    <div class="mb-3">
       <app-data-filters
         [fields]="filterFields"
         [initialValues]="filters"
@@ -34,7 +34,7 @@
     </app-data-table>
 
     <!-- Pagination -->
-    <div class="mt-4">
+    <div class="mt-2">
       <app-pagination
         [pagination]="pagination"
         [pageSizeOptions]="[10, 15, 25, 50]"

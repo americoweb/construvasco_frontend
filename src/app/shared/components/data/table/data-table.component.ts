@@ -150,95 +150,103 @@ export class DataTableComponent {
   }
 
   getBadgeClass(value: any, element?: any): string {
-    // Use status_color from backend if available (for orders)
+    const apiColorMap: Record<string, string> = {
+      yellow: 'app-badge--warning',
+      blue: 'app-badge--info',
+      orange: 'app-badge--warning',
+      purple: 'app-badge--primary',
+      green: 'app-badge--success',
+      red: 'app-badge--danger',
+      gray: 'app-badge--neutral',
+      indigo: 'app-badge--primary',
+      teal: 'app-badge--success',
+      cyan: 'app-badge--info',
+    };
+
     if (element && element.status_color) {
-      const colorMap: Record<string, string> = {
-        'yellow': 'bg-yellow-100 text-yellow-800',
-        'blue': 'bg-blue-100 text-blue-800',
-        'orange': 'bg-orange-100 text-orange-800',
-        'purple': 'bg-purple-100 text-purple-800',
-        'green': 'bg-green-100 text-green-800',
-        'red': 'bg-red-100 text-red-800',
-        'gray': 'bg-gray-100 text-gray-800'
-      };
-      return colorMap[element.status_color] || 'bg-gray-100 text-gray-800';
+      return apiColorMap[element.status_color] || 'app-badge--neutral';
     }
-    
-    // Use payment_status_color from backend if available
+
     if (element && element.payment_status_color) {
-      const colorMap: Record<string, string> = {
-        'yellow': 'bg-yellow-100 text-yellow-800',
-        'blue': 'bg-blue-100 text-blue-800',
-        'orange': 'bg-orange-100 text-orange-800',
-        'purple': 'bg-purple-100 text-purple-800',
-        'green': 'bg-green-100 text-green-800',
-        'red': 'bg-red-100 text-red-800',
-        'gray': 'bg-gray-100 text-gray-800'
-      };
-      return colorMap[element.payment_status_color] || 'bg-gray-100 text-gray-800';
+      return apiColorMap[element.payment_status_color] || 'app-badge--neutral';
     }
-    
+
     if (typeof value === 'boolean') {
-      return value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+      return value ? 'app-badge--success' : 'app-badge--neutral';
     }
-    
+
     if (typeof value === 'string') {
       const lowerValue = value.toLowerCase();
-      
-      // Order Status colors
+
       if (lowerValue.includes('pendente') || lowerValue.includes('pending')) {
-        return 'bg-yellow-100 text-yellow-800';
+        return 'app-badge--warning';
       }
       if (lowerValue.includes('confirmado') || lowerValue.includes('confirmed')) {
-        return 'bg-blue-100 text-blue-800';
+        return 'app-badge--info';
       }
-      if (lowerValue.includes('em produção') || lowerValue.includes('in production') || lowerValue.includes('produção')) {
-        return 'bg-orange-100 text-orange-800';
+      if (
+        lowerValue.includes('em produção') ||
+        lowerValue.includes('in production') ||
+        lowerValue.includes('produção')
+      ) {
+        return 'app-badge--warning';
       }
       if (lowerValue.includes('enviado') || lowerValue.includes('shipped')) {
-        return 'bg-purple-100 text-purple-800';
+        return 'app-badge--primary';
       }
       if (lowerValue.includes('entregue') || lowerValue.includes('delivered')) {
-        return 'bg-green-100 text-green-800';
+        return 'app-badge--success';
       }
       if (lowerValue.includes('cancelado') || lowerValue.includes('cancelled')) {
-        return 'bg-red-100 text-red-800';
+        return 'app-badge--danger';
       }
-      
-      // Payment Status colors
+
       if (lowerValue.includes('pago') || lowerValue.includes('paid')) {
-        return 'bg-green-100 text-green-800';
+        return 'app-badge--success';
       }
       if (lowerValue.includes('falhou') || lowerValue.includes('failed')) {
-        return 'bg-red-100 text-red-800';
+        return 'app-badge--danger';
       }
       if (lowerValue.includes('reembolsado') || lowerValue.includes('refunded')) {
-        return 'bg-gray-100 text-gray-800';
+        return 'app-badge--neutral';
       }
-      
-      // Generic status colors
-      if (lowerValue.includes('ativo') || lowerValue.includes('active') || lowerValue === 'sim' || lowerValue === 'yes') {
-        return 'bg-green-100 text-green-800';
+
+      if (
+        lowerValue.includes('ativo') ||
+        lowerValue.includes('active') ||
+        lowerValue === 'sim' ||
+        lowerValue === 'yes'
+      ) {
+        return 'app-badge--success';
       }
-      if (lowerValue.includes('inativo') || lowerValue.includes('inactive') || lowerValue === 'não' || lowerValue === 'no') {
-        return 'bg-gray-100 text-gray-800';
+      if (
+        lowerValue.includes('inativo') ||
+        lowerValue.includes('inactive') ||
+        lowerValue === 'não' ||
+        lowerValue === 'no'
+      ) {
+        return 'app-badge--neutral';
       }
       if (lowerValue.includes('erro') || lowerValue.includes('error')) {
-        return 'bg-red-100 text-red-800';
+        return 'app-badge--danger';
       }
-      if (lowerValue.includes('completo') || lowerValue.includes('completed') || lowerValue.includes('sucesso') || lowerValue.includes('success')) {
-        return 'bg-blue-100 text-blue-800';
+      if (
+        lowerValue.includes('completo') ||
+        lowerValue.includes('completed') ||
+        lowerValue.includes('sucesso') ||
+        lowerValue.includes('success')
+      ) {
+        return 'app-badge--info';
       }
       if (lowerValue === 'online') {
-        return 'bg-indigo-100 text-indigo-800 font-semibold border border-indigo-200';
+        return 'app-badge--primary';
       }
       if (lowerValue === 'walk-in') {
-        return 'bg-gray-100 text-gray-600 border border-gray-200';
+        return 'app-badge--neutral';
       }
     }
-    
-    // Default badge style
-    return 'bg-gray-100 text-gray-800';
+
+    return 'app-badge--neutral';
   }
 
   getInitials(name: string): string {

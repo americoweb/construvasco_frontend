@@ -1,7 +1,7 @@
 <div class="admin-dashboard w-full">
   <app-page-header
     [title]="'Painel'"
-    [subtitle]="'Visão geral da produção · ' + today"
+    [subtitle]="'Visão geral da operação · ' + today"
     [showSearch]="false"
     [loading]="loading">
   </app-page-header>
@@ -17,7 +17,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
           </svg>
-          Novo Job Card
+          Nova ficha de projecto
         </a>
       }
       <a
@@ -64,9 +64,9 @@
         <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white">
           <div class="flex items-center justify-between mb-6">
             <div>
-              <p class="text-indigo-200 text-sm font-medium uppercase tracking-wider">Job Cards</p>
+              <p class="text-indigo-200 text-sm font-medium uppercase tracking-wider">Fichas de projecto</p>
               <p class="text-5xl font-extrabold mt-1">{{ stats.job_cards_total }}</p>
-              <p class="text-indigo-200 text-sm mt-1">{{ stats.job_cards_active }} activos em produção</p>
+              <p class="text-indigo-200 text-sm mt-1">{{ stats.job_cards_active }} activas em execução</p>
             </div>
             <div class="rounded-xl bg-white/15 p-4">
               <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,13 +80,13 @@
             <a routerLink="/admin/job-cards/kanban" class="stage-pill group">
               <div class="stage-number bg-purple-500/30 text-purple-100">{{ stats.job_cards_in_design }}</div>
               <div>
-                <p class="text-xs text-indigo-200">Em Design</p>
+                <p class="text-xs text-indigo-200">Execução técnica</p>
               </div>
             </a>
             <a routerLink="/admin/job-cards/kanban" class="stage-pill group">
               <div class="stage-number bg-amber-500/30 text-amber-100">{{ stats.job_cards_in_approval }}</div>
               <div>
-                <p class="text-xs text-indigo-200">Aguarda Aprovação</p>
+                <p class="text-xs text-indigo-200">Aguarda aprovação</p>
               </div>
             </a>
             <a routerLink="/admin/job-cards/list" [queryParams]="{priority_override: 1}" class="stage-pill group">
@@ -113,7 +113,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                 </svg>
-                {{ stats.job_cards_urgent }} job card(s) urgente(s) → ver agora
+                {{ stats.job_cards_urgent }} ficha(s) urgente(s) → ver agora
               </a>
             }
             @if (stats.job_cards_overdue > 0) {
@@ -148,31 +148,30 @@
           </a>
         }
 
-        <!-- Products -->
-        @if (userRole === '' || userRole === 'admin') {
-          <a routerLink="/admin/products" class="stat-card">
+        <!-- Finanças (MVP) -->
+        @if (userRole !== 'designer') {
+          <a routerLink="/admin/financas" class="stat-card">
             <div>
-              <p class="stat-label">Produtos</p>
-              <p class="stat-value">{{ stats.products_total }}</p>
-              <p class="stat-hint">Catálogo</p>
+              <p class="stat-label">Finanças</p>
+              <p class="stat-value">—</p>
+              <p class="stat-hint">Pagamentos e resumo (em construção)</p>
             </div>
-            <div class="stat-icon bg-emerald-100 text-emerald-700">
+            <div class="stat-icon bg-teal-100 text-teal-800">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
             </div>
           </a>
 
-          <!-- Categories -->
-          <a routerLink="/admin/categories" class="stat-card">
+          <a routerLink="/admin/staff" class="stat-card">
             <div>
-              <p class="stat-label">Categorias</p>
-              <p class="stat-value">{{ stats.categories_total }}</p>
-              <p class="stat-hint">Organização</p>
+              <p class="stat-label">Equipa</p>
+              <p class="stat-value">—</p>
+              <p class="stat-hint">Membros e perfis</p>
             </div>
-            <div class="stat-icon bg-amber-100 text-amber-800">
+            <div class="stat-icon bg-slate-100 text-slate-700">
               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
               </svg>
             </div>
           </a>
@@ -182,7 +181,7 @@
       <!-- ── Recent Job Cards ────────────────────────────────────── -->
       <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 class="text-base font-semibold text-gray-900">Job Cards recentes</h2>
+          <h2 class="text-base font-semibold text-gray-900">Fichas de projecto recentes</h2>
           <a routerLink="/admin/job-cards/list" class="text-sm font-medium text-indigo-600 hover:text-indigo-700">
             Ver todos →
           </a>
@@ -193,8 +192,8 @@
             <svg class="w-10 h-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
-            <p class="text-sm">Ainda não há job cards.</p>
-            <a routerLink="/admin/job-cards/create" class="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700">Criar o primeiro →</a>
+            <p class="text-sm">Ainda não há fichas de projecto.</p>
+            <a routerLink="/admin/job-cards/create" class="mt-3 text-sm font-medium text-indigo-600 hover:text-indigo-700">Criar a primeira →</a>
           </div>
         } @else {
           <ul class="divide-y divide-gray-100">

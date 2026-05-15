@@ -88,7 +88,7 @@ export class DataFiltersComponent {
       case 'multiselect':
         return [];
       case 'select':
-        return null;
+        return '';
       case 'text':
       case 'number':
         return '';

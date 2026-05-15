@@ -8,7 +8,7 @@
     [loading]="submitting">
   </app-page-header>
 
-  <div class="container mx-auto px-4 py-6 max-w-6xl">
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -24,8 +24,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               <!-- Client search autocomplete -->
-              <div class="field md:col-span-2">
-                <span>Cliente *</span>
+              <div class="md:col-span-2 space-y-1">
+                <span class="text-sm font-medium text-gray-700">Cliente *</span>
 
                 @if (selectedClient) {
                   <!-- Selected chip — same pattern as product -->
@@ -43,22 +43,24 @@
                     </button>
                   </div>
                 } @else {
-                  <!-- Search input -->
                   <div class="relative w-full">
-                    <input
-                      type="text"
-                      class="input w-full pr-10"
-                      [value]="clientQuery"
-                      (input)="onClientInput($any($event.target).value)"
-                      (focus)="clientDropdownOpen = clientQuery.length >= 1"
-                      placeholder="Pesquisar por nome ou contacto..."
-                      autocomplete="off"
-                    />
-                    <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">search</span>
+                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                      <mat-label>Pesquisar cliente</mat-label>
+                      <input
+                        matInput
+                        type="text"
+                        [value]="clientQuery"
+                        (input)="onClientInput($any($event.target).value)"
+                        (focus)="clientDropdownOpen = clientQuery.length >= 1"
+                        placeholder="Nome ou contacto..."
+                        autocomplete="off"
+                      />
+                      <mat-icon matSuffix class="text-gray-400 !text-base">search</mat-icon>
+                    </mat-form-field>
 
                     <!-- Dropdown -->
                     @if (clientDropdownOpen && (clientResults.length > 0 || clientQuery.length >= 1)) {
-                      <div class="absolute z-50 left-0 right-0 top-full mt-1 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                      <div class="absolute z-50 left-0 right-0 top-full mt-0 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto">
                         @for (c of clientResults; track c.id) {
                           <button
                             type="button"
@@ -94,27 +96,27 @@
                 }
 
                 @if (hasError('client_id')) {
-                  <span class="error-msg">O cliente é obrigatório.</span>
+                  <p class="text-xs text-red-600">O cliente é obrigatório.</p>
                 }
               </div>
 
-              <label class="field">
-                <span>Designer <span class="text-gray-400 font-normal">(opcional)</span></span>
-                <select formControlName="assigned_designer_id" class="input">
-                  <option [value]="null">— sem designer —</option>
+              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                <mat-label>Designer</mat-label>
+                <mat-select formControlName="assigned_designer_id">
+                  <mat-option [value]="null">— sem designer —</mat-option>
                   @for (d of designers; track d.id) {
-                    <option [value]="d.id">{{ d.name }}</option>
+                    <mat-option [value]="d.id">{{ d.name }}</mat-option>
                   }
-                </select>
+                </mat-select>
                 @if (designers.length === 0) {
-                  <span class="text-xs text-gray-400">
-                    Nenhum designer activo. <a routerLink="/admin/staff/create" class="text-blue-600 hover:underline">Adicionar designer</a>
-                  </span>
+                  <mat-hint>Nenhum designer activo. <a routerLink="/admin/staff/create" class="text-blue-600 hover:underline">Adicionar designer</a></mat-hint>
+                } @else {
+                  <mat-hint>Opcional</mat-hint>
                 }
-              </label>
+              </mat-form-field>
 
-              <div class="field">
-                <span>Tier do Cliente</span>
+              <div class="md:col-span-2">
+                <span class="text-sm font-medium text-gray-700 block mb-1">Tier do Cliente</span>
                 <div class="flex gap-2 mt-0.5">
                   @for (tier of tiers; track tier.value) {
                     <button
@@ -139,60 +141,62 @@
             <h2 class="text-lg font-semibold text-gray-900 mb-4">Brief do Job</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              <label class="field md:col-span-2">
-                <span>Título do Job *</span>
-                <input
-                  type="text"
-                  formControlName="title"
-                  class="input"
-                  placeholder="ex: Cartaz Promoção Natal 2026 – Vodacom"
-                />
-                @if (hasError('title')) {
-                  <span class="error-msg">O título é obrigatório.</span>
-                }
-              </label>
+              <div class="md:col-span-2">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Título do Job</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    formControlName="title"
+                    placeholder="ex: Cartaz Promoção Natal 2026 – Vodacom"
+                  />
+                  @if (hasError('title')) {
+                    <mat-error>O título é obrigatório.</mat-error>
+                  }
+                </mat-form-field>
+              </div>
 
-              <label class="field">
-                <span>Objectivo</span>
+              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                <mat-label>Objectivo</mat-label>
                 <input
+                  matInput
                   type="text"
                   formControlName="objective"
-                  class="input"
                   placeholder="Promoção, Branding, Evento..."
                 />
-              </label>
+              </mat-form-field>
 
-              <label class="field">
-                <span>Prazo de Entrega *</span>
-                <input
-                  type="datetime-local"
-                  formControlName="deadline"
-                  class="input"
-                />
+              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                <mat-label>Prazo de Entrega</mat-label>
+                <input matInput type="datetime-local" formControlName="deadline" />
                 @if (hasError('deadline')) {
-                  <span class="error-msg">O prazo é obrigatório.</span>
+                  <mat-error>O prazo é obrigatório.</mat-error>
                 }
-              </label>
+              </mat-form-field>
 
-              <label class="field md:col-span-2">
-                <span>Descrição / Conteúdo</span>
-                <textarea
-                  formControlName="description"
-                  rows="4"
-                  class="input"
-                  placeholder="Descreva o trabalho: textos a incluir, logos, referências visuais, cores da marca, etc."
-                ></textarea>
-              </label>
+              <div class="md:col-span-2">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Descrição / Conteúdo</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="description"
+                    rows="4"
+                    placeholder="Descreva o trabalho: textos a incluir, logos, referências visuais, cores da marca, etc."
+                  ></textarea>
+                </mat-form-field>
+              </div>
 
-              <label class="field md:col-span-2">
-                <span>Notas Internas <span class="text-gray-400 font-normal">(não visíveis ao cliente)</span></span>
-                <textarea
-                  formControlName="notes"
-                  rows="2"
-                  class="input"
-                  placeholder="Observações para a equipa interna..."
-                ></textarea>
-              </label>
+              <div class="md:col-span-2">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Notas Internas</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="notes"
+                    rows="2"
+                    placeholder="Observações para a equipa interna (não visíveis ao cliente)..."
+                  ></textarea>
+                </mat-form-field>
+              </div>
 
             </div>
           </section>
@@ -228,8 +232,8 @@
                   </div>
 
                   <!-- Catalog search -->
-                  <div class="field mb-4 w-full">
-                    <span>Produto do catálogo <span class="text-gray-400 font-normal">(opcional)</span></span>
+                  <div class="mb-4 w-full space-y-1">
+                    <span class="text-sm font-medium text-gray-700">Produto do catálogo <span class="text-gray-400 font-normal">(opcional)</span></span>
 
                     @if (getItemMeta(itemIdx).selectedProduct; as prod) {
                       <!-- Selected chip -->
@@ -250,25 +254,27 @@
                         </button>
                       </div>
                     } @else {
-                      <!-- Search input -->
                       <div class="relative w-full">
-                        <input
-                          type="text"
-                          class="input w-full pr-10"
-                          [value]="getItemMeta(itemIdx).productQuery"
-                          (input)="onProductSearchInput(itemIdx, $any($event.target).value)"
-                          (focus)="onProductSearchInput(itemIdx, getItemMeta(itemIdx).productQuery)"
-                          placeholder="Pesquisar produto do catálogo..."
-                          autocomplete="off"
-                        />
-                        @if (loadingProducts) {
-                          <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base animate-spin pointer-events-none">refresh</span>
-                        } @else {
-                          <span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-base pointer-events-none">search</span>
-                        }
+                        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                          <mat-label>Pesquisar produto</mat-label>
+                          <input
+                            matInput
+                            type="text"
+                            [value]="getItemMeta(itemIdx).productQuery"
+                            (input)="onProductSearchInput(itemIdx, $any($event.target).value)"
+                            (focus)="onProductSearchInput(itemIdx, getItemMeta(itemIdx).productQuery)"
+                            placeholder="Nome do produto..."
+                            autocomplete="off"
+                          />
+                          @if (loadingProducts) {
+                            <mat-icon matSuffix class="animate-spin text-gray-400 !text-base">refresh</mat-icon>
+                          } @else {
+                            <mat-icon matSuffix class="text-gray-400 !text-base">search</mat-icon>
+                          }
+                        </mat-form-field>
 
                         @if (getItemMeta(itemIdx).productDropdownOpen) {
-                          <div class="absolute z-50 left-0 right-0 top-full mt-1 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+                          <div class="absolute z-50 left-0 right-0 top-full mt-0 rounded-xl border border-gray-200 bg-white shadow-lg overflow-hidden max-h-60 overflow-y-auto">
                             @for (p of getFilteredProducts(itemIdx); track p.id) {
                               <button
                                 type="button"
@@ -344,38 +350,42 @@
                   <!-- Fields grid -->
                   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                    <label class="field md:col-span-2">
-                      <span>Tipo / Descrição do Produto *</span>
-                      <input
-                        type="text"
-                        formControlName="product_type"
-                        class="input"
-                        placeholder="ex: Cartaz, Flyer, Banner, Caneca..."
-                      />
-                      @if (hasItemError(itemIdx, 'product_type')) {
-                        <span class="error-msg">O tipo de produto é obrigatório.</span>
-                      }
-                    </label>
+                    <div class="md:col-span-2">
+                      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                        <mat-label>Tipo / Descrição do Produto</mat-label>
+                        <input
+                          matInput
+                          type="text"
+                          formControlName="product_type"
+                          placeholder="ex: Cartaz, Flyer, Banner, Caneca..."
+                        />
+                        @if (hasItemError(itemIdx, 'product_type')) {
+                          <mat-error>O tipo de produto é obrigatório.</mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
 
-                    <label class="field">
-                      <span>Quantidade *</span>
-                      <input type="number" formControlName="quantity" class="input" min="1" />
-                    </label>
+                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                      <mat-label>Quantidade</mat-label>
+                      <input matInput type="number" formControlName="quantity" min="1" />
+                    </mat-form-field>
 
-                    <label class="field">
-                      <span>Tamanho / Dimensões</span>
-                      <input type="text" formControlName="size" class="input" placeholder="A4, 90×60cm..." />
-                    </label>
+                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                      <mat-label>Tamanho / Dimensões</mat-label>
+                      <input matInput type="text" formControlName="size" placeholder="A4, 90×60cm..." />
+                    </mat-form-field>
 
-                    <label class="field">
-                      <span>Material</span>
-                      <input type="text" formControlName="material" class="input" placeholder="Vinil, papel couché..." />
-                    </label>
+                    <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                      <mat-label>Material</mat-label>
+                      <input matInput type="text" formControlName="material" placeholder="Vinil, papel couché..." />
+                    </mat-form-field>
 
-                    <label class="field md:col-span-2 lg:col-span-1">
-                      <span>Observações</span>
-                      <input type="text" formControlName="notes" class="input" placeholder="Detalhes específicos..." />
-                    </label>
+                    <div class="md:col-span-2 lg:col-span-1">
+                      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                        <mat-label>Observações</mat-label>
+                        <input matInput type="text" formControlName="notes" placeholder="Detalhes específicos..." />
+                      </mat-form-field>
+                    </div>
 
                   </div>
                 </div>
@@ -454,18 +464,18 @@
               <p class="text-xs text-gray-400 mt-1 pl-1">Máx. 3 urgentes simultâneos</p>
 
               @if (isOverrideActive()) {
-                <label class="field mt-3">
-                  <span>Motivo do urgente *</span>
+                <mat-form-field appearance="outline" class="w-full mt-3" subscriptSizing="dynamic">
+                  <mat-label>Motivo do urgente</mat-label>
                   <input
+                    matInput
                     type="text"
                     formControlName="priority_reason"
-                    class="input"
                     placeholder="ex: Cliente VIP, entrega amanhã"
                   />
                   @if (hasError('priority_reason')) {
-                    <span class="error-msg">O motivo é obrigatório.</span>
+                    <mat-error>O motivo é obrigatório.</mat-error>
                   }
-                </label>
+                </mat-form-field>
               }
             </div>
           </section>
@@ -527,18 +537,18 @@
         </div>
 
         <!-- Body -->
-        <form [formGroup]="createClientForm" (ngSubmit)="saveNewClient()" class="p-6 space-y-4">
+        <form [formGroup]="createClientForm" (ngSubmit)="saveNewClient()" class="p-6 space-y-2">
 
-          <label class="field">
-            <span>Nome completo *</span>
-            <input type="text" formControlName="name" class="input" placeholder="ex: João Manuel da Silva" />
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Nome completo</mat-label>
+            <input matInput type="text" formControlName="name" placeholder="ex: João Manuel da Silva" />
             @if (createClientForm.get('name')?.invalid && createClientForm.get('name')?.touched) {
-              <span class="error-msg">Nome é obrigatório.</span>
+              <mat-error>Nome é obrigatório.</mat-error>
             }
-          </label>
+          </mat-form-field>
 
-          <div class="field">
-            <span>Tipo de contacto</span>
+          <div>
+            <span class="text-sm font-medium text-gray-700 block mb-1">Tipo de contacto</span>
             <div class="flex gap-2 mt-0.5">
               <button type="button"
                 (click)="createClientForm.get('type')!.setValue('phone')"
@@ -559,18 +569,18 @@
             </div>
           </div>
 
-          <label class="field">
-            <span>{{ createClientForm.get('type')?.value === 'phone' ? 'Número de telemóvel' : 'Endereço de e-mail' }} *</span>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>{{ createClientForm.get('type')?.value === 'phone' ? 'Número de telemóvel' : 'Endereço de e-mail' }}</mat-label>
             <input
+              matInput
               type="text"
               formControlName="identifier"
-              class="input"
               [placeholder]="createClientForm.get('type')?.value === 'phone' ? 'ex: 841234567' : 'ex: joao@empresa.co.mz'"
             />
             @if (createClientForm.get('identifier')?.invalid && createClientForm.get('identifier')?.touched) {
-              <span class="error-msg">Contacto é obrigatório.</span>
+              <mat-error>Contacto é obrigatório.</mat-error>
             }
-          </label>
+          </mat-form-field>
 
           <div class="flex gap-3 pt-2">
             <app-button type="button" variant="outline" [fullWidth]="true" (onClick)="closeCreateClientModal()">

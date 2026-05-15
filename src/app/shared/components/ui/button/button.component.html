@@ -5,22 +5,17 @@
   matRipple
   [matRippleDisabled]="disabled"
   (click)="onButtonClick($event)">
-  
   <!-- Loading spinner -->
-  <mat-icon *ngIf="loading" class="animate-spin mr-2">autorenew</mat-icon>
-  
+  <mat-icon *ngIf="loading" class="btn-app__icon btn-app__icon--left animate-spin">sync</mat-icon>
+
   <!-- Left icon -->
-  <mat-icon *ngIf="icon && iconPosition === 'left' && !loading" 
-            [class]="'mr-2 text-' + size"
-            style="vertical-align: middle;"
-            >{{ icon }}</mat-icon>
-  
+  <mat-icon *ngIf="icon && iconPosition === 'left' && !loading" class="btn-app__icon btn-app__icon--left">{{ icon }}</mat-icon>
+
   <!-- Content -->
   <span>
     <ng-content></ng-content>
   </span>
-  
+
   <!-- Right icon -->
-  <mat-icon *ngIf="icon && iconPosition === 'right' && !loading" 
-            [class]="'ml-2 text-' + size">{{ icon }}</mat-icon>
+  <mat-icon *ngIf="icon && iconPosition === 'right' && !loading" class="btn-app__icon btn-app__icon--right">{{ icon }}</mat-icon>
 </button>

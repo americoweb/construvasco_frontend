@@ -49,6 +49,8 @@ export class PageHeaderComponent {
   @Input() searchPlaceholder = 'Search...';
   @Input() searchValue = '';
   @Input() showFilters = false;
+  /** Mostrar botão de refresh mesmo sem pesquisa/filtros. */
+  @Input() showRefresh = false;
   @Input() showViewToggle = false;
   @Input() currentView = 'list';
   @Input() viewOptions: { value: string; label: string; icon: string }[] = [];
@@ -61,7 +63,6 @@ export class PageHeaderComponent {
   @Output() refresh = new EventEmitter<void>();
 
   onSearchChange(value: string): void {
-    this.searchValue = value;
     this.searchChange.emit(value);
   }
 

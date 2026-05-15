@@ -1,5 +1,7 @@
 // Job Card Types — mirrors backend JobCard resources
 
+import type { Order } from '../../orders/shared/order.types';
+
 export enum JobCardStatus {
   DRAFT      = 'draft',
   BRIEFING   = 'briefing',
@@ -127,6 +129,8 @@ export interface JobCard {
   designer?: JobCardUser;
 
   order_id?: number;
+  /** Nested commercial order when API returns GET job-card with eager-loaded order. */
+  order?: Order;
 
   items?: JobCardItem[];
   files?: JobCardFile[];

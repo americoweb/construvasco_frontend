@@ -1,76 +1,97 @@
 <div class="admin-order-create w-full">
   <app-page-header
-    [title]="'Novo pedido'"
-    [subtitle]="'Registe um pedido em nome do cliente e continue a gestão a partir da lista'"
+    [title]="'Novo pedido (catálogo)'"
+    [subtitle]="'Registo manual de pedido com itens do catálogo (materiais / serviços pré-definidos). Para execução de obra por fases e marcos, use Fichas de projecto — não é o mesmo fluxo.'"
     [showSearch]="false"
     [loading]="submitting || loadingProducts">
   </app-page-header>
 
-  <div class="container mx-auto px-4 py-6 max-w-5xl">
+  <div class="container mx-auto px-4 py-6 max-w-7xl">
+    <div
+      class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+      <p class="font-medium">Isto não substitui uma ficha de projecto</p>
+      <p class="mt-1 text-amber-900/90">
+        Pedidos aqui são para <strong>linhas do catálogo</strong> (produto, cor, variante, valores).
+        Para brief, designer, prioridades e acompanhamento de obra, abra uma
+        <a routerLink="/admin/job-cards/create" class="font-semibold text-amber-950 underline hover:no-underline">nova ficha de projecto</a>.
+      </p>
+    </div>
+
     <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-8">
       <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Cliente e envio</h2>
+        <h2 class="text-lg font-semibold text-gray-900 mb-1">Cliente e entrega</h2>
+        <p class="text-sm text-gray-500 mb-4">Dados de contacto e local usados na facturação e na entrega de materiais do catálogo.</p>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label class="field">
-            <span>Nome *</span>
-            <input type="text" formControlName="shipping_name" class="input" />
-          </label>
-          <label class="field">
-            <span>WhatsApp *</span>
-            <input type="text" formControlName="shipping_whatsapp" class="input" placeholder="+258..." />
-          </label>
-          <label class="field md:col-span-2">
-            <span>Morada *</span>
-            <textarea formControlName="shipping_address" rows="2" class="input"></textarea>
-          </label>
-          <label class="field">
-            <span>Cidade</span>
-            <input type="text" formControlName="shipping_city" class="input" />
-          </label>
-          <label class="field">
-            <span>Província / Estado</span>
-            <input type="text" formControlName="shipping_state" class="input" />
-          </label>
-          <label class="field">
-            <span>Código postal</span>
-            <input type="text" formControlName="shipping_postal_code" class="input" />
-          </label>
-          <label class="field">
-            <span>País</span>
-            <input type="text" formControlName="shipping_country" class="input" />
-          </label>
-          <label class="field">
-            <span>Telefone</span>
-            <input type="text" formControlName="shipping_phone" class="input" />
-          </label>
-          <label class="field">
-            <span>E-mail (faturação)</span>
-            <input type="email" formControlName="billing_email" class="input" />
-          </label>
-          <label class="field">
-            <span>Nome faturação</span>
-            <input type="text" formControlName="billing_name" class="input" />
-          </label>
-          <label class="field md:col-span-2">
-            <span>Notas internas</span>
-            <textarea formControlName="notes" rows="2" class="input"></textarea>
-          </label>
-          <label class="field">
-            <span>Portes (MT)</span>
-            <input type="number" formControlName="shipping_cost" class="input" min="0" step="0.01" />
-          </label>
-          <label class="field">
-            <span>Desconto (MT)</span>
-            <input type="number" formControlName="discount_amount" class="input" min="0" step="0.01" />
-          </label>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Nome</mat-label>
+            <input matInput type="text" formControlName="shipping_name" />
+            @if (form.get('shipping_name')?.invalid && form.get('shipping_name')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>WhatsApp</mat-label>
+            <input matInput type="text" formControlName="shipping_whatsapp" placeholder="+258..." />
+            @if (form.get('shipping_whatsapp')?.invalid && form.get('shipping_whatsapp')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full md:col-span-2" subscriptSizing="dynamic">
+            <mat-label>Morada / local de entrega</mat-label>
+            <textarea matInput formControlName="shipping_address" rows="2"></textarea>
+            @if (form.get('shipping_address')?.invalid && form.get('shipping_address')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Cidade</mat-label>
+            <input matInput type="text" formControlName="shipping_city" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Província / Estado</mat-label>
+            <input matInput type="text" formControlName="shipping_state" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Código postal</mat-label>
+            <input matInput type="text" formControlName="shipping_postal_code" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>País</mat-label>
+            <input matInput type="text" formControlName="shipping_country" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Telefone</mat-label>
+            <input matInput type="text" formControlName="shipping_phone" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>E-mail (faturação)</mat-label>
+            <input matInput type="email" formControlName="billing_email" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Nome faturação</mat-label>
+            <input matInput type="text" formControlName="billing_name" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full md:col-span-2" subscriptSizing="dynamic">
+            <mat-label>Notas internas</mat-label>
+            <textarea matInput formControlName="notes" rows="2"></textarea>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Portes (MT)</mat-label>
+            <input matInput type="number" formControlName="shipping_cost" min="0" step="0.01" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Desconto (MT)</mat-label>
+            <input matInput type="number" formControlName="discount_amount" min="0" step="0.01" />
+          </mat-form-field>
         </div>
       </section>
 
       <section class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
-          <h2 class="text-lg font-semibold text-gray-900">Itens</h2>
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
+          <h2 class="text-lg font-semibold text-gray-900">Itens do catálogo</h2>
           <app-button type="button" variant="outline" (onClick)="addLine()">Adicionar linha</app-button>
         </div>
+        <p class="text-sm text-gray-500 mb-4">Cada linha corresponde a um artigo do catálogo (variante e preço). Não descreve fases nem marcos de obra.</p>
 
         <div formArrayName="items" class="space-y-6">
           @for (ctrl of items.controls; track $index; let i = $index) {
@@ -84,50 +105,53 @@
                 }
               </div>
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <label class="field md:col-span-2">
-                  <span>Produto *</span>
-                  <select
-                    class="input"
-                    formControlName="product_id"
-                    (change)="onProductSelected(i)">
-                    <option [ngValue]="null">Selecionar…</option>
+                <mat-form-field appearance="outline" class="w-full md:col-span-2" subscriptSizing="dynamic">
+                  <mat-label>Produto</mat-label>
+                  <mat-select formControlName="product_id" (selectionChange)="onProductSelected(i)">
+                    <mat-option [value]="null">Selecionar…</mat-option>
                     @for (p of products; track p.id) {
-                      <option [ngValue]="p.id">{{ p.name }}</option>
+                      <mat-option [value]="p.id">{{ p.name }}</mat-option>
                     }
-                  </select>
-                </label>
-                <label class="field">
-                  <span>Cor *</span>
-                  <select
-                    class="input"
-                    formControlName="product_color_id"
-                    (change)="onColorOrAreaChange(i)">
-                    <option [ngValue]="null">—</option>
+                  </mat-select>
+                  @if (items.at(i).get('product_id')?.invalid && items.at(i).get('product_id')?.touched) {
+                    <mat-error>Obrigatório</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Cor</mat-label>
+                  <mat-select formControlName="product_color_id" (selectionChange)="onColorOrAreaChange(i)">
+                    <mat-option [value]="null">—</mat-option>
                     @for (c of colorsForRow(i); track c.id) {
-                      <option [ngValue]="c.id">{{ c.name }}</option>
+                      <mat-option [value]="c.id">{{ c.name }}</mat-option>
                     }
-                  </select>
-                </label>
-                <label class="field">
-                  <span>Área de impressão *</span>
-                  <select
-                    class="input"
-                    formControlName="product_print_area_id"
-                    (change)="onColorOrAreaChange(i)">
-                    <option [ngValue]="null">—</option>
+                  </mat-select>
+                  @if (items.at(i).get('product_color_id')?.invalid && items.at(i).get('product_color_id')?.touched) {
+                    <mat-error>Obrigatório</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Variante / área (catálogo)</mat-label>
+                  <mat-select formControlName="product_print_area_id" (selectionChange)="onColorOrAreaChange(i)">
+                    <mat-option [value]="null">—</mat-option>
                     @for (a of areasForRow(i); track a.id) {
-                      <option [ngValue]="a.id">{{ a.name }}</option>
+                      <mat-option [value]="a.id">{{ a.name }}</mat-option>
                     }
-                  </select>
-                </label>
-                <label class="field">
-                  <span>Quantidade *</span>
-                  <input type="number" formControlName="quantity" class="input" min="1" />
-                </label>
-                <label class="field">
-                  <span>Preço unitário (MT) *</span>
-                  <input type="number" formControlName="unit_price" class="input" min="0" step="0.01" />
-                </label>
+                  </mat-select>
+                  @if (items.at(i).get('product_print_area_id')?.invalid && items.at(i).get('product_print_area_id')?.touched) {
+                    <mat-error>Obrigatório</mat-error>
+                  }
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Quantidade</mat-label>
+                  <input matInput type="number" formControlName="quantity" min="1" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Preço unitário (MT)</mat-label>
+                  <input matInput type="number" formControlName="unit_price" min="0" step="0.01" />
+                  @if (items.at(i).get('unit_price')?.invalid && items.at(i).get('unit_price')?.touched) {
+                    <mat-error>Obrigatório</mat-error>
+                  }
+                </mat-form-field>
               </div>
             </div>
           }

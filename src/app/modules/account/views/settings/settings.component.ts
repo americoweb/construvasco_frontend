@@ -2,6 +2,12 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRe
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { UserService } from '../../../../core/auth/services/user.service';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { User } from '../../../../core/auth/models/user.interface';
@@ -10,7 +16,17 @@ import { ProfilePhotoComponent } from '../../../../shared/components/ui/profile-
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ProfilePhotoComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatButtonModule,
+    MatIconModule,
+    ProfilePhotoComponent,
+  ],
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,13 +37,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
   passwordForm!: FormGroup;
   preferencesForm!: FormGroup;
   addressForm!: FormGroup;
-  
+
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   isUploadingPhoto = false;
   isSavingProfile = false;
   isChangingPassword = false;
-  
+
   addresses: any[] = [];
   showAddressForm = false;
   editingAddress: any = null;
@@ -57,17 +73,14 @@ export class SettingsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Create forms once with empty/default values
     this.createForms();
-    
-    // Check if user data is already available
+
     const currentUser = this.userService.user;
     if (currentUser) {
       this.user = currentUser;
       this.patchFormsWithUserData(currentUser);
       this.cdr.markForCheck();
     } else {
-      // Fetch user data from backend if not available
       this.userService.getCurrentUser()
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe({
@@ -82,8 +95,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
           }
         });
     }
-    
-    // Subscribe to user data and patch forms when data arrives or changes
+
     this.userService.user$
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe((user: User | null) => {
@@ -94,7 +106,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       });
 
-    // Load addresses
     this.loadAddresses();
   }
 
@@ -106,9 +117,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
           this.addresses = addresses || [];
           this.cdr.markForCheck();
         },
-        error: (error) => {
-          console.error('Failed to load addresses:', error);
-          // If endpoint doesn't exist yet, just set empty array
+        error: () => {
           this.addresses = [];
           this.cdr.markForCheck();
         }
@@ -121,7 +130,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   createForms(): void {
-    // Create forms with default/empty values
     this.profileForm = this.fb.group({
       name: ['', Validators.required],
       phone: [''],
@@ -154,14 +162,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
   }
 
   patchFormsWithUserData(user: User): void {
-    // Patch profile form with user data
     this.profileForm.patchValue({
       name: user.name || '',
       phone: user.phone || '',
       whatsapp: user.whatsapp || ''
     }, { emitEvent: false });
 
-    // Patch preferences form with user settings if available
     if (user.settings) {
       this.preferencesForm.patchValue({
         email_promotions: user.settings.email_promotions || false,
@@ -177,12 +183,17 @@ export class SettingsComponent implements OnInit, OnDestroy {
   passwordMatchValidator(form: FormGroup): { [key: string]: boolean } | null {
     const password = form.get('password');
     const passwordConfirmation = form.get('password_confirmation');
-    
+
     if (!password || !passwordConfirmation) {
       return null;
     }
-    
+
     return password.value === passwordConfirmation.value ? null : { passwordMismatch: true };
+  }
+
+  openPhotoPicker(): void {
+    const input = document.getElementById('photo-upload') as HTMLInputElement | null;
+    input?.click();
   }
 
   onFileSelected(event: Event): void {
@@ -209,7 +220,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   uploadPhoto(): void {
     if (!this.selectedFile) return;
-    
+
     this.isUploadingPhoto = true;
     this.userService.uploadAvatar(this.selectedFile)
       .pipe(takeUntil(this._unsubscribeAll))
@@ -229,7 +240,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   saveProfile(): void {
     if (this.profileForm.invalid) return;
-    
+
     this.isSavingProfile = true;
     this.userService.updateProfile(this.profileForm.value)
       .pipe(takeUntil(this._unsubscribeAll))
@@ -247,7 +258,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   changePassword(): void {
     if (this.passwordForm.invalid) return;
-    
+
     this.isChangingPassword = true;
     const formValue = this.passwordForm.value;
     this.authService.changePassword({
@@ -283,7 +294,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
     // TODO: Export user data
   }
 
-  // Address management methods
   addNewAddress(): void {
     this.editingAddress = null;
     this.showAddressForm = true;
@@ -302,29 +312,24 @@ export class SettingsComponent implements OnInit, OnDestroy {
     if (this.addressForm.invalid) return;
 
     const addressData = this.addressForm.value;
-    
-    // Generate ID for new address
+
     if (!this.editingAddress) {
       addressData.id = 'addr_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       addressData.created_at = new Date().toISOString();
     }
     addressData.updated_at = new Date().toISOString();
 
-    // Get current addresses
     let updatedAddresses = [...this.addresses];
 
     if (this.editingAddress) {
-      // Update existing address
       const index = updatedAddresses.findIndex(addr => addr.id === this.editingAddress.id);
       if (index !== -1) {
         updatedAddresses[index] = { ...updatedAddresses[index], ...addressData };
       }
     } else {
-      // Add new address
       updatedAddresses.push(addressData);
     }
 
-    // If setting as primary, unset others
     if (addressData.is_primary) {
       updatedAddresses = updatedAddresses.map(addr => ({
         ...addr,
@@ -332,7 +337,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
       }));
     }
 
-    // Save all addresses via settings
     this.userService.saveAddresses(updatedAddresses)
       .pipe(takeUntil(this._unsubscribeAll))
       .subscribe({
@@ -361,7 +365,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   deleteAddress(address: any): void {
     if (confirm('Tem certeza que deseja excluir este endereço?')) {
       const updatedAddresses = this.addresses.filter(addr => addr.id !== address.id);
-      
+
       this.userService.saveAddresses(updatedAddresses)
         .pipe(takeUntil(this._unsubscribeAll))
         .subscribe({
@@ -399,4 +403,3 @@ export class SettingsComponent implements OnInit, OnDestroy {
       });
   }
 }
-

@@ -1,23 +1,26 @@
-<div class="saved-designs-container">
-  <div class="flex items-center justify-between mb-6">
-    <h1 class="text-3xl font-bold text-gray-900">Designs Salvos</h1>
+<div class="saved-designs-container w-full min-w-0">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Meus projectos</h1>
     <a
-      routerLink="/produtos"
-      class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-      Criar Novo Design
+      routerLink="/conta/pedidos"
+      class="inline-flex justify-center px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-sm">
+      Ver pedidos
     </a>
   </div>
 
+  <p class="text-gray-600 text-sm mb-6 max-w-3xl">
+    Aqui irá aparecer a lista dos seus projectos técnicos e documentos associados aos pedidos. Esta vista substitui o antigo módulo de «designs» da aplicação de gráfica.
+  </p>
+
   <div *ngIf="designs.length === 0" class="text-center py-12 text-gray-500">
     <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
     </svg>
-    <p class="text-lg">Ainda não tem designs salvos</p>
-    <p class="text-sm mt-2">Comece criando seu primeiro design personalizado</p>
+    <p class="text-lg">Ainda não tem projectos listados</p>
+    <p class="text-sm mt-2">Quando existir API de projectos por cliente, os itens aparecerão aqui.</p>
   </div>
 
   <div *ngIf="designs.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <!-- Design cards will be displayed here -->
+    <!-- Cards de projecto -->
   </div>
 </div>
-

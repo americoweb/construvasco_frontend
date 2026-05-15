@@ -1,7 +1,7 @@
 <div class="job-cards-kanban-container w-full">
   <app-page-header
-    [title]="'Job Cards — Kanban'"
-    [subtitle]="'Arraste os cards entre colunas para avançar o fluxo'"
+    [title]="'Kanban — Fichas de projecto'"
+    [subtitle]="'Arraste as fichas entre colunas para avançar o fluxo operacional'"
     [showSearch]="false"
     [showFilters]="false"
     [actions]="pageHeaderActions"
@@ -9,175 +9,196 @@
     (refresh)="load()">
   </app-page-header>
 
-  <div class="container mx-auto px-4 py-6">
+  <div class="container mx-auto px-4 py-4 md:py-6">
 
-    <!-- Loading state -->
     @if (loading) {
-      <div class="flex items-center justify-center h-64 text-gray-400">
-        <span class="animate-spin material-icons mr-2">autorenew</span> A carregar...
+      <div class="flex flex-col items-center justify-center gap-3 rounded-xl border border-slate-200 bg-slate-50 py-16 text-slate-500">
+        <mat-icon class="animate-spin text-teal-600" style="width: 2rem; height: 2rem; font-size: 2rem">sync</mat-icon>
+        <span class="text-sm font-medium">A carregar quadro…</span>
       </div>
     }
 
     @if (!loading) {
-      <!-- Kanban board -->
-      <div class="flex gap-4 overflow-x-auto pb-4 min-h-[70vh]">
+      <div class="kanban-scroll flex gap-4 overflow-x-auto pb-2 min-h-[65vh]">
 
         @for (col of columns; track trackByStatus($index, col)) {
-          <div class="flex-shrink-0 w-72">
+          <mat-card class="kanban-column-card flex-shrink-0 w-[17.5rem] md:w-72 shadow-sm border border-slate-200/90">
+            <mat-card-header class="!flex !flex-row !items-center !justify-between gap-2 !pb-1 px-1">
+              <div class="flex min-w-0 flex-1 items-center gap-2">
+                <span
+                  class="truncate rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide"
+                  [ngClass]="{
+                    'bg-blue-100 text-blue-800': col.color === 'blue',
+                    'bg-purple-100 text-purple-800': col.color === 'purple',
+                    'bg-amber-100 text-amber-900': col.color === 'yellow',
+                    'bg-orange-100 text-orange-900': col.color === 'orange',
+                    'bg-indigo-100 text-indigo-800': col.color === 'indigo',
+                    'bg-slate-100 text-slate-700': col.color === 'gray'
+                  }">
+                  {{ col.label }}
+                </span>
+              </div>
+              <mat-chip-set class="!ml-0 shrink-0">
+                <mat-chip class="!h-7 !min-h-0 !px-2 !text-xs !font-semibold">
+                  {{ col.cards.length }}
+                </mat-chip>
+              </mat-chip-set>
+            </mat-card-header>
 
-            <!-- Column header -->
-            <div class="flex items-center justify-between mb-3 px-1">
-              <span
-                class="text-xs font-semibold uppercase tracking-wider px-2 py-1 rounded-full"
-                [ngClass]="{
-                  'bg-blue-100 text-blue-700':    col.color === 'blue',
-                  'bg-purple-100 text-purple-700':col.color === 'purple',
-                  'bg-yellow-100 text-yellow-700':col.color === 'yellow',
-                  'bg-orange-100 text-orange-700':col.color === 'orange',
-                  'bg-indigo-100 text-indigo-700':col.color === 'indigo',
-                  'bg-gray-100 text-gray-700':    col.color === 'gray'
-                }"
-              >{{ col.label }}</span>
-              <span class="text-xs text-gray-400 font-medium">{{ col.cards.length }}</span>
-            </div>
+            <mat-divider class="!my-2"></mat-divider>
 
-            <!-- Drop zone -->
-            <div
-              cdkDropList
-              [id]="'col-' + col.status"
-              [cdkDropListData]="col.cards"
-              [cdkDropListConnectedTo]="dropListIds"
-              (cdkDropListDropped)="onDrop($event, col)"
-              class="min-h-[200px] rounded-xl bg-gray-50 p-2 space-y-3 border border-dashed border-gray-200"
-            >
-              @for (card of col.cards; track trackById($index, card)) {
-                <div
-                  cdkDrag
-                  class="bg-white rounded-lg shadow-sm border border-gray-100 p-3 cursor-grab hover:shadow-md transition-shadow"
-                  [class.border-red-300]="isUrgent(card)"
-                  [class.border-l-4]="isUrgent(card)"
-                  [class.border-l-red-500]="isUrgent(card)"
-                >
-                  <!-- Urgent badge -->
-                  @if (isUrgent(card)) {
-                    <div class="flex items-center gap-1 mb-2">
-                      <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">
-                        ⚠️ URGENTE
-                      </span>
-                    </div>
-                  }
-
-                  <!-- Job number + title -->
-                  <div class="flex items-start justify-between gap-2 mb-2">
-                    <div>
-                      <p class="text-xs text-gray-400 font-mono">{{ card.job_number }}</p>
-                      <p class="text-sm font-semibold text-gray-800 leading-tight line-clamp-2">{{ card.title }}</p>
-                    </div>
-                    <button
-                      (click)="viewCard(card)"
-                      class="text-gray-400 hover:text-indigo-600 flex-shrink-0"
-                      title="Abrir"
-                    >
-                      <span class="material-icons text-base">open_in_new</span>
-                    </button>
-                  </div>
-
-                  <!-- Priority badge -->
-                  <div class="flex items-center gap-2 mb-2">
-                    <span
-                      class="text-xs px-2 py-0.5 rounded-full font-medium"
-                      [ngClass]="{
-                        'bg-green-100 text-green-700':  card.priority_color === 'green',
-                        'bg-yellow-100 text-yellow-700':card.priority_color === 'yellow',
-                        'bg-red-100 text-red-700':      card.priority_color === 'red'
-                      }"
-                    >{{ card.priority_label }}</span>
-
-                    @if (card.client_tier === 'vip') {
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold">VIP</span>
-                    }
-                  </div>
-
-                  <!-- Footer: client, deadline, revisions -->
-                  <div class="flex items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-50">
-                    <span class="truncate max-w-[120px]">{{ card.client?.name ?? '—' }}</span>
-                    <div class="flex items-center gap-2">
-                      @if (isOverdue(card)) {
-                        <span class="text-red-500 font-semibold">⏱ Atrasado</span>
-                      } @else {
-                        <span>{{ formatDeadline(card.deadline) }}</span>
+            <mat-card-content class="!pb-3 !pt-0">
+              <div
+                cdkDropList
+                [id]="'col-' + col.status"
+                [cdkDropListData]="col.cards"
+                [cdkDropListConnectedTo]="dropListIds"
+                (cdkDropListDropped)="onDrop($event, col)"
+                class="kanban-drop space-y-2.5 rounded-lg border border-dashed border-slate-200 bg-slate-50/80 p-2">
+                @for (card of col.cards; track trackById($index, card)) {
+                  <mat-card
+                    cdkDrag
+                    class="kanban-card !shadow-sm border border-slate-200/90 transition-shadow hover:shadow-md"
+                    [class.kanban-card--urgent]="isUrgent(card)">
+                    <mat-card-content class="!p-3">
+                      @if (isUrgent(card)) {
+                        <div class="mb-2 flex items-center gap-1">
+                          <span class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-bold text-red-700"> Urgente </span>
+                        </div>
                       }
-                      <span class="text-gray-300">|</span>
-                      <span
-                        [class.text-red-500]="card.over_revision_limit"
-                        [class.font-semibold]="card.over_revision_limit"
-                      >Rev {{ card.revision_count }}/{{ card.revision_limit }}</span>
-                    </div>
-                  </div>
-                </div>
-              }
 
-              <!-- Empty column placeholder -->
-              @if (col.cards.length === 0) {
-                <div class="flex flex-col items-center justify-center h-24 text-gray-300 text-sm">
-                  <span class="material-icons mb-1">inbox</span>
-                  Sem jobs
-                </div>
-              }
-            </div>
-          </div>
+                      <div class="mb-2 flex items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1">
+                          <p class="mb-0.5 font-mono text-[11px] text-slate-400">{{ card.job_number }}</p>
+                          <p class="line-clamp-2 text-sm font-semibold leading-snug text-slate-900">{{ card.title }}</p>
+                        </div>
+                        <button
+                          mat-icon-button
+                          type="button"
+                          (click)="viewCard(card); $event.stopPropagation()"
+                          matTooltip="Abrir ficha"
+                          class="!-mr-1 shrink-0 text-slate-400 hover:text-teal-700">
+                          <mat-icon>open_in_new</mat-icon>
+                        </button>
+                      </div>
+
+                      <div class="mb-2 flex flex-wrap items-center gap-1.5">
+                        <span
+                          class="rounded-full px-2 py-0.5 text-xs font-medium"
+                          [ngClass]="{
+                            'bg-emerald-100 text-emerald-800': card.priority_color === 'green',
+                            'bg-amber-100 text-amber-900': card.priority_color === 'yellow',
+                            'bg-red-100 text-red-800': card.priority_color === 'red'
+                          }">
+                          {{ card.priority_label }}
+                        </span>
+                        @if (card.client_tier === 'vip') {
+                          <span class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">VIP</span>
+                        }
+                      </div>
+
+                      <mat-divider class="!my-2"></mat-divider>
+
+                      <div class="flex items-center justify-between gap-2 text-xs text-slate-500">
+                        <span class="min-w-0 truncate">{{ card.client?.name ?? '—' }}</span>
+                        <div class="flex shrink-0 items-center gap-1.5">
+                          @if (isOverdue(card)) {
+                            <span class="font-semibold text-red-600">Atrasado</span>
+                          } @else {
+                            <span>{{ formatDeadline(card.deadline) }}</span>
+                          }
+                          <span class="text-slate-300">·</span>
+                          <span
+                            [class.text-red-600]="card.over_revision_limit"
+                            [class.font-semibold]="card.over_revision_limit">
+                            Rev {{ card.revision_count }}/{{ card.revision_limit }}
+                          </span>
+                        </div>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                }
+
+                @if (col.cards.length === 0) {
+                  <div
+                    class="empty-col flex min-h-[10rem] flex-col items-center justify-center gap-2 px-3 py-6 text-center">
+                    <mat-icon class="text-slate-300" style="width: 2.5rem; height: 2.5rem; font-size: 2.5rem">inbox</mat-icon>
+                    <p class="m-0 text-xs font-medium text-slate-500">Sem fichas nesta etapa</p>
+                    <p class="m-0 max-w-[12rem] text-[11px] leading-snug text-slate-400">
+                      Arraste uma ficha para aqui ou crie uma nova na vista lista.
+                    </p>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
         }
       </div>
 
-      <!-- Done + Cancelled sections -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-
-        <!-- Done -->
-        <div>
-          <h3 class="text-sm font-semibold text-green-700 mb-2 flex items-center gap-1">
-            <span class="material-icons text-base">check_circle</span> Concluídos (últimos 20)
-          </h3>
-          <div class="space-y-2">
+      <div class="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <mat-card class="done-section border border-emerald-100/80 shadow-sm">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="!flex !h-10 !w-10 !items-center !justify-center rounded-full bg-emerald-50 text-emerald-700">
+              check_circle
+            </mat-icon>
+            <mat-card-title class="!text-base">Concluídos</mat-card-title>
+            <mat-card-subtitle>Últimos 20</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content class="space-y-2">
             @for (card of doneCards; track card.id) {
-              <div class="bg-white rounded-lg border border-green-100 p-3 flex items-center justify-between text-sm">
-                <div>
-                  <span class="text-xs text-gray-400 font-mono mr-2">{{ card.job_number }}</span>
-                  <span class="font-medium text-gray-700">{{ card.title }}</span>
+              <div
+                class="flex items-center justify-between gap-2 rounded-lg border border-emerald-100 bg-white px-3 py-2.5 text-sm">
+                <div class="min-w-0">
+                  <span class="mr-2 font-mono text-[11px] text-slate-400">{{ card.job_number }}</span>
+                  <span class="font-medium text-slate-800">{{ card.title }}</span>
                 </div>
-                <button (click)="viewCard(card)" class="text-gray-400 hover:text-indigo-600">
-                  <span class="material-icons text-base">open_in_new</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="viewCard(card)"
+                  matTooltip="Abrir"
+                  class="shrink-0 text-slate-400 hover:text-teal-700">
+                  <mat-icon>open_in_new</mat-icon>
                 </button>
               </div>
             }
             @if (doneCards.length === 0) {
-              <p class="text-sm text-gray-400 text-center py-4">Nenhum job concluído</p>
+              <p class="py-6 text-center text-sm text-slate-400">Nenhuma ficha concluída recentemente.</p>
             }
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
 
-        <!-- Cancelled -->
-        <div>
-          <h3 class="text-sm font-semibold text-red-700 mb-2 flex items-center gap-1">
-            <span class="material-icons text-base">cancel</span> Cancelados (últimos 10)
-          </h3>
-          <div class="space-y-2">
+        <mat-card class="cancel-section border border-red-100/80 shadow-sm">
+          <mat-card-header>
+            <mat-icon mat-card-avatar class="!flex !h-10 !w-10 !items-center !justify-center rounded-full bg-red-50 text-red-700">
+              cancel
+            </mat-icon>
+            <mat-card-title class="!text-base">Cancelados</mat-card-title>
+            <mat-card-subtitle>Últimos 10</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content class="space-y-2">
             @for (card of cancelledCards; track card.id) {
-              <div class="bg-white rounded-lg border border-red-100 p-3 flex items-center justify-between text-sm">
-                <div>
-                  <span class="text-xs text-gray-400 font-mono mr-2">{{ card.job_number }}</span>
-                  <span class="font-medium text-gray-500 line-through">{{ card.title }}</span>
+              <div
+                class="flex items-center justify-between gap-2 rounded-lg border border-red-100 bg-white px-3 py-2.5 text-sm">
+                <div class="min-w-0">
+                  <span class="mr-2 font-mono text-[11px] text-slate-400">{{ card.job_number }}</span>
+                  <span class="font-medium text-slate-500 line-through">{{ card.title }}</span>
                 </div>
-                <button (click)="viewCard(card)" class="text-gray-400 hover:text-indigo-600">
-                  <span class="material-icons text-base">open_in_new</span>
+                <button
+                  mat-icon-button
+                  type="button"
+                  (click)="viewCard(card)"
+                  matTooltip="Abrir"
+                  class="shrink-0 text-slate-400 hover:text-teal-700">
+                  <mat-icon>open_in_new</mat-icon>
                 </button>
               </div>
             }
             @if (cancelledCards.length === 0) {
-              <p class="text-sm text-gray-400 text-center py-4">Nenhum job cancelado</p>
+              <p class="py-6 text-center text-sm text-slate-400">Nenhuma ficha cancelada neste período.</p>
             }
-          </div>
-        </div>
-
+          </mat-card-content>
+        </mat-card>
       </div>
     }
 

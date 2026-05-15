@@ -88,7 +88,14 @@ export const routes: Route[] = [
                     {path: '', pathMatch: 'full', redirectTo: 'dashboard'},
                     {path: 'dashboard', loadComponent: () => import('./modules/account/views/dashboard/dashboard.component').then(m => m.DashboardComponent)},
                     {path: 'pedidos', loadComponent: () => import('./modules/account/views/orders/orders.component').then(m => m.OrdersComponent)},
-                    {path: 'designs', loadComponent: () => import('./modules/account/views/saved-designs/saved-designs.component').then(m => m.SavedDesignsComponent)},
+                    {path: 'designs', pathMatch: 'full', redirectTo: 'projectos'},
+                    {
+                        path: 'projectos',
+                        loadComponent: () =>
+                            import('./modules/account/views/saved-designs/saved-designs.component').then(
+                                (m) => m.SavedDesignsComponent
+                            ),
+                    },
                     {path: 'pagamentos', loadComponent: () => import('./modules/account/views/payment-methods/payment-methods.component').then(m => m.PaymentMethodsComponent)},
                     {path: 'definicoes', loadComponent: () => import('./modules/account/views/settings/settings.component').then(m => m.SettingsComponent)},
                 ]
@@ -100,16 +107,15 @@ export const routes: Route[] = [
     {
         path: 'admin',
         component: LayoutComponent,
+        // Only canActivate: canActivateChild would run this guard once per nested segment (admin → orders → list).
         canActivate: [adminGuard],
-        canActivateChild: [adminGuard],
-       
         children: [
             { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
             {
                 path: 'dashboard',
                 data: {
                     title: 'Painel',
-                    description: 'Visão geral da administração',
+                    description: 'Visão geral da operação',
                 },
                 loadComponent: () =>
                     import('./modules/admin/dashboard/admin-dashboard.component').then(
@@ -117,10 +123,19 @@ export const routes: Route[] = [
                     ),
             },
             {
+                path: 'financas',
+                data: {
+                    title: 'Finanças',
+                    description: 'Pagamentos e resumo financeiro (MVP)',
+                },
+                loadComponent: () =>
+                    import('./modules/admin/finances/admin-finances.component').then((m) => m.AdminFinancesComponent),
+            },
+            {
                 path: 'settings',
                 data: {
-                    title: 'Settings',
-                    description: 'Manage your account and preferences',
+                    title: 'Configurações',
+                    description: 'Conta e preferências',
                 },
                 loadComponent: () => import('./modules/settings/settings.component').then(m => m.SettingsComponent)
             },
@@ -156,8 +171,8 @@ export const routes: Route[] = [
             {
                 path: 'orders',
                 data: {
-                    title: 'Orders',
-                    description: 'Manage orders',
+                    title: 'Pedidos',
+                    description: 'Pedidos de serviço e estados',
                 },
                 loadComponent: () => import('./modules/admin/orders/orders.component').then(m => m.OrdersComponent),
                 children: [
@@ -186,7 +201,7 @@ export const routes: Route[] = [
             },
             {
                 path: 'staff',
-                data: { title: 'Staff', description: 'Gestão de membros da equipa' },
+                data: { title: 'Equipa', description: 'Membros e perfis da equipa' },
                 loadComponent: () => import('./modules/admin/staff/staff.component').then(m => m.StaffComponent),
                 children: [
                     { path: '', pathMatch: 'full', redirectTo: 'list' },
@@ -198,8 +213,8 @@ export const routes: Route[] = [
             {
                 path: 'job-cards',
                 data: {
-                    title: 'Job Cards',
-                    description: 'Gestão de trabalhos de design e produção',
+                    title: 'Fichas de projecto',
+                    description: 'Execução técnica, marcos e entregas por projecto',
                 },
                 loadComponent: () => import('./modules/admin/job-cards/job-cards.component').then(m => m.JobCardsComponent),
                 children: [

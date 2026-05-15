@@ -9,14 +9,14 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 p-5 lg:p-6">
+    <main class="flex-1 min-w-0 w-full p-5 lg:p-6">
       <router-outlet (activate)="onRouteActivate($event)" (deactivate)="onRouteDeactivate($event)"></router-outlet>
     </main>
   </div>
 
   <!-- Mobile Layout: Content Only (Bottom Tabs) -->
   <div class="md:hidden flex-1">
-    <main class="pb-20">
+    <main class="pb-20 w-full min-w-0 p-4">
       <router-outlet (activate)="onRouteActivate($event)" (deactivate)="onRouteDeactivate($event)"></router-outlet>
     </main>
 
@@ -46,14 +46,14 @@
         </a>
 
         <a
-          routerLink="/conta/designs"
+          routerLink="/conta/projectos"
           routerLinkActive="text-blue-600"
           [routerLinkActiveOptions]="{exact: false}"
           class="flex flex-col items-center justify-center flex-1 text-gray-600 hover:text-blue-600 transition-colors">
           <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
-          <span class="text-xs">Designs</span>
+          <span class="text-xs">Projectos</span>
         </a>
 
         <a

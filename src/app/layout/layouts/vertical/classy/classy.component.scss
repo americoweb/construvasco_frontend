@@ -1,0 +1,4 @@
+/* Largura da sidebar: o Fuse define 280px em :root; aqui herdámos um valor maior só dentro deste layout. */
+classy-layout {
+  --fuse-vertical-navigation-width: 312px;
+}

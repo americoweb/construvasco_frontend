@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, catchError, finalize, tap } from 'rxjs/operators';
 import { throwError } from 'rxjs';
@@ -232,20 +232,36 @@ export class OrderService extends BaseService<Order> {
   }
 
   // Get user orders (for customer account page)
-  getUserOrders(page: number = 1, perPage: number = 15): Observable<ApiResponse<Order[]>> {
+  getUserOrders(
+    page: number = 1,
+    perPage: number = 15,
+    filters?: { status?: string; search?: string }
+  ): Observable<ApiResponse<Order[]>> {
     this.loading.next(true);
-    return this.httpClient.get<ApiResponse<Order[]>>(
-      this.configService.getApiUrl(`${API_ENDPOINTS.ORDERS.USER_ORDERS}?page=${page}&per_page=${perPage}`)
-    ).pipe(
-      map(response => {
-        if (response.data) {
-          this.items.next(response.data);
-        }
-        return response;
-      }),
-      this.handleError('getUserOrders'),
-      this.finalizeLoading()
-    );
+    let params = new HttpParams()
+      .set('page', String(page))
+      .set('per_page', String(perPage));
+    if (filters?.status) {
+      params = params.set('status', filters.status);
+    }
+    const q = filters?.search?.trim();
+    if (q) {
+      params = params.set('search', q);
+    }
+    return this.httpClient
+      .get<ApiResponse<Order[]>>(
+        this.configService.getApiUrl(API_ENDPOINTS.ORDERS.USER_ORDERS),
+        { params }
+      )
+      .pipe(
+        tap((response) => {
+          if (response.data) {
+            this.items.next(response.data);
+          }
+        }),
+        this.handleError('getUserOrders'),
+        this.finalizeLoading()
+      );
   }
 
   // Helper method to update item in list

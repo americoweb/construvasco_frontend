@@ -39,11 +39,17 @@ export class OrderStatusUpdateDialogComponent {
   form: FormGroup;
   statusOptions = [
     { value: OrderStatus.PENDING, label: 'Pendente', color: 'yellow' },
+    { value: OrderStatus.TRIAGED, label: 'Triado', color: 'blue' },
+    { value: OrderStatus.ASSIGNED, label: 'Atribuído', color: 'indigo' },
+    { value: OrderStatus.IN_DESIGN, label: 'Em Projeto', color: 'purple' },
+    { value: OrderStatus.AWAITING_CLIENT, label: 'Aguardando Cliente', color: 'orange' },
+    { value: OrderStatus.APPROVED, label: 'Aprovado', color: 'teal' },
+    { value: OrderStatus.IN_EXECUTION, label: 'Em Execução', color: 'cyan' },
     { value: OrderStatus.CONFIRMED, label: 'Confirmado', color: 'blue' },
     { value: OrderStatus.IN_PRODUCTION, label: 'Em Produção', color: 'orange' },
     { value: OrderStatus.SHIPPED, label: 'Enviado', color: 'purple' },
     { value: OrderStatus.DELIVERED, label: 'Entregue', color: 'green' },
-    { value: OrderStatus.CANCELLED, label: 'Cancelado', color: 'red' }
+    { value: OrderStatus.CANCELLED, label: 'Cancelado', color: 'red' },
   ];
   availableStatuses: Array<{ value: OrderStatus; label: string; color: string }> = [];
 
@@ -76,16 +82,22 @@ export class OrderStatusUpdateDialogComponent {
       if (option.value === currentStatus) return false;
       
       // Basic validation - can be enhanced with backend validation
-      const validTransitions: Record<OrderStatus, OrderStatus[]> = {
-        [OrderStatus.PENDING]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+      const validTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
+        [OrderStatus.PENDING]: [OrderStatus.TRIAGED, OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+        [OrderStatus.TRIAGED]: [OrderStatus.ASSIGNED, OrderStatus.CANCELLED],
+        [OrderStatus.ASSIGNED]: [OrderStatus.IN_DESIGN, OrderStatus.CANCELLED],
+        [OrderStatus.IN_DESIGN]: [OrderStatus.AWAITING_CLIENT, OrderStatus.CANCELLED],
+        [OrderStatus.AWAITING_CLIENT]: [OrderStatus.IN_DESIGN, OrderStatus.APPROVED, OrderStatus.CANCELLED],
+        [OrderStatus.APPROVED]: [OrderStatus.IN_EXECUTION, OrderStatus.CANCELLED],
+        [OrderStatus.IN_EXECUTION]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
         [OrderStatus.CONFIRMED]: [OrderStatus.IN_PRODUCTION, OrderStatus.CANCELLED],
         [OrderStatus.IN_PRODUCTION]: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
-        [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED],
+        [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.CANCELLED],
         [OrderStatus.DELIVERED]: [],
-        [OrderStatus.CANCELLED]: []
+        [OrderStatus.CANCELLED]: [],
       };
 
-      return validTransitions[currentStatus]?.includes(option.value) || false;
+      return validTransitions[currentStatus]?.includes(option.value) ?? false;
     });
     
     // If no valid transitions, allow all statuses except current (for edge cases)

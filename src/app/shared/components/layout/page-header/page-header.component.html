@@ -1,103 +1,83 @@
-<div class="bg-white border-b border-gray-200 px-4 py-4 sm:px-6 lg:px-8">
+<div class="page-header">
   <div class="flex flex-col space-y-4">
-    
-    <!-- Top Section: Breadcrumbs -->
+    <!-- Breadcrumbs -->
     <div *ngIf="breadcrumbs.length > 0">
       <app-breadcrumb [items]="breadcrumbs"></app-breadcrumb>
     </div>
 
-    <!-- Middle Section: Title and Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-      
-      <!-- Left: Title and Subtitle -->
+    <!-- Title + actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
       <div class="flex-1 min-w-0">
-        <h1 class="text-2xl font-bold text-gray-900 sm:text-3xl sm:truncate">
+        <h1 class="page-header__title sm:truncate">
           {{ title }}
         </h1>
-        <p *ngIf="subtitle" class="mt-1 text-sm text-gray-500">
+        <p *ngIf="subtitle" class="page-header__subtitle">
           {{ subtitle }}
         </p>
       </div>
 
-      <!-- Right: Action Buttons -->
-      <div class="mt-4 sm:mt-0 sm:ml-4">
-        <div class="flex items-center space-x-3">
-          
-          <!-- Refresh Button -->
+      <div class="page-header__actions flex flex-wrap items-center gap-2 sm:justify-end">
+        <button
+          *ngIf="showRefresh || showFilters || showSearch"
+          type="button"
+          class="page-header__icon-btn"
+          [disabled]="loading"
+          (click)="onRefresh()"
+          [attr.aria-label]="'Actualizar'">
+          <mat-icon [class.animate-spin]="loading">refresh</mat-icon>
+        </button>
+
+        <div *ngIf="showViewToggle && viewOptions.length > 0" class="page-header__view-toggle">
           <button
-            *ngIf="showFilters || showSearch"
+            *ngFor="let option of viewOptions; trackBy: trackByValue"
             type="button"
-            class="inline-flex items-center p-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            [disabled]="loading"
-            (click)="onRefresh()">
-            <mat-icon 
-              class="h-4 w-4" 
-              [class.animate-spin]="loading">
-              refresh
-            </mat-icon>
+            class="page-header__view-toggle-btn"
+            [class.page-header__view-toggle-btn--active]="currentView === option.value"
+            (click)="onViewChange(option.value)">
+            <mat-icon class="page-header__view-toggle-icon">{{ option.icon }}</mat-icon>
+            <span class="ml-2 hidden sm:inline">{{ option.label }}</span>
           </button>
+        </div>
 
-          <!-- View Toggle -->
-          <div *ngIf="showViewToggle && viewOptions.length > 0" class="flex bg-gray-100 rounded-lg p-1">
-            <button
-              *ngFor="let option of viewOptions; trackBy: trackByValue"
-              type="button"
-              class="px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
-              [class]="currentView === option.value 
-                ? 'bg-white text-gray-900 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'"
-              (click)="onViewChange(option.value)">
-              <mat-icon class="h-4 w-4">{{ option.icon }}</mat-icon>
-              <span class="ml-2 hidden sm:inline">{{ option.label }}</span>
-            </button>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="flex items-center space-x-2">
-            <app-button
-              *ngFor="let action of actions"
-              [variant]="action.variant || 'primary'"
-              [icon]="action.icon"
-              [disabled]="action.disabled"
-              (onClick)="onActionClick(action)">
-              {{ action.label }}
-            </app-button>
-          </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <app-button
+            *ngFor="let action of actions"
+            size="sm"
+            [variant]="action.variant || 'primary'"
+            [icon]="action.icon"
+            [disabled]="action.disabled"
+            (onClick)="onActionClick(action)">
+            {{ action.label }}
+          </app-button>
         </div>
       </div>
     </div>
 
-    <!-- Bottom Section: Search and Filters -->
-    <div *ngIf="showSearch || showFilters" class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-      
-      <!-- Search -->
-      <div *ngIf="showSearch" class="flex-1 max-w-lg">
-        <div class="relative">
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <mat-icon class="h-5 w-5 text-gray-400">search</mat-icon>
-          </div>
+    <!-- Search + filters -->
+    <div
+      *ngIf="showSearch || showFilters"
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div *ngIf="showSearch" class="page-header__search-field w-full sm:flex-1 max-w-lg">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="page-header__search-mat w-full">
+          <mat-icon matPrefix class="page-header__search-prefix">search</mat-icon>
           <input
+            matInput
             type="text"
-            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             [placeholder]="searchPlaceholder"
-            [value]="searchValue"
-            (input)="onSearchChange($event.target?.value || '')">
-        </div>
+            [ngModel]="searchValue"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="onSearchChange($event)" />
+        </mat-form-field>
       </div>
 
-      <!-- Filters Toggle -->
       <div *ngIf="showFilters" class="flex items-center">
-        <button
-          type="button"
-          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          (click)="onFilterToggle()">
-          <mat-icon class="h-4 w-4 mr-2">filter_list</mat-icon>
-          Filters
+        <button type="button" class="page-header__filter-btn" (click)="onFilterToggle()">
+          <mat-icon class="page-header__filter-icon">filter_list</mat-icon>
+          Filtros
         </button>
       </div>
     </div>
 
-    <!-- Slot for custom content -->
     <div class="content-slot">
       <ng-content></ng-content>
     </div>

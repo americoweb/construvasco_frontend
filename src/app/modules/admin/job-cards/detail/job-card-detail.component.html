@@ -152,8 +152,10 @@
 
   <!-- Tabs -->
   <div class="flex border-b border-gray-200 mb-6 gap-1 overflow-x-auto">
-    @for (tab of ['info', 'items', 'design', 'files', 'feedback']; track tab) {
+    @for (tab of ['info', 'pedido', 'items', 'design', 'files', 'feedback']; track tab) {
+      @if (tab !== 'pedido' || jobCard.order_id) {
       <button
+        type="button"
         (click)="setTab(tab)"
         class="px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap flex items-center gap-1.5"
         [class.border-indigo-500]="activeTab === tab"
@@ -164,11 +166,15 @@
         @if (tab === 'design') {
           <span class="material-icons text-sm">auto_awesome</span>
         }
-        {{ tab === 'info' ? 'Informação' : tab === 'items' ? 'Itens' : tab === 'design' ? 'Design' : tab === 'files' ? 'Ficheiros' : 'Feedback' }}
+        @if (tab === 'pedido') {
+          <span class="material-icons text-sm">shopping_cart</span>
+        }
+        {{ tab === 'info' ? 'Informação' : tab === 'pedido' ? 'Pedido' : tab === 'items' ? 'Itens' : tab === 'design' ? 'Design' : tab === 'files' ? 'Ficheiros' : 'Feedback' }}
         @if (tab === 'design' && designFiles.length > 0) {
           <span class="ml-0.5 px-1.5 py-0.5 rounded-full bg-indigo-100 text-indigo-600 text-[10px] font-bold leading-none">{{ designFiles.length }}</span>
         }
       </button>
+      }
     }
   </div>
 
@@ -188,9 +194,11 @@
             <div class="flex gap-2 mt-4 pt-4 border-t border-gray-100">
               <dt class="text-gray-400 w-28 flex-shrink-0">Origem</dt>
               <dd class="font-medium text-indigo-600">
-                <a [routerLink]="['/admin/orders', jobCard.order_id]" class="hover:underline flex items-center gap-1 w-max">
-                  <span class="material-icons text-sm">shopping_cart</span> Pedido #{{ jobCard.order_id }} (Online)
-                </a>
+                <button type="button" (click)="setTab('pedido')" class="hover:underline flex items-center gap-1 w-max text-left bg-transparent border-0 p-0 cursor-pointer text-indigo-600 font-medium">
+                  <span class="material-icons text-sm">shopping_cart</span>
+                  Pedido comercial ({{ jobCard.order?.order_number || '#' + jobCard.order_id }})
+                </button>
+                <a class="block text-xs text-gray-500 mt-1 hover:text-indigo-600" [routerLink]="['/admin/orders', jobCard.order_id]" [queryParams]="{ stay: 1 }">Abrir só pedido →</a>
               </dd>
             </div>
           }
@@ -208,6 +216,21 @@
         </dl>
       </div>
 
+    </div>
+  }
+
+  <!-- TAB: Pedido (commercial order cockpit) -->
+  @if (activeTab === 'pedido' && jobCard.order_id && jobCard.order) {
+    <app-order-detail-panel
+      [order]="jobCard.order"
+      [embedded]="true"
+      (orderUpdated)="onLinkedOrderUpdated($event)">
+    </app-order-detail-panel>
+  }
+  @if (activeTab === 'pedido' && jobCard.order_id && !jobCard.order) {
+    <div class="flex items-center justify-center py-16 text-gray-500 gap-2">
+      <span class="material-icons animate-spin">autorenew</span>
+      A carregar dados do pedido…
     </div>
   }
 

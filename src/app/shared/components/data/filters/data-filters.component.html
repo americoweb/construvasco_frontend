@@ -1,30 +1,22 @@
-<div class="data-filters bg-white border border-gray-200 rounded-lg p-4">
-  
-  <!-- Filter Header -->
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="text-lg font-medium text-gray-900">Filters</h3>
-    <div class="flex items-center gap-2">
-      <span *ngIf="hasActiveFilters()" 
-            class="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded">
-        {{ getActiveFiltersCount() }} active
-      </span>
-      <button mat-button
-              color="primary"
-              (click)="onReset()"
-              [disabled]="!hasActiveFilters()">
+<div class="data-filters">
+  <div class="data-filters__header">
+    <h3 class="data-filters__title">Filtros</h3>
+    <div class="flex items-center gap-2 flex-wrap">
+      <span *ngIf="hasActiveFilters()" class="data-filters__badge"> {{ getActiveFiltersCount() }} ativos </span>
+      <button mat-button color="primary" class="data-filters__reset" (click)="onReset()" [disabled]="!hasActiveFilters()">
         <mat-icon>clear</mat-icon>
-        Reset
+        Limpar
       </button>
     </div>
   </div>
 
-  <!-- Active Filters Chips -->
-  <div *ngIf="hasActiveFilters()" class="mb-4">
+  <div *ngIf="hasActiveFilters()" class="mb-3">
     <div class="flex flex-wrap gap-2">
-      <mat-chip *ngFor="let field of fields"
-                [removable]="true"
-                (removed)="removeFilter(field.key)"
-                class="text-sm">
+      <mat-chip
+        *ngFor="let field of fields"
+        [removable]="true"
+        (removed)="removeFilter(field.key)"
+        class="text-sm">
         <strong>{{ field.label }}:</strong>
         <span class="ml-1">{{ getFieldDisplayValue(field) }}</span>
         <mat-icon matChipRemove>cancel</mat-icon>
@@ -32,65 +24,43 @@
     </div>
   </div>
 
-  <!-- Filter Form -->
-  <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    
+  <form [formGroup]="filterForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
     <ng-container *ngFor="let field of fields">
-      
-      <!-- Text Input -->
-      <mat-form-field *ngIf="field.type === 'text'" appearance="outline">
+      <mat-form-field *ngIf="field.type === 'text'" appearance="outline" subscriptSizing="dynamic" class="data-filters__field">
         <mat-label>{{ field.label }}</mat-label>
-        <input matInput 
-               [formControlName]="field.key"
-               [placeholder]="field.placeholder">
+        <input matInput [formControlName]="field.key" [placeholder]="field.placeholder" />
       </mat-form-field>
 
-      <!-- Number Input -->
-      <mat-form-field *ngIf="field.type === 'number'" appearance="outline">
+      <mat-form-field *ngIf="field.type === 'number'" appearance="outline" subscriptSizing="dynamic" class="data-filters__field">
         <mat-label>{{ field.label }}</mat-label>
-        <input matInput 
-               type="number"
-               [formControlName]="field.key"
-               [placeholder]="field.placeholder">
+        <input matInput type="number" [formControlName]="field.key" [placeholder]="field.placeholder" />
       </mat-form-field>
 
-      <!-- Select -->
-      <mat-form-field *ngIf="field.type === 'select'" appearance="outline">
+      <mat-form-field *ngIf="field.type === 'select'" appearance="outline" subscriptSizing="dynamic" class="data-filters__field">
         <mat-label>{{ field.label }}</mat-label>
-        <mat-select [formControlName]="field.key"
-                    [placeholder]="field.placeholder">
-          <mat-option value="">All</mat-option>
-          <mat-option *ngFor="let option of field.options" 
-                      [value]="option.value">
+        <mat-select [formControlName]="field.key" [placeholder]="field.placeholder">
+          <mat-option value="">Todos</mat-option>
+          <mat-option *ngFor="let option of field.options" [value]="option.value">
             {{ option.label }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <!-- Multi Select -->
-      <mat-form-field *ngIf="field.type === 'multiselect'" appearance="outline">
+      <mat-form-field *ngIf="field.type === 'multiselect'" appearance="outline" subscriptSizing="dynamic" class="data-filters__field">
         <mat-label>{{ field.label }}</mat-label>
-        <mat-select [formControlName]="field.key"
-                    multiple
-                    [placeholder]="field.placeholder">
-          <mat-option *ngFor="let option of field.options" 
-                      [value]="option.value">
+        <mat-select [formControlName]="field.key" multiple [placeholder]="field.placeholder">
+          <mat-option *ngFor="let option of field.options" [value]="option.value">
             {{ option.label }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <!-- Date -->
-      <mat-form-field *ngIf="field.type === 'date'" appearance="outline">
+      <mat-form-field *ngIf="field.type === 'date'" appearance="outline" subscriptSizing="dynamic" class="data-filters__field">
         <mat-label>{{ field.label }}</mat-label>
-        <input matInput 
-               [matDatepicker]="picker"
-               [formControlName]="field.key"
-               [placeholder]="field.placeholder">
+        <input matInput [matDatepicker]="picker" [formControlName]="field.key" [placeholder]="field.placeholder" />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
-
     </ng-container>
   </form>
 </div>

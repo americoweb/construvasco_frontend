@@ -2,6 +2,12 @@
 
 export enum OrderStatus {
   PENDING = 'pending',
+  TRIAGED = 'triaged',
+  ASSIGNED = 'assigned',
+  IN_DESIGN = 'in_design',
+  AWAITING_CLIENT = 'awaiting_client',
+  APPROVED = 'approved',
+  IN_EXECUTION = 'in_execution',
   CONFIRMED = 'confirmed',
   IN_PRODUCTION = 'in_production',
   SHIPPED = 'shipped',
