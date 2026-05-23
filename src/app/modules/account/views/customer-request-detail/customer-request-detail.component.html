@@ -1,84 +1,114 @@
-<div class="request-detail max-w-2xl">
+<div class="request-detail max-w-3xl">
   @if (loading) {
     <div class="flex justify-center py-12">
       <mat-spinner diameter="36" />
     </div>
   } @else if (request) {
-    @if (justSubmitted) {
-      <mat-card class="mb-6 border-l-4 border-l-green-600">
-        <mat-card-content class="!py-4">
-          <p class="font-semibold text-green-800 mb-1">Pedido submetido</p>
-          <p class="text-sm text-slate-600 mb-0">
-            A Construvasco vai analisar o seu pedido. Receberá actualizações por email.
-          </p>
+    @if (showSubmitBanner) {
+      <mat-card class="submit-banner mb-6 border-l-4 border-l-green-600">
+        <mat-card-content class="!py-3 !flex items-start justify-between gap-3">
+          <div>
+            <p class="font-semibold text-green-800 mb-1">Pedido submetido com sucesso.</p>
+            <p class="text-sm text-slate-600 mb-0">A Construvasco vai analisar o seu pedido.</p>
+          </div>
+          <button mat-icon-button type="button" aria-label="Fechar" (click)="dismissBanner()">
+            <mat-icon>close</mat-icon>
+          </button>
         </mat-card-content>
       </mat-card>
     }
 
-    <h1 class="text-2xl font-bold mb-2">{{ request.title }}</h1>
-    <p class="text-slate-500 text-sm mb-4">{{ request.reference_code }} · {{ request.status }}</p>
+    <header class="mb-6">
+      <h1 class="text-2xl font-bold text-slate-900 mb-2">{{ request.title }}</h1>
+      <p class="text-slate-600 text-sm mb-1">
+        <span class="font-medium">{{ request.reference_code }}</span>
+        · {{ statusLabel }}
+      </p>
+      @if (request.submitted_at) {
+        <p class="text-slate-500 text-sm mb-0">
+          Submetido em {{ request.submitted_at | date: 'medium' }}
+        </p>
+      }
+    </header>
 
-    <mat-card class="mb-4">
-      <mat-card-content class="!pt-4">
-        <h2 class="text-sm font-semibold text-slate-700 mb-3">Briefing</h2>
-        <dl class="grid gap-2 text-sm">
-          <div class="flex gap-2">
-            <dt class="text-slate-500 min-w-[7rem]">Tipo</dt>
-            <dd>{{ request.project_type }} / {{ request.tipologia }}</dd>
-          </div>
-          <div class="flex gap-2">
-            <dt class="text-slate-500 min-w-[7rem]">Local</dt>
-            <dd>{{ request.localizacao || '—' }}</dd>
-          </div>
-          @if (request.area_m2) {
-            <div class="flex gap-2">
-              <dt class="text-slate-500 min-w-[7rem]">Área</dt>
-              <dd>{{ request.area_m2 }} m²</dd>
-            </div>
-          }
-          @if (request.num_pisos) {
-            <div class="flex gap-2">
-              <dt class="text-slate-500 min-w-[7rem]">Pisos</dt>
-              <dd>{{ request.num_pisos }}</dd>
-            </div>
-          }
-          @if (request.estilo_arquitectonico) {
-            <div class="flex gap-2">
-              <dt class="text-slate-500 min-w-[7rem]">Estilo</dt>
-              <dd>{{ request.estilo_arquitectonico }}</dd>
-            </div>
-          }
-          @if (request.paleta_acabamento) {
-            <div class="flex gap-2">
-              <dt class="text-slate-500 min-w-[7rem]">Paleta</dt>
-              <dd>{{ request.paleta_acabamento }}</dd>
-            </div>
-          }
-          @if (request.submitted_at) {
-            <div class="flex gap-2">
-              <dt class="text-slate-500 min-w-[7rem]">Submetido</dt>
-              <dd>{{ request.submitted_at | date: 'medium' }}</dd>
-            </div>
-          }
-        </dl>
-      </mat-card-content>
-    </mat-card>
+    @if (hasApprovedMockup) {
+      <mat-card class="mb-4 mockup-featured">
+        <mat-card-content class="!pt-4">
+          <p class="text-sm font-semibold text-slate-700 mb-3">Mockup aprovado para este projecto</p>
+          <img
+            [src]="approvedMockupUrl!"
+            alt="Mockup aprovado"
+            class="w-full rounded-lg border border-slate-200 shadow-sm"
+          />
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <p class="text-sm text-slate-500 mb-4 italic">
+        Sem mockup aprovado — a Construvasco usará o briefing escrito como referência.
+      </p>
+    }
 
-    @if (approvedMockupUrl) {
+    @if (briefingRows.length) {
       <mat-card class="mb-4">
         <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Mockup de referência aprovado</h2>
-          <img
-            [src]="approvedMockupUrl"
-            alt="Mockup aprovado"
-            class="w-full rounded-lg border border-slate-200"
-          />
-          <p class="text-xs text-slate-500 mt-2 mb-0">
-            Referência visual para a equipa Construvasco. O projecto técnico é elaborado após aceitar o orçamento.
-          </p>
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Briefing</h2>
+          <dl class="grid gap-2 text-sm">
+            @for (row of briefingRows; track row.label) {
+              <div class="flex gap-2">
+                <dt class="text-slate-500 min-w-[10rem] shrink-0">{{ row.label }}</dt>
+                <dd class="text-slate-900">{{ row.value }}</dd>
+              </div>
+            }
+          </dl>
         </mat-card-content>
       </mat-card>
     }
+
+    @if (headerRows.length) {
+      <mat-card class="mb-4">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Projecto</h2>
+          <dl class="grid gap-2 text-sm">
+            @for (row of headerRows; track row.label) {
+              <div class="flex gap-2">
+                <dt class="text-slate-500 min-w-[10rem] shrink-0">{{ row.label }}</dt>
+                <dd class="text-slate-900">{{ row.value }}</dd>
+              </div>
+            }
+          </dl>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (referenceDocuments.length) {
+      <mat-card class="mb-4">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Documentos de referência</h2>
+          <div class="doc-grid">
+            @for (doc of referenceDocuments; track doc.id) {
+              @if (documentUrl(doc); as url) {
+                <figure class="doc-thumb">
+                  <img [src]="url" [alt]="doc.original_name || 'Referência'" loading="lazy" />
+                  <figcaption class="text-xs text-slate-500 truncate px-1">
+                    {{ doc.original_name || 'Imagem' }}
+                  </figcaption>
+                </figure>
+              }
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <mat-card class="mb-6 bg-blue-50 border border-blue-100">
+      <mat-card-content class="!py-4 text-sm text-slate-700">
+        <p class="font-semibold text-slate-900 mb-2">Próximos passos</p>
+        <p class="mb-0">
+          Pedido submetido. A Construvasco vai analisar o seu pedido e enviar uma proposta de arquitectura.
+          Receberá notificação por email quando estiver disponível.
+        </p>
+      </mat-card-content>
+    </mat-card>
 
     <a mat-stroked-button routerLink="/conta/pedidos">Voltar aos pedidos</a>
   }

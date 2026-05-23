@@ -68,11 +68,11 @@ export class StudioWorkspaceComponent implements OnDestroy {
   }
 
   get generations(): AiGenerationRecord[] {
-    const all = this.state?.generations ?? [];
+    const all = (this.state?.generations ?? []).filter((g) => g.status !== 'failed');
     if (this.showSuperseded) {
       return all;
     }
-    return all.filter((g) => g.status !== 'superseded' && g.status !== 'failed');
+    return all.filter((g) => g.status !== 'superseded');
   }
 
   get approvedId(): number | null {
