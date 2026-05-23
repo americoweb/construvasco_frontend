@@ -133,7 +133,7 @@ export const routes: Route[] = [
                                 (m) => m.CustomerProjectsComponent
                             ),
                     },
-                    {path: 'pagamentos', loadComponent: () => import('./modules/account/views/payment-methods/payment-methods.component').then(m => m.PaymentMethodsComponent)},
+                    { path: 'pagamentos', pathMatch: 'full', redirectTo: 'dashboard' },
                     {path: 'definicoes', loadComponent: () => import('./modules/account/views/settings/settings.component').then(m => m.SettingsComponent)},
                 ]
             }
@@ -175,34 +175,9 @@ export const routes: Route[] = [
                 },
                 loadComponent: () => import('./modules/settings/settings.component').then(m => m.SettingsComponent)
             },
-            {
-                path: 'products',
-                data: {
-                    title: 'Products',
-                    description: 'Manage products',
-                },
-                loadComponent: () => import('./modules/admin/products/products.component').then(m => m.ProductsComponent),
-                children: [
-                    {path: '', pathMatch: 'full', redirectTo: 'list'},
-                    {path: 'list', loadComponent: () => import('./modules/admin/products/list/products-list.component').then(m => m.ProductsListComponent)},
-                    {path: 'create', loadComponent: () => import('./modules/admin/products/form/product-form.component').then(m => m.ProductFormComponent)},
-                    {path: ':id/edit', loadComponent: () => import('./modules/admin/products/form/product-form.component').then(m => m.ProductFormComponent)},
-                    {path: ':id', loadComponent: () => import('./modules/admin/products/detail/product-detail.component').then(m => m.ProductDetailComponent)},
-                ]
-            },
-            {
-                path: 'designs',
-                data: {
-                    title: 'Designs',
-                    description: 'Manage designs',
-                },
-                loadComponent: () => import('./modules/admin/designs/designs.component').then(m => m.DesignsComponent),
-                children: [
-                    {path: '', pathMatch: 'full', redirectTo: 'list'},
-                    {path: 'list', loadComponent: () => import('./modules/admin/designs/list/designs-list.component').then(m => m.DesignsListComponent)},
-                    {path: ':id', loadComponent: () => import('./modules/admin/designs/detail/design-detail.component').then(m => m.DesignDetailComponent)},
-                ]
-            },
+            { path: 'products', pathMatch: 'prefix', redirectTo: 'dashboard' },
+            { path: 'designs', pathMatch: 'prefix', redirectTo: 'dashboard' },
+            { path: 'categories', pathMatch: 'prefix', redirectTo: 'dashboard' },
             {
                 path: 'pedidos',
                 data: { title: 'Pedidos de projecto', description: 'Briefings e orçamentos' },

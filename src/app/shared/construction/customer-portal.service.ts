@@ -31,6 +31,46 @@ export class CustomerPortalService {
     );
   }
 
+  createRequest(payload: Partial<ProjectRequest>): Observable<ApiDataResponse<ProjectRequest>> {
+    return this.http.post<ApiDataResponse<ProjectRequest>>(
+      this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.PROJECT_REQUESTS),
+      payload
+    );
+  }
+
+  updateRequest(
+    id: number | string,
+    payload: Partial<ProjectRequest>
+  ): Observable<ApiDataResponse<ProjectRequest>> {
+    return this.http.patch<ApiDataResponse<ProjectRequest>>(
+      this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.PROJECT_REQUEST(id)),
+      payload
+    );
+  }
+
+  submitRequest(id: number | string): Observable<ApiDataResponse<ProjectRequest>> {
+    return this.http.post<ApiDataResponse<ProjectRequest>>(
+      this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.PROJECT_REQUEST_SUBMIT(id)),
+      {}
+    );
+  }
+
+  uploadDocument(
+    requestId: number | string,
+    file: File,
+    documentType?: string
+  ): Observable<ApiDataResponse<unknown>> {
+    const form = new FormData();
+    form.append('file', file);
+    if (documentType) {
+      form.append('document_type', documentType);
+    }
+    return this.http.post<ApiDataResponse<unknown>>(
+      this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.PROJECT_REQUEST_DOCUMENTS(requestId)),
+      form
+    );
+  }
+
   getRequest(id: number | string): Observable<ApiDataResponse<ProjectRequest>> {
     return this.http.get<ApiDataResponse<ProjectRequest>>(
       this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.PROJECT_REQUEST(id))

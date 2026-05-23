@@ -5,6 +5,10 @@ export const API_ENDPOINTS = {
     PROJECT: (id: string | number) => `v1/admin/projects/${id}`,
     ASSIGN_PROJECT: (id: string | number) => `v1/admin/projects/${id}/assign`,
     STAFF_DESIGNERS: 'v1/admin/staff/designers',
+    CREDITS: {
+      BALANCE: (userId: string | number) => `v1/admin/users/${userId}/credits`,
+      GRANT: (userId: string | number) => `v1/admin/users/${userId}/credits/grant`,
+    },
   },
   TECHNICIAN: {
     DASHBOARD: 'v1/technician/dashboard',
@@ -29,11 +33,18 @@ export const API_ENDPOINTS = {
     DASHBOARD: 'v1/customer/dashboard',
     PROJECT_REQUESTS: 'v1/customer/project-requests',
     PROJECT_REQUEST: (id: string | number) => `v1/customer/project-requests/${id}`,
+    PROJECT_REQUEST_SUBMIT: (id: string | number) => `v1/customer/project-requests/${id}/submit`,
+    PROJECT_REQUEST_DOCUMENTS: (id: string | number) => `v1/customer/project-requests/${id}/documents`,
     QUOTE: (id: string | number) => `v1/customer/quotes/${id}`,
     QUOTE_ACCEPT: (id: string | number) => `v1/customer/quotes/${id}/accept`,
     QUOTE_REJECT: (id: string | number) => `v1/customer/quotes/${id}/reject`,
     PROJECTS: 'v1/customer/projects',
     PROJECT: (id: string | number) => `v1/customer/projects/${id}`,
+    CREDITS: {
+      BALANCE: 'v1/customer/credits/balance',
+      HISTORY: 'v1/customer/credits/history',
+      PACKAGES: 'v1/customer/credit-packages',
+    },
   },
   AUTH: {
     LOGIN: 'auth/login',
@@ -63,6 +74,7 @@ export const API_ENDPOINTS = {
     SEARCH: 'search',
     EXPORT: 'export'
   },
+  /** @deprecated Legado e-commerce — fora do MVP Construvasco */
   PRODUCTS: {
     BASE: 'v1/admin/products',
     LIST: 'v1/admin/products',
@@ -135,13 +147,19 @@ export const API_ENDPOINTS = {
     PUBLIC_FOR_PRODUCT: (productId: number) => `v1/products/${productId}/testimonials`
   },
   AI: {
-    SUGGESTIONS: 'v1/ai/suggestions',
-    MOCKUP: 'v1/ai/mockup',
-    HOUSE: 'v1/ai/house',
-    FLOORPLAN: 'v1/ai/floorplan',
-    REFINE: 'v1/ai/refine',
-    HEALTH: 'v1/ai/health'
+    GENERATIONS: 'v1/ai/generations',
+    GENERATION: (id: string | number) => `v1/ai/generations/${id}`,
+    REFINE: (id: string | number) => `v1/ai/generations/${id}/refine`,
+    HEALTH: 'v1/ai/health',
+    APPROVE_GENERATION: (requestId: string | number, generationId: string | number) =>
+      `v1/customer/project-requests/${requestId}/approve-ai-generation/${generationId}`,
+    /** @deprecated legado landing — usar GENERATIONS */
+    SUGGESTIONS: 'v1/ai/generations',
+    MOCKUP: 'v1/ai/generations',
+    HOUSE: 'v1/ai/generations',
+    FLOORPLAN: 'v1/ai/generations',
   },
+  /** @deprecated Legado e-commerce */
   DESIGNS: {
     BASE: 'v1/admin/designs',
     LIST: 'v1/admin/designs',
@@ -176,6 +194,7 @@ export const API_ENDPOINTS = {
     VALIDATE: 'v1/checkout/validate',
     PROCESS: 'v1/checkout/process'
   },
+  /** @deprecated Legado e-commerce */
   ORDERS: {
     BASE: 'v1/admin/orders',
     LIST: 'v1/admin/orders',
