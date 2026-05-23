@@ -67,6 +67,8 @@ export interface ProjectRequest {
   user?: ProjectRequestUser;
   quotes?: Quote[];
   documents?: ProjectDocument[];
+  ai_generations?: AiGenerationRecord[];
+  approved_ai_generation?: AiGenerationRecord | null;
 }
 
 export interface ConstructionProject {

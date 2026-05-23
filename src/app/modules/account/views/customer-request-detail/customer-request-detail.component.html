@@ -18,16 +18,68 @@
     <h1 class="text-2xl font-bold mb-2">{{ request.title }}</h1>
     <p class="text-slate-500 text-sm mb-4">{{ request.reference_code }} · {{ request.status }}</p>
 
-    <mat-card>
-      <mat-card-content class="!pt-4 grid gap-2 text-sm">
-        <p><span class="text-slate-500">Tipo:</span> {{ request.project_type }} / {{ request.tipologia }}</p>
-        <p><span class="text-slate-500">Local:</span> {{ request.localizacao || '—' }}</p>
-        @if (request.submitted_at) {
-          <p><span class="text-slate-500">Submetido:</span> {{ request.submitted_at | date: 'medium' }}</p>
-        }
+    <mat-card class="mb-4">
+      <mat-card-content class="!pt-4">
+        <h2 class="text-sm font-semibold text-slate-700 mb-3">Briefing</h2>
+        <dl class="grid gap-2 text-sm">
+          <div class="flex gap-2">
+            <dt class="text-slate-500 min-w-[7rem]">Tipo</dt>
+            <dd>{{ request.project_type }} / {{ request.tipologia }}</dd>
+          </div>
+          <div class="flex gap-2">
+            <dt class="text-slate-500 min-w-[7rem]">Local</dt>
+            <dd>{{ request.localizacao || '—' }}</dd>
+          </div>
+          @if (request.area_m2) {
+            <div class="flex gap-2">
+              <dt class="text-slate-500 min-w-[7rem]">Área</dt>
+              <dd>{{ request.area_m2 }} m²</dd>
+            </div>
+          }
+          @if (request.num_pisos) {
+            <div class="flex gap-2">
+              <dt class="text-slate-500 min-w-[7rem]">Pisos</dt>
+              <dd>{{ request.num_pisos }}</dd>
+            </div>
+          }
+          @if (request.estilo_arquitectonico) {
+            <div class="flex gap-2">
+              <dt class="text-slate-500 min-w-[7rem]">Estilo</dt>
+              <dd>{{ request.estilo_arquitectonico }}</dd>
+            </div>
+          }
+          @if (request.paleta_acabamento) {
+            <div class="flex gap-2">
+              <dt class="text-slate-500 min-w-[7rem]">Paleta</dt>
+              <dd>{{ request.paleta_acabamento }}</dd>
+            </div>
+          }
+          @if (request.submitted_at) {
+            <div class="flex gap-2">
+              <dt class="text-slate-500 min-w-[7rem]">Submetido</dt>
+              <dd>{{ request.submitted_at | date: 'medium' }}</dd>
+            </div>
+          }
+        </dl>
       </mat-card-content>
     </mat-card>
 
-    <a mat-stroked-button class="mt-6" routerLink="/conta/pedidos">Voltar aos pedidos</a>
+    @if (approvedMockupUrl) {
+      <mat-card class="mb-4">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Mockup de referência aprovado</h2>
+          <img
+            [src]="approvedMockupUrl"
+            alt="Mockup aprovado"
+            class="w-full rounded-lg border border-slate-200"
+          />
+          <p class="text-xs text-slate-500 mt-2 mb-0">
+            Referência visual para a equipa Construvasco. O projecto técnico é elaborado após aceitar o orçamento.
+          </p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <a mat-stroked-button routerLink="/conta/pedidos">Voltar aos pedidos</a>
   }
 </div>

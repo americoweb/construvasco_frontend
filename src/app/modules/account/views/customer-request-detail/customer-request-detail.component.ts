@@ -44,4 +44,20 @@ export class CustomerRequestDetailComponent implements OnInit {
       },
     });
   }
+
+  get approvedMockupUrl(): string | null {
+    const req = this.request;
+    if (!req) {
+      return null;
+    }
+    if (req.approved_ai_generation?.image_url) {
+      return req.approved_ai_generation.image_url;
+    }
+    const approvedId = req.approved_ai_generation_id;
+    if (approvedId && req.ai_generations?.length) {
+      const match = req.ai_generations.find((g) => g.id === approvedId);
+      return match?.image_url ?? null;
+    }
+    return null;
+  }
 }

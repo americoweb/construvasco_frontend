@@ -72,7 +72,7 @@ export class StudioWorkspaceComponent implements OnDestroy {
     if (this.showSuperseded) {
       return all;
     }
-    return all.filter((g) => g.status !== 'superseded');
+    return all.filter((g) => g.status !== 'superseded' && g.status !== 'failed');
   }
 
   get approvedId(): number | null {
