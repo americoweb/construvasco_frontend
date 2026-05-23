@@ -1,0 +1,120 @@
+<div class="finances-page w-full">
+  <app-page-header
+    title="Finanças"
+    subtitle="Orçamentos enviados, pagamentos e resumo financeiro"
+    [showSearch]="false"
+    [loading]="loading" />
+
+  <div class="container mx-auto max-w-6xl px-4 pb-10">
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <mat-spinner diameter="40" />
+      </div>
+    } @else if (overview) {
+      <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <p class="kpi-label">Pagamentos recebidos</p>
+            <p class="kpi-value">{{ formatMoney(overview.payments_total_mt) }}</p>
+            <p class="kpi-sub">{{ overview.payments_count }} transacção(ões)</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="kpi-card">
+          <mat-card-content>
+            <p class="kpi-label">Orçamentos (enviados + aceites)</p>
+            <p class="kpi-value">{{ formatMoney(overview.quotes_total_sent_mt) }}</p>
+            <p class="kpi-sub">{{ overview.quotes_sent_count }} pendentes · {{ overview.quotes_accepted_count }} aceites</p>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="kpi-card kpi-card--link">
+          <mat-card-content>
+            <p class="kpi-label">Pedidos</p>
+            <a mat-stroked-button routerLink="/admin/pedidos" class="!mt-2">Registar pedido</a>
+          </mat-card-content>
+        </mat-card>
+        <mat-card class="kpi-card kpi-card--link">
+          <mat-card-content>
+            <p class="kpi-label">Projectos</p>
+            <a mat-stroked-button routerLink="/admin/projectos" class="!mt-2">Ver projectos</a>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="grid gap-6 lg:grid-cols-2">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Orçamentos recentes</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="!p-0">
+            @if (!overview.recent_quotes.length) {
+              <p class="p-6 text-sm text-slate-500">Ainda não há orçamentos registados.</p>
+            } @else {
+              <table mat-table [dataSource]="overview.recent_quotes" class="w-full">
+                <ng-container matColumnDef="ref">
+                  <th mat-header-cell *matHeaderCellDef>Ref.</th>
+                  <td mat-cell *matCellDef="let q">{{ q.reference_code || '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="client">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let q">{{ q.client_name || '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Valor</th>
+                  <td mat-cell *matCellDef="let q">{{ formatMoney(q.total_amount_mt) }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let q">
+                    <span class="quote-chip" [attr.data-status]="q.status">{{ labelQuoteStatus(q.status) }}</span>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="quoteColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: quoteColumns"></tr>
+              </table>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Pagamentos recentes</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="!p-0">
+            @if (!overview.recent_payments.length) {
+              <p class="p-6 text-sm text-slate-500">Ainda não há pagamentos registados.</p>
+            } @else {
+              <table mat-table [dataSource]="overview.recent_payments" class="w-full">
+                <ng-container matColumnDef="project">
+                  <th mat-header-cell *matHeaderCellDef>Projecto</th>
+                  <td mat-cell *matCellDef="let p">{{ p.project_name || '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="client">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let p">{{ p.client_name || '—' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="amount">
+                  <th mat-header-cell *matHeaderCellDef>Valor</th>
+                  <td mat-cell *matCellDef="let p">{{ formatMoney(p.amount) }} {{ p.currency }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let p">
+                    <span class="pay-chip" [attr.data-status]="p.status">{{ p.status }}</span>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="paymentColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: paymentColumns"></tr>
+              </table>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    } @else {
+      <mat-card>
+        <mat-card-content class="!py-10 text-center text-slate-500">
+          Não foi possível carregar o resumo financeiro.
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</div>

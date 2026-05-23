@@ -93,7 +93,7 @@ export class UserProfileDropdownComponent implements OnInit, OnDestroy {
   logout(): void {
     this.closeDropdown();
     this.authService.signOut().subscribe(() => {
-      this.router.navigate(['/']);
+      this.router.navigate(['/auth/sign-in']);
     });
   }
 }

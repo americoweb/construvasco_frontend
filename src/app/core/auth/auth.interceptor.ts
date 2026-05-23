@@ -5,9 +5,12 @@ import {
     HttpRequest,
 } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from 'app/core/auth/services/auth.service';
 import { AuthUtils } from 'app/core/auth/auth.utils';
 import { Observable, catchError, throwError } from 'rxjs';
+
+let handlingUnauthorized = false;
 
 /**
  * Intercept
@@ -20,6 +23,7 @@ export const authInterceptor = (
     next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
     const authService = inject(AuthService);
+    const router = inject(Router);
 
     // Clone the request object
     let newReq = req.clone();
@@ -36,12 +40,17 @@ export const authInterceptor = (
         authService.accessToken &&
         !AuthUtils.isTokenExpired(authService.accessToken)
     ) {
-        newReq = req.clone({
-            headers: req.headers.set(
-                'Authorization',
-                'Bearer ' + authService.accessToken
-            ),
-        });
+        const skipAuthEndpoints = ['/auth/login', '/auth/register', '/auth/google'];
+        const shouldSkipAuth = skipAuthEndpoints.some((endpoint) => req.url.includes(endpoint));
+
+        if (!shouldSkipAuth) {
+            newReq = req.clone({
+                headers: req.headers.set(
+                    'Authorization',
+                    'Bearer ' + authService.accessToken
+                ),
+            });
+        }
     }
 
     // Response
@@ -49,13 +58,28 @@ export const authInterceptor = (
         catchError((error) => {
             // Catch "401 Unauthorized" responses
             if (error instanceof HttpErrorResponse && error.status === 401) {
-                // Sign out
-                authService.signOut();
-                // Optionally, you can navigate to login or show a notification here
-                // Do NOT reload the app
+                const skip401Handling = [
+                    '/auth/login',
+                    '/auth/register',
+                    '/auth/google',
+                    '/auth/logout',
+                    '/auth/refresh',
+                ];
+                const isAuthEndpoint = skip401Handling.some((endpoint) =>
+                    req.url.includes(endpoint)
+                );
+
+                if (!isAuthEndpoint && !handlingUnauthorized) {
+                    handlingUnauthorized = true;
+                    authService.clearSession();
+                    void router.navigate(['/auth/sign-in']);
+                    setTimeout(() => {
+                        handlingUnauthorized = false;
+                    }, 500);
+                }
             }
 
-            return throwError(error);
+            return throwError(() => error);
         })
     );
 };

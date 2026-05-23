@@ -1,0 +1,93 @@
+<div class="projects-page w-full">
+    <mat-card class="!mb-6">
+      <mat-card-content class="!flex flex-wrap items-center gap-4 !pt-4">
+        <mat-form-field appearance="outline" class="w-full sm:w-64" subscriptSizing="dynamic">
+          <mat-label>Pesquisar</mat-label>
+          <input matInput [(ngModel)]="searchText" (ngModelChange)="applyFilter()" placeholder="Nome, cliente, local..." />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w-full sm:w-48" subscriptSizing="dynamic">
+          <mat-label>Estado</mat-label>
+          <mat-select [(value)]="statusFilter" (selectionChange)="applyFilter()">
+            <mat-option value="">Todos</mat-option>
+            @for (s of statusOptions; track s.value) {
+              <mat-option [value]="s.value">{{ s.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <span class="text-sm text-slate-500">{{ filteredRows.length }} projecto(s)</span>
+        @if (!isTechnicianView) {
+          <a mat-stroked-button routerLink="/admin/pedidos/novo" class="!ml-auto">
+            <mat-icon>add</mat-icon>
+            Novo pedido
+          </a>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    @if (loading) {
+      <div class="flex justify-center py-16">
+        <mat-spinner diameter="40" />
+      </div>
+    } @else if (!filteredRows.length) {
+      <mat-card>
+        <mat-card-content class="!py-12 text-center">
+          <mat-icon class="!mb-2 !h-12 !w-12 !text-slate-300">architecture</mat-icon>
+          <p class="font-medium text-slate-700">Nenhum projecto encontrado</p>
+          <p class="mt-1 text-sm text-slate-500">
+            Fluxo: pedido de projecto → orçamento → cliente aceita → projecto activo.
+          </p>
+          <a mat-flat-button color="primary" routerLink="/admin/pedidos/novo" class="!mt-4">Ir para pedidos</a>
+        </mat-card-content>
+      </mat-card>
+    } @else {
+      <mat-card>
+        <table mat-table [dataSource]="filteredRows" class="w-full">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Projecto</th>
+            <td mat-cell *matCellDef="let p">
+              <a [routerLink]="['/admin/projectos', p.id]" class="font-medium text-blue-700 hover:underline">
+                {{ p.name || ('#' + p.id) }}
+              </a>
+              @if (p.project_type) {
+                <span class="block text-xs text-slate-500">{{ p.project_type }}</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="client">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let p">{{ p.client?.name || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let p">
+              <span class="status-chip" [attr.data-status]="p.status">{{ labelStatus(p.status) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="phase">
+            <th mat-header-cell *matHeaderCellDef>Fase</th>
+            <td mat-cell *matCellDef="let p">{{ p.current_phase || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef>Local</th>
+            <td mat-cell *matCellDef="let p">{{ p.location || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="budget">
+            <th mat-header-cell *matHeaderCellDef>Orçamento</th>
+            <td mat-cell *matCellDef="let p">{{ formatMoney(p.budget ?? p.target_budget) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="team">
+            <th mat-header-cell *matHeaderCellDef>Equipa</th>
+            <td mat-cell *matCellDef="let p">{{ teamLabel(p) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="updated">
+            <th mat-header-cell *matHeaderCellDef>Actualizado</th>
+            <td mat-cell *matCellDef="let p">{{ formatDate(p.updated_at) }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="hover-row"></tr>
+        </table>
+      </mat-card>
+    }
+</div>

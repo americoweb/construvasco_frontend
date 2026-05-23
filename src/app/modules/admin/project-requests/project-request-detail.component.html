@@ -1,0 +1,93 @@
+<div class="pb-10">
+  <a mat-button routerLink="/admin/pedidos/lista" class="!mb-4">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar à lista
+  </a>
+
+  @if (loading) {
+    <div class="flex justify-center py-16">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (item) {
+    <mat-card class="!mb-6">
+      <mat-card-header>
+        <mat-card-title>{{ item.title }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ item.reference_code }} · {{ item.user?.name || item.user?.identifier }} ·
+          <span class="font-medium">{{ item.status }}</span>
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="!pt-4 space-y-3">
+        <p><strong>Tipo:</strong> {{ item.project_type }} / {{ item.tipologia }}</p>
+        <p><strong>Local:</strong> {{ item.localizacao || '—' }}</p>
+        <p><strong>Descrição:</strong> {{ item.description || '—' }}</p>
+        @if (briefingEntries().length) {
+          <mat-divider class="!my-4" />
+          <h3 class="text-sm font-semibold text-slate-700">Briefing adicional</h3>
+          <ul class="text-sm text-slate-600 list-disc pl-5">
+            @for (entry of briefingEntries(); track entry[0]) {
+              <li><strong>{{ entry[0] }}:</strong> {{ entry[1] }}</li>
+            }
+          </ul>
+        }
+        @if (item.documents?.length) {
+          <mat-divider class="!my-4" />
+          <h3 class="text-sm font-semibold text-slate-700">Documentos ({{ item.documents!.length }})</h3>
+          <ul class="text-sm">
+            @for (doc of item.documents; track doc.id) {
+              <li>{{ doc.original_name || doc.document_type }}</li>
+            }
+          </ul>
+        }
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-stroked-button type="button" (click)="approve()">Marcar em análise</button>
+        <button mat-stroked-button color="warn" type="button" (click)="reject()">Recusar pedido</button>
+      </mat-card-actions>
+    </mat-card>
+
+    <mat-card class="!mb-6">
+      <mat-card-header>
+        <mat-card-title>Orçamentos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (quotes.length) {
+          <ul class="space-y-2 mb-6">
+            @for (q of quotes; track q.id) {
+              <li class="text-sm border rounded-lg p-3">
+                <strong>#{{ q.id }}</strong> — {{ q.total_amount_mt | number: '1.0-0' }} MT
+                · {{ q.status }}
+                @if (q.delivery_days) {
+                  · {{ q.delivery_days }} dias
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="text-sm text-slate-500 mb-4">Ainda sem orçamentos enviados.</p>
+        }
+
+        <h3 class="text-sm font-semibold mb-3">Novo orçamento</h3>
+        <form [formGroup]="quoteForm" class="grid gap-4 sm:grid-cols-2" (ngSubmit)="sendQuote()">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Valor total (MT)</mat-label>
+            <input matInput type="number" formControlName="total_amount_mt" min="0" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Prazo (dias)</mat-label>
+            <input matInput type="number" formControlName="delivery_days" min="1" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full sm:col-span-2">
+            <mat-label>Condições</mat-label>
+            <textarea matInput rows="3" formControlName="conditions"></textarea>
+          </mat-form-field>
+          <div class="sm:col-span-2">
+            <button mat-flat-button color="primary" type="submit" [disabled]="savingQuote">
+              Enviar orçamento ao cliente
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

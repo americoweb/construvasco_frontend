@@ -1,0 +1,19 @@
+<div class="project-requests-hub w-full">
+  <app-page-header
+    title="Pedidos de projecto"
+    subtitle="Briefings, orçamentos e acompanhamento comercial"
+    [showSearch]="false" />
+
+  <div class="container mx-auto max-w-6xl px-4 pb-4">
+    <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="!mb-4">
+      <a mat-tab-link routerLink="lista" routerLinkActive #rlaLista="routerLinkActive" [active]="rlaLista.isActive">
+        Lista
+      </a>
+      <a mat-tab-link routerLink="novo" routerLinkActive #rlaNovo="routerLinkActive" [active]="rlaNovo.isActive">
+        Novo pedido
+      </a>
+    </nav>
+    <mat-tab-nav-panel #tabPanel />
+    <router-outlet />
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<a routerLink="/conta/pedidos" class="text-blue-600 text-sm mb-4 inline-block">← Voltar aos pedidos</a>
+
+@if (loading) {
+  <div class="flex justify-center py-12">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (quote) {
+  <h1 class="text-2xl font-bold text-slate-900 mb-4">Orçamento #{{ quote.id }}</h1>
+  <mat-card class="!mb-6">
+    <mat-card-content class="!pt-4 space-y-2">
+      <p class="text-3xl font-bold text-slate-900">{{ quote.total_amount_mt | number: '1.0-0' }} MT</p>
+      @if (quote.delivery_days) {
+        <p><strong>Prazo:</strong> {{ quote.delivery_days }} dias</p>
+      }
+      @if (quote.conditions) {
+        <p><strong>Condições:</strong> {{ quote.conditions }}</p>
+      }
+      <p class="text-sm text-slate-500">Estado: {{ quote.status }}</p>
+      @if (quote.project_request?.title) {
+        <p class="text-sm">Pedido: {{ quote.project_request.title }}</p>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  @if (quote.status === 'sent') {
+    <div class="flex flex-wrap gap-3 mb-6">
+      <button mat-flat-button color="primary" type="button" [disabled]="busy" (click)="accept()">
+        Aceitar orçamento
+      </button>
+    </div>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Recusar orçamento</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="!pt-4">
+        <form [formGroup]="rejectForm" (ngSubmit)="reject()">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Motivo (opcional)</mat-label>
+            <textarea matInput rows="3" formControlName="reason"></textarea>
+          </mat-form-field>
+          <button mat-stroked-button color="warn" type="submit" [disabled]="busy">Recusar</button>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <p class="text-slate-600">Este orçamento já foi respondido ({{ quote.status }}).</p>
+  }
+}

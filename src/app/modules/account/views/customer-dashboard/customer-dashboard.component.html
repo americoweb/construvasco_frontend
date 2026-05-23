@@ -1,0 +1,35 @@
+<div class="customer-dashboard">
+  <h1 class="text-2xl font-bold text-slate-900 mb-2">Olá, {{ userName }}</h1>
+  <p class="text-slate-600 mb-6">Acompanhe os seus pedidos, orçamentos e projectos.</p>
+
+  @if (loading) {
+    <div class="flex justify-center py-12">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (stats) {
+    <div class="grid gap-4 sm:grid-cols-3 mb-8">
+      <mat-card>
+        <mat-card-content class="!pt-4">
+          <p class="text-sm text-slate-500">Pedidos</p>
+          <p class="text-3xl font-bold">{{ stats.project_requests_count }}</p>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content class="!pt-4">
+          <p class="text-sm text-slate-500">Orçamentos pendentes</p>
+          <p class="text-3xl font-bold">{{ stats.pending_quotes }}</p>
+        </mat-card-content>
+      </mat-card>
+      <mat-card>
+        <mat-card-content class="!pt-4">
+          <p class="text-sm text-slate-500">Créditos IA</p>
+          <p class="text-3xl font-bold">{{ stats.credits_balance ?? 0 }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <a mat-flat-button color="primary" routerLink="/conta/pedidos">Ver pedidos</a>
+      <a mat-stroked-button routerLink="/conta/projectos">Ver projectos</a>
+    </div>
+  }
+</div>

@@ -8,6 +8,7 @@ export interface User {
   avatar_url?: string; // Full URL for avatar image
   avatar?: string; // Alias for profile_photo_path
   is_active?: boolean;
+  must_change?: boolean;
   verified_at?: string;
   last_login_at?: string;
   created_at: string;

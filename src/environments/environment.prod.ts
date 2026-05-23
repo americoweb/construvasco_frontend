@@ -12,7 +12,8 @@ export const environment: AppConfig = {
     aiEnabled: true,
     analytics: true,
     debugging: false,
-    multiTenant: true
+    multiTenant: true,
+    publicSiteEnabled: false
   },
   app: {
     name: 'Construvasco',

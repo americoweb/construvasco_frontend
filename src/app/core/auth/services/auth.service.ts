@@ -129,6 +129,11 @@ export class AuthService {
     );
   }
 
+  /** Limpa sessão local sem chamar API (ex.: 401 no interceptor). */
+  clearSession(): void {
+    this.handleSignOut();
+  }
+
   // Token validation and refresh
   check(): Observable<boolean> {
     if (this._authenticated.value) {
@@ -239,7 +244,9 @@ export class AuthService {
   private handleAuthSuccess(response: AuthResponse): void {
     this.accessToken = response.access_token;
     this._authenticated.next(true);
-    this._mustChangePassword.next(response.must_change || false);
+    this._mustChangePassword.next(
+      Boolean(response.must_change ?? response.user?.must_change)
+    );
     
     // Store user data
     this.userService.setUser(response.user);

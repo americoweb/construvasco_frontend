@@ -21,6 +21,7 @@ import { UserService } from '../../../../core/auth/services/user.service';
 
 // Models
 import { LoginCredentials } from '../../../../core/auth/models/auth.types';
+import { resolveRoleDashboardPath } from '../../../../core/auth/utils/role-dashboard.util';
 import { environment } from '../../../../../environments/environment';
 import {
   ensureGoogleIdentityServicesInitialized,
@@ -271,16 +272,8 @@ export class LoginModalComponent implements OnInit, OnDestroy {
   }
 
   private redirectByRole(role: string | undefined): void {
-    const normalizedRole = (role || '').toLowerCase();
-    const isAdminUser = normalizedRole !== '' && normalizedRole !== 'customer';
     this.closeModal();
-
-    if (isAdminUser) {
-      this.router.navigate(['/admin/dashboard']);
-      return;
-    }
-
-    this.router.navigate(['/conta/dashboard']);
+    this.router.navigate([resolveRoleDashboardPath(role)]);
   }
 }
 

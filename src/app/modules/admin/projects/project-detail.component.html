@@ -1,0 +1,55 @@
+<div class="project-detail w-full pb-10">
+  <a mat-button routerLink="/admin/projectos" class="!mb-4">
+    <mat-icon>arrow_back</mat-icon>
+    Voltar à lista
+  </a>
+
+  @if (loading) {
+    <div class="flex justify-center py-16">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else if (project) {
+    <mat-card class="!mb-6">
+      <mat-card-header>
+        <mat-card-title>{{ project.name || 'Projecto #' + project.id }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ project.client?.name }} · {{ project.status }} · {{ project.location || '—' }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="!pt-4 space-y-2 text-sm">
+        <p><strong>Tipo:</strong> {{ project.project_type || '—' }}</p>
+        <p><strong>Fase actual:</strong> {{ project.current_phase || '—' }}</p>
+        <p><strong>Orçamento:</strong> {{ project.budget || project.target_budget | number: '1.0-0' }} MT</p>
+        @if (project.assignments?.length) {
+          <p>
+            <strong>Equipa:</strong>
+            @for (a of project.assignments; track a.id) {
+              {{ a.assigned_user?.name }}{{ a.assignment_role === 'main' ? ' (principal)' : '' }}
+            }
+          </p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      @if (!isTechnicianView) {
+      <mat-card-header>
+        <mat-card-title>Atribuir técnico</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="!flex flex-wrap items-end gap-4 !pt-4">
+        <mat-form-field appearance="outline" class="w-full sm:w-80">
+          <mat-label>Técnico / gestor</mat-label>
+          <mat-select [(value)]="selectedTechnicianId">
+            @for (t of technicians; track t.id) {
+              <mat-option [value]="t.id">{{ t.name }} ({{ t.identifier }})</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-flat-button color="primary" type="button" [disabled]="assigning" (click)="assign()">
+          Guardar atribuição
+        </button>
+      </mat-card-content>
+      }
+    </mat-card>
+  }
+</div>

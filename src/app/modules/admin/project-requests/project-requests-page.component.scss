@@ -1,0 +1,87 @@
+.client-search-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+.dropdown-panel {
+  position: absolute;
+  z-index: 1100;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 0.35rem;
+  max-height: 16rem;
+  overflow-y: auto;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.dropdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: #f8fafc;
+  }
+
+  &--create {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+    color: #15803d;
+    border-top: 1px solid #f1f5f9;
+  }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.45);
+  padding: 1rem;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1rem;
+  background: #fff;
+  padding: 1.5rem;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+:host ::ng-deep .mat-expansion-panel {
+  margin-bottom: 0.5rem !important;
+}
+
+/* Dropdown de clientes não pode ser cortado pelo painel seguinte */
+:host ::ng-deep .mat-accordion {
+  overflow: visible;
+}
+
+:host ::ng-deep .client-search-panel {
+  overflow: visible !important;
+
+  &.client-search-panel--open {
+    position: relative;
+    z-index: 30 !important;
+  }
+
+  .mat-expansion-panel-content-wrapper,
+  .mat-expansion-panel-content,
+  .mat-expansion-panel-body {
+    overflow: visible !important;
+  }
+}

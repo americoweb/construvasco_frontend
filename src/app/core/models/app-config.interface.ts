@@ -10,6 +10,8 @@ export interface AppConfig {
     analytics: boolean;
     debugging: boolean;
     multiTenant: boolean;
+    /** When false, public landing/shop routes are disabled; app opens on login + interior. */
+    publicSiteEnabled: boolean;
   };
   app: {
     name: string;

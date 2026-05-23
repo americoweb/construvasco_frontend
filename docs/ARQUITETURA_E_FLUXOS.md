@@ -9,61 +9,60 @@
 5. **Core**: `AuthService`, `UserService`, `ConfigService`, interceptors HTTP.
 6. **Shared**: componentes reutilizáveis (header, modais, paginação) e constantes.
 
+## Modo interior (entrada por defeito)
+
+Com `features.publicSiteEnabled: false` (ver `environment.ts`):
+
+1. `/` → `/admin/dashboard` (sem sessão, `adminGuard` envia para `/auth/sign-in`).
+2. Após login: staff → `/admin/dashboard`; cliente (`customer`) → `/conta/dashboard` ([`role-dashboard.util.ts`](../src/app/core/auth/utils/role-dashboard.util.ts)).
+3. URLs antigas da loja (`/produtos`, `/checkout`, …) redireccionam para `/auth/sign-in`.
+4. Site público só é montado se `publicSiteEnabled: true` (prefixo `/public`).
+
 ## Mapa de fluxos (alto nível)
 
 ```mermaid
 flowchart TB
-  subgraph public [Visitante_anonimo]
-    Home[Landing_home]
-    Catalog[Catalogo_produtos]
-    Product[Detalhe_produto_slug]
-    Checkout[Checkout]
-    Home --> Catalog
-    Catalog --> Product
-    Product --> Checkout
-  end
+  root["/"] --> adminDash["/admin/dashboard"]
+  adminDash --> adminGuard{adminGuard}
+  adminGuard -->|nao autenticado| signIn["/auth/sign-in"]
+  adminGuard -->|customer| contaDash["/conta/dashboard"]
+  adminGuard -->|staff| adminOK[Admin_UI]
 
   subgraph auth [Autenticacao]
     SignIn[auth_sign_in]
     SignUp[auth_sign_up]
     ChangePwd[auth_change_password]
-    SignIn --> ChangePwd
+    SignIn --> adminOK
+    SignIn --> contaDash
     SignUp --> SignIn
   end
 
   subgraph conta [Cliente_autenticado]
     Dashboard[conta_dashboard]
     Pedidos[conta_pedidos]
-    Designs[conta_designs]
+    Projectos[conta_projectos]
     Pagamentos[conta_pagamentos]
     Definicoes[conta_definicoes]
-    SignIn --> Dashboard
+    contaDash --> Dashboard
     Dashboard --> Pedidos
-    Dashboard --> Designs
-    Dashboard --> Pagamentos
-    Dashboard --> Definicoes
+    Dashboard --> Projectos
   end
 
   subgraph admin [Staff_admin]
     AdminDash[admin_dashboard]
     AdminOrders[admin_orders]
-    AdminProducts[admin_products]
     AdminJobCards[admin_job_cards]
     AdminStaff[admin_staff]
     AdminDash --> AdminOrders
-    AdminDash --> AdminProducts
     AdminDash --> AdminJobCards
     AdminDash --> AdminStaff
   end
-
-  Checkout --> SignIn
-  Product -.->|login_modal_ou_redirect| SignIn
 ```
 
 Notas:
 
-- O visitante pode autenticar-se via **modal** no header (landing) ou páginas em `/auth/*`.
-- Rotas antigas `forgot-password`, `reset-password`, `redefinir-senha/:token` redireccionam para `sign-in`; alteração de palavra-passe com sessão em `/auth/change-password` e definições da conta.
+- Rotas antigas `forgot-password`, `reset-password`, `redefinir-senha/:token` redireccionam para `sign-in`; alteração de palavra-passe com sessão em `/auth/change-password`.
+- Logout redirecciona para `/auth/sign-in`.
 
 ## Rotas principais (referência)
 
@@ -71,16 +70,15 @@ Definição canónica: [`src/app/app.routes.ts`](../src/app/app.routes.ts). Land
 
 | Prefixo | Público | Descrição |
 |---------|---------|-----------|
-| `/` | Sim | Home landing |
-| `/produtos` | Sim | Catálogo (filhas em `products.routes`) |
-| `/products/:slug` | Sim | Detalhe por slug |
-| `/checkout` | Sim | Checkout |
-| `/auth/sign-in`, `/auth/sign-up` | Sim (guest) | Páginas de entrada |
+| `/` | Não (redirect) | → `/admin/dashboard` (login-first) |
+| `/auth/sign-in`, `/auth/sign-up` | Sim (guest) | Entrada; `noAuthGuard` redirecciona se já autenticado |
 | `/auth/change-password` | Não | JWT + `authGuard`; também fluxo `must_change` |
-| `/conta/*` | Não | Área cliente (`authGuard` + `canActivateChild`) |
-| `/admin/*` | Não | Backoffice (`adminGuard`) |
+| `/conta/*` | Não | Área cliente (`authGuard`) |
+| `/admin/*` | Não | Backoffice (`adminGuard`; customer → `/conta`) |
+| `/public/*` | Sim | Só com `publicSiteEnabled: true` (landing/loja) |
+| `/produtos`, `/checkout`, … | Redirect | → `/auth/sign-in` quando loja desactivada |
 
-Redireccionamentos úteis em `landing.routes.ts`: por exemplo `/servicos` → `/produtos`, `/contacto` → `/checkout` (ver ficheiro para lista actual).
+Com `publicSiteEnabled: true`, ver `landing.routes.ts` sob o prefixo `/public`.
 
 ## Autenticação e autorização
 

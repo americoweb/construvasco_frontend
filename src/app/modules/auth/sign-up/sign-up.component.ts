@@ -18,6 +18,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { fuseAnimations } from '@fuse/animations';
 import { FuseAlertComponent, FuseAlertType } from '@fuse/components/alert';
 import { AuthService } from 'app/core/auth/services/auth.service';
+import { resolveRoleDashboardPath } from 'app/core/auth/utils/role-dashboard.util';
 
 @Component({
     selector: 'auth-sign-up',
@@ -207,7 +208,8 @@ export class AuthSignUpComponent implements OnInit {
     private async validateCompanyName(): Promise<void> {
         try {
             const response = await this._authService.validateCompany(this.companyName).toPromise();
-            this.companyDetails = response.company;
+            this.companyDetails = response.company ?? response.tenant;
+            this.invitationDetails = { tenant: response.tenant ?? response.company };
             this.isInvitationMode = true;
             this.showOrganizationField = false;
             
@@ -275,9 +277,7 @@ export class AuthSignUpComponent implements OnInit {
             payload.invitation_token = this.invitationToken;
             console.log('Adding invitation_token to payload:', this.invitationToken);
         } else if (this.companyName) {
-            // SMS invitation
-            payload.organization_name = this.invitationDetails.tenant.name;
-            console.log('Adding company_name to payload:', this.companyName);
+            payload.company_name = this.companyName;
         }
         // Note: Regular registration no longer requires organization_name - all users default to tenant_id 1
 
@@ -290,7 +290,12 @@ export class AuthSignUpComponent implements OnInit {
         this._authService.signUp(payload).subscribe(
             (response) => {
                 this.isLoading = false;
-                this._router.navigateByUrl('/');
+                if (response?.must_change) {
+                    this._router.navigate(['/auth/change-password']);
+                    return;
+                }
+                const role = response?.user?.current_tenant_context?.role;
+                this._router.navigate([resolveRoleDashboardPath(role)]);
             },
             (response) => {
                 this.isLoading = false;

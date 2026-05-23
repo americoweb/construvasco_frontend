@@ -1,6 +1,39 @@
 export const API_ENDPOINTS = {
   ADMIN: {
-    DASHBOARD: 'v1/admin/dashboard'
+    DASHBOARD: 'v1/admin/dashboard',
+    PROJECTS: 'v1/admin/projects',
+    PROJECT: (id: string | number) => `v1/admin/projects/${id}`,
+    ASSIGN_PROJECT: (id: string | number) => `v1/admin/projects/${id}/assign`,
+    STAFF_DESIGNERS: 'v1/admin/staff/designers',
+  },
+  TECHNICIAN: {
+    DASHBOARD: 'v1/technician/dashboard',
+    PROJECTS: 'v1/technician/projects',
+    PROJECT: (id: string | number) => `v1/technician/projects/${id}`,
+  },
+  MANAGER: {
+    DASHBOARD: 'v1/manager/dashboard',
+    FINANCES_OVERVIEW: 'v1/manager/finances/overview',
+    PROJECT_REQUESTS: 'v1/manager/project-requests',
+    PROJECT_REQUEST: (id: string | number) => `v1/manager/project-requests/${id}`,
+    PROJECT_REQUEST_DOCUMENTS: (id: string | number) => `v1/manager/project-requests/${id}/documents`,
+    PROJECT_REQUEST_APPROVE: (id: string | number) => `v1/manager/project-requests/${id}/approve`,
+    PROJECT_REQUEST_REJECT: (id: string | number) => `v1/manager/project-requests/${id}/reject`,
+    PROJECT_REQUEST_QUOTES: (id: string | number) => `v1/manager/project-requests/${id}/quotes`,
+    ASSIGNABLE_USERS: 'v1/manager/assignable-users',
+    PROJECTS: 'v1/manager/projects',
+    PROJECT: (id: string | number) => `v1/manager/projects/${id}`,
+    ASSIGN_PROJECT: (id: string | number) => `v1/manager/projects/${id}/assign`,
+  },
+  CUSTOMER: {
+    DASHBOARD: 'v1/customer/dashboard',
+    PROJECT_REQUESTS: 'v1/customer/project-requests',
+    PROJECT_REQUEST: (id: string | number) => `v1/customer/project-requests/${id}`,
+    QUOTE: (id: string | number) => `v1/customer/quotes/${id}`,
+    QUOTE_ACCEPT: (id: string | number) => `v1/customer/quotes/${id}/accept`,
+    QUOTE_REJECT: (id: string | number) => `v1/customer/quotes/${id}/reject`,
+    PROJECTS: 'v1/customer/projects',
+    PROJECT: (id: string | number) => `v1/customer/projects/${id}`,
   },
   AUTH: {
     LOGIN: 'auth/login',

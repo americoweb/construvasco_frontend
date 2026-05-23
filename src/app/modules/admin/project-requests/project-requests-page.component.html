@@ -1,0 +1,313 @@
+<div class="project-requests-page w-full pb-10">
+  <p class="text-sm text-slate-600 mb-4">
+    Briefing adaptado ao tipo de projecto — campos de construção residencial, comercial, industrial, etc.
+  </p>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+
+      <mat-accordion multi>
+        <!-- Cliente -->
+        <mat-expansion-panel
+          expanded
+          class="client-search-panel"
+          [class.client-search-panel--open]="clientDropdownOpen">
+          <mat-expansion-panel-header>
+            <mat-panel-title>Cliente</mat-panel-title>
+            <mat-panel-description>Nome completo e contacto</mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="space-y-3 pb-2">
+            @if (selectedClient) {
+              <div class="flex items-center gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-200 text-sm font-bold text-indigo-800">
+                  {{ selectedClient.name.charAt(0).toUpperCase() }}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="font-semibold text-slate-900">{{ selectedClient.name }}</p>
+                  <p class="text-sm text-slate-600">{{ selectedClient.identifier }}</p>
+                </div>
+                <button type="button" mat-icon-button (click)="clearClient()" aria-label="Remover cliente">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+            } @else {
+              <div class="client-search-wrap">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Nome completo do cliente</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    [value]="clientQuery"
+                    (input)="onClientInput($any($event.target).value)"
+                    (focus)="clientDropdownOpen = clientQuery.length >= 1"
+                    placeholder="Pesquisar por nome, email ou telefone..."
+                    autocomplete="off" />
+                  <mat-icon matSuffix>search</mat-icon>
+                  <mat-hint>Não use o ID numérico — pesquise pelo nome ou contacto.</mat-hint>
+                </mat-form-field>
+
+                @if (clientDropdownOpen) {
+                  <div class="dropdown-panel">
+                    @for (c of clientResults; track c.id) {
+                      <button type="button" class="dropdown-item" (click)="selectClient(c)">
+                        <span class="font-medium">{{ c.name }}</span>
+                        <span class="text-xs text-slate-500">{{ c.identifier }}</span>
+                      </button>
+                    }
+                    <button type="button" class="dropdown-item dropdown-item--create" (click)="openCreateClientModal()">
+                      <mat-icon class="!text-green-600">person_add</mat-icon>
+                      <span>Criar novo cliente</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Projecto -->
+        <mat-expansion-panel expanded>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Identificação do projecto</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 pb-2 sm:grid-cols-2">
+            <mat-form-field appearance="outline" class="sm:col-span-2" subscriptSizing="dynamic">
+              <mat-label>Título do pedido</mat-label>
+              <input matInput formControlName="title" placeholder="Ex.: Moradia T3 em Maputo — zona Costa do Sol" />
+              @if (form.get('title')?.invalid && form.get('title')?.touched) {
+                <mat-error>Obrigatório</mat-error>
+              }
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Tipo de projecto</mat-label>
+              <mat-select formControlName="project_type">
+                @for (t of projectTypes; track t.value) {
+                  <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Tipologia</mat-label>
+              <mat-select formControlName="tipologia">
+                @for (t of filteredTipologias; track t.value) {
+                  <mat-option [value]="t.value">{{ t.label }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>Lista ajustada ao tipo de projecto seleccionado</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="sm:col-span-2" subscriptSizing="dynamic">
+              <mat-label>Descrição / objectivo</mat-label>
+              <textarea matInput formControlName="description" rows="3" placeholder="Resumo do que o cliente pretende"></textarea>
+            </mat-form-field>
+          </div>
+          <p class="mt-2 text-sm text-indigo-700">
+            Ao mudar o tipo, as secções abaixo mostram apenas campos relevantes (moradia, loja, armazém, remodelação…).
+          </p>
+        </mat-expansion-panel>
+
+        <!-- Terreno -->
+        <mat-expansion-panel expanded>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Terreno e dimensões</mat-panel-title>
+            <mat-panel-description>Plano / levantamento</mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 pb-2 sm:grid-cols-2 lg:grid-cols-3">
+            <mat-form-field appearance="outline" class="sm:col-span-2 lg:col-span-3" subscriptSizing="dynamic">
+              <mat-label>Localização do terreno</mat-label>
+              <input matInput formControlName="localizacao" placeholder="Bairro, cidade, referências" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Área total (m²)</mat-label>
+              <input matInput type="number" formControlName="area_m2" min="0" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Largura (m)</mat-label>
+              <input matInput type="number" formControlName="largura_m" min="0" step="0.01" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Comprimento (m)</mat-label>
+              <input matInput type="number" formControlName="comprimento_m" min="0" step="0.01" />
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Programa -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Programa e estrutura</mat-panel-title>
+            <mat-panel-description>Pisos, divisões</mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 pb-2 sm:grid-cols-2 lg:grid-cols-4">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>N.º pisos</mat-label>
+              <input matInput type="number" formControlName="num_pisos" min="0" max="20" />
+            </mat-form-field>
+            @if (showNumQuartos) {
+              <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                <mat-label>N.º quartos / dormitórios</mat-label>
+                <input matInput type="number" formControlName="num_quartos" min="0" max="50" />
+              </mat-form-field>
+            }
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Orçamento estimado (MT)</mat-label>
+              <input matInput type="number" formControlName="orcamento_estimado_mt" min="0" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Prazo desejado</mat-label>
+              <input matInput [matDatepicker]="prazoPicker" formControlName="prazo_desejado" />
+              <mat-datepicker-toggle matIconSuffix [for]="prazoPicker" />
+              <mat-datepicker #prazoPicker />
+            </mat-form-field>
+            @if (showZonaPrioritaria) {
+              <mat-form-field appearance="outline" class="sm:col-span-2" subscriptSizing="dynamic">
+                <mat-label>Zona prioritária</mat-label>
+                <input matInput formControlName="zona_prioritaria" placeholder="Ex.: cozinha ampla, montra, docas de carga" />
+              </mat-form-field>
+            }
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Secções dinâmicas por tipo -->
+        @for (section of visibleSections; track section.id) {
+          <mat-expansion-panel [expanded]="section.defaultExpanded ?? false">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ section.title }}</mat-panel-title>
+              @if (section.description) {
+                <mat-panel-description>{{ section.description }}</mat-panel-description>
+              }
+            </mat-expansion-panel-header>
+            <app-briefing-fields-grid
+              [fields]="section.fields"
+              [formGroup]="briefingGroup" />
+          </mat-expansion-panel>
+        }
+
+        <!-- Estilo resumo -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Estilo arquitectónico (resumo)</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 pb-2 sm:grid-cols-2">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Estilo arquitectónico</mat-label>
+              <input matInput formControlName="estilo_arquitectonico" placeholder="Moderno, tropical, minimal..." />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>Paleta / acabamentos (resumo)</mat-label>
+              <input matInput formControlName="paleta_acabamento" placeholder="Cores, materiais preferidos" />
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Contacto e notas -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Contacto e notas da chamada</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 pb-2 sm:grid-cols-2">
+            <mat-form-field appearance="outline" subscriptSizing="dynamic">
+              <mat-label>WhatsApp (se diferente)</mat-label>
+              <input matInput formControlName="whatsapp" placeholder="+258..." />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="sm:col-span-2" subscriptSizing="dynamic">
+              <mat-label>Observações internas</mat-label>
+              <textarea matInput formControlName="observacoes" rows="3" placeholder="Notas da chamada, email, acordos verbais"></textarea>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Anexos -->
+        <mat-expansion-panel expanded>
+          <mat-expansion-panel-header>
+            <mat-panel-title>Referências e anexos</mat-panel-title>
+            <mat-panel-description>Fotos, plantas, PDF</mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="space-y-4 pb-2">
+            <div class="flex flex-wrap items-end gap-3">
+              <mat-form-field appearance="outline" class="w-48" subscriptSizing="dynamic">
+                <mat-label>Tipo de ficheiro</mat-label>
+                <mat-select [(value)]="defaultDocumentType">
+                  @for (d of documentTypes; track d.value) {
+                    <mat-option [value]="d.value">{{ d.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+              <button type="button" mat-stroked-button (click)="fileInput.click()">
+                <mat-icon>attach_file</mat-icon>
+                Adicionar ficheiros
+              </button>
+              <input #fileInput type="file" class="hidden" multiple accept="image/*,.pdf,.doc,.docx" (change)="onFilesSelected($event)" />
+            </div>
+            @if (pendingFiles.length) {
+              <div class="grid gap-3 sm:grid-cols-2">
+                @for (p of pendingFiles; track p.file.name; let i = $index) {
+                  <div class="flex gap-3 rounded-lg border border-slate-200 p-3">
+                    @if (p.previewUrl) {
+                      <img [src]="p.previewUrl" alt="" class="h-16 w-16 rounded object-cover" />
+                    } @else {
+                      <div class="flex h-16 w-16 items-center justify-center rounded bg-slate-100">
+                        <mat-icon>description</mat-icon>
+                      </div>
+                    }
+                    <div class="min-w-0 flex-1">
+                      <p class="truncate text-sm font-medium">{{ p.file.name }}</p>
+                      <mat-form-field appearance="outline" class="!mt-1 w-full" subscriptSizing="dynamic">
+                        <mat-select [(value)]="p.document_type">
+                          @for (d of documentTypes; track d.value) {
+                            <mat-option [value]="d.value">{{ d.label }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </div>
+                    <button type="button" mat-icon-button (click)="removePendingFile(i)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="text-sm text-slate-500">Anexe fotos de referência, planta do terreno ou documentos recebidos por email/WhatsApp.</p>
+            }
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <div class="flex flex-wrap gap-3">
+        <button mat-flat-button color="primary" type="submit" [disabled]="submitting">
+          @if (submitting) {
+            <mat-spinner diameter="20" class="!inline-block mr-2" />
+          }
+          Registar e submeter pedido
+        </button>
+        <a mat-stroked-button routerLink="/admin/clientes">Gerir clientes</a>
+      </div>
+    </form>
+</div>
+
+@if (showCreateClientModal) {
+  <div class="modal-backdrop" (click)="closeCreateClientModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3 class="text-lg font-semibold">Novo cliente</h3>
+      <form [formGroup]="createClientForm" (ngSubmit)="createClient()" class="mt-4 grid gap-3">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Nome completo</mat-label>
+          <input matInput formControlName="name" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Email ou telefone</mat-label>
+          <input matInput formControlName="identifier" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Tipo de contacto</mat-label>
+          <mat-select formControlName="type">
+            <mat-option value="email">Email</mat-option>
+            <mat-option value="phone">Telefone / WhatsApp</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="flex justify-end gap-2">
+          <button type="button" mat-button (click)="closeCreateClientModal()">Cancelar</button>
+          <button type="submit" mat-flat-button color="primary" [disabled]="creatingClient">Criar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -53,7 +53,7 @@ export class AccountSidebarComponent implements OnInit, OnDestroy {
 
   logout(): void {
     this.authService.signOut().subscribe(() => {
-      this.router.navigate(['/']);
+      this.router.navigate(['/auth/sign-in']);
     });
   }
 }

@@ -8,7 +8,7 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { loadingInterceptor } from './core/interceptors/loading.interceptor';
-import { authInterceptor } from './core/auth/interceptors/auth.interceptor';
+import { authInterceptor } from './core/auth/auth.interceptor';
 import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 import { provideTransloco, TranslocoService } from '@ngneat/transloco';
 import { TranslocoHttpLoader } from './core/transloco/transloco.http-loader';
@@ -48,7 +48,6 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAnimationsAsync(),
     provideToastr(),
-     provideHttpClient(),
 
     // Material Date Adapter
     {

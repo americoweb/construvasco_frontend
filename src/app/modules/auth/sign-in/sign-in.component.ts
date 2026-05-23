@@ -1,8 +1,15 @@
-import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, NgForm } from '@angular/forms';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { finalize, delay } from 'rxjs/operators';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FuseAlertComponent } from '@fuse/components/alert';
 
 // Services
 import { AuthService } from '../../../core/auth/services/auth.service';
@@ -12,6 +19,7 @@ import { UserService } from '../../../core/auth/services/user.service';
 // Models
 import { LoginCredentials } from '../../../core/auth/models/auth.types';
 import { environment } from '../../../../environments/environment';
+import { isStaffRole, resolveRoleDashboardPath } from '../../../core/auth/utils/role-dashboard.util';
 import {
   ensureGoogleIdentityServicesInitialized,
   registerGoogleCredentialHandler,
@@ -26,11 +34,19 @@ declare let google: any;
   standalone: true,
   imports: [
     CommonModule,
+    FuseAlertComponent,
     ReactiveFormsModule,
-    RouterLink
+    RouterLink,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+    MatCheckboxModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './sign-in.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./sign-in.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInComponent implements OnInit, OnDestroy {
   @ViewChild('signInNgForm') signInNgForm!: NgForm;
@@ -54,7 +70,8 @@ export class SignInComponent implements OnInit, OnDestroy {
     private notificationService: NotificationService,
     private userService: UserService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -83,12 +100,14 @@ export class SignInComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+    this.cdr.markForCheck();
     const credentials: LoginCredentials = this.signInForm.value;
 
     this.authService.signIn(credentials)
       .pipe(
         finalize(() => {
           this.isLoading = false;
+          this.cdr.markForCheck();
         })
       )
       .subscribe({
@@ -99,12 +118,13 @@ export class SignInComponent implements OnInit, OnDestroy {
           const err = error?.error || {};
           this.alert = {
             type: 'error',
-            message: err.message || 'Invalid credentials. Please try again.'
+            message: err.message || 'Credenciais inválidas. Tente novamente.'
           };
           this.showAlert = true;
           this.action = err.action;
           this.redirect = err.redirect;
           this.signInForm.get('password')?.reset();
+          this.cdr.markForCheck();
         }
       });
   }
@@ -171,6 +191,7 @@ export class SignInComponent implements OnInit, OnDestroy {
             message: 'Error loading Google Sign-In. Please reload the page.'
           };
           this.showAlert = true;
+          this.cdr.markForCheck();
         }
       };
       setTimeout(checkGoogle, 100);
@@ -213,6 +234,7 @@ export class SignInComponent implements OnInit, OnDestroy {
         message: 'Error initializing Google Sign-In. Please try again.'
       };
       this.showAlert = true;
+      this.cdr.markForCheck();
     }
   }
 
@@ -248,13 +270,15 @@ export class SignInComponent implements OnInit, OnDestroy {
     if (response && response.credential) {
       console.log('[Google Sign-In] Sending token to backend...');
       this.isLoading = true;
-      
+      this.cdr.markForCheck();
+
       // Send token to backend
       this.authService.signInWithGoogle(response.credential)
         .pipe(
           delay(500),
           finalize(() => {
             this.isLoading = false;
+            this.cdr.markForCheck();
           })
         )
         .subscribe({
@@ -274,6 +298,7 @@ export class SignInComponent implements OnInit, OnDestroy {
         message: 'Error obtaining Google token. Please try again.'
       };
       this.showAlert = true;
+      this.cdr.markForCheck();
     }
   }
 
@@ -297,16 +322,15 @@ export class SignInComponent implements OnInit, OnDestroy {
   }
 
   private redirectByRole(role: string | undefined): void {
-    const normalizedRole = (role || '').toLowerCase();
-    const isAdminUser = normalizedRole !== '' && normalizedRole !== 'customer';
+    const defaultTarget = resolveRoleDashboardPath(role);
+    const queryRedirect = this.activatedRoute.snapshot.queryParams['redirectUrl'] as string | undefined;
 
-    if (isAdminUser) {
-      const redirectUrl = this.activatedRoute.snapshot.queryParams['redirectUrl'] || '/admin/dashboard';
-      this.router.navigate([redirectUrl]);
+    if (isStaffRole(role) && queryRedirect) {
+      this.router.navigate([queryRedirect]);
       return;
     }
 
-    this.router.navigate(['/']);
+    this.router.navigate([defaultTarget]);
   }
 
   /**
@@ -320,7 +344,7 @@ export class SignInComponent implements OnInit, OnDestroy {
     };
     // Show the alert
     this.showAlert = true;
-    // Force a check of the authentication state
+    this.cdr.markForCheck();
     this.authService.check().subscribe();
   }
 }

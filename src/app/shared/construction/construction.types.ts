@@ -1,0 +1,105 @@
+export interface PaginatedResponse<T> {
+  data: T[];
+  current_page?: number;
+  last_page?: number;
+  total?: number;
+  per_page?: number;
+  meta?: {
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
+  };
+}
+
+export interface ApiDataResponse<T> {
+  data: T;
+}
+
+export interface ProjectRequestUser {
+  id: number;
+  name?: string;
+  identifier?: string;
+  email?: string;
+}
+
+export interface ProjectDocument {
+  id: number;
+  document_type?: string;
+  file_path?: string;
+  original_name?: string;
+  created_at?: string;
+}
+
+export interface Quote {
+  id: number;
+  project_request_id: number;
+  total_amount_mt: number | string;
+  delivery_days?: number;
+  conditions?: string;
+  status?: string;
+  sent_at?: string;
+  responded_at?: string;
+  rejection_reason?: string;
+  breakdown?: Record<string, unknown>;
+  project_request?: ProjectRequest;
+}
+
+export interface ProjectRequest {
+  id: number;
+  reference_code?: string;
+  user_id: number;
+  project_type?: string;
+  tipologia?: string;
+  title?: string;
+  description?: string;
+  localizacao?: string;
+  status?: string;
+  briefing_data?: Record<string, unknown>;
+  submitted_at?: string;
+  reviewed_at?: string;
+  converted_project_id?: number | null;
+  user?: ProjectRequestUser;
+  quotes?: Quote[];
+  documents?: ProjectDocument[];
+}
+
+export interface ConstructionProject {
+  id: number;
+  name?: string;
+  status?: string;
+  project_type?: string;
+  location?: string;
+  current_phase?: string;
+  budget?: number | string;
+  target_budget?: number | string;
+  updated_at?: string;
+  client?: { id?: number; name?: string; identifier?: string };
+  assignments?: {
+    id?: number;
+    assigned_to?: number;
+    assignment_role?: string;
+    assigned_user?: { id: number; name?: string };
+  }[];
+  milestones?: { id: number; title?: string; status?: string }[];
+  quote?: Quote;
+}
+
+export interface AssignableUser {
+  id: number;
+  name: string;
+  identifier?: string;
+}
+
+export interface StoreQuotePayload {
+  total_amount_mt: number;
+  delivery_days?: number;
+  conditions?: string;
+  breakdown?: Record<string, unknown>;
+}
+
+export interface CustomerDashboard {
+  credits_balance?: number;
+  project_requests_count: number;
+  pending_quotes: number;
+}

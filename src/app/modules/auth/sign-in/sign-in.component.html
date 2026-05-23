@@ -1,165 +1,160 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="w-full max-w-md">
-    <!-- Card Container -->
-    <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-8 sm:p-10">
-      
-      <!-- Logo -->
-      <div class="flex justify-center mb-6">
-        <img src="images/logo/logo.svg" alt="Construvasco" class="h-16 w-auto" />
-      </div>
+<div class="auth-sign-in-shell flex flex-col md:flex-row min-h-screen bg-gray-50">
 
-      <!-- Heading -->
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Bem-vindo de volta!</h1>
-        <p class="text-sm text-gray-600">Entre na sua conta para continuar</p>
-      </div>
+  <!-- Painel esquerdo — formulário -->
+  <div class="w-full md:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12">
+    <div class="w-full max-w-md">
 
-      <!-- Alert -->
-      <div *ngIf="showAlert" 
-           class="mb-6 p-4 rounded-lg border-2"
-           [class.bg-red-50]="alert.type === 'error'"
-           [class.border-red-200]="alert.type === 'error'"
-           [class.bg-green-50]="alert.type === 'success'"
-           [class.border-green-200]="alert.type === 'success'">
-        <p class="text-sm"
-           [class.text-red-700]="alert.type === 'error'"
-           [class.text-green-700]="alert.type === 'success'">
-          {{ alert.message }}
-          <ng-container *ngIf="action && redirect">
-            <a [routerLink]="[redirect]" 
-               class="ml-2 font-semibold hover:underline">
-              {{ action }}
-            </a>
-          </ng-container>
+      <div class="mb-8 text-center md:text-left">
+        <div class="inline-flex items-center justify-center mb-4">
+          <img src="images/logo/logo.svg" alt="Construvasco" class="h-14 w-auto" />
+        </div>
+        <h1 class="text-lg sm:text-xl font-bold text-gray-900 whitespace-nowrap">
+          Bem-vindo à <span class="auth-sign-in-panel-accent">Construvasco</span>
+        </h1>
+        <p class="text-gray-600 mt-2">
+          Plataforma de projectos de obra e arquitectura
         </p>
       </div>
 
-      <!-- Google Sign-In Button -->
-      <div class="mb-6">
-        <div id="googleSignInButton" class="flex justify-center"></div>
+      <div *ngIf="showAlert" class="mb-6">
+        <fuse-alert
+          [appearance]="'outline'"
+          [showIcon]="false"
+          [type]="alert.type"
+        >
+          {{ alert.message }}
+          <ng-container *ngIf="action && redirect">
+            <a [routerLink]="[redirect]" class="ml-2 auth-sign-in-panel-accent font-medium hover:underline">{{ action }}</a>
+          </ng-container>
+        </fuse-alert>
       </div>
 
-      <!-- Divider -->
+      <div class="mb-6">
+        <div id="googleSignInButton" class="flex justify-center min-h-[44px]"></div>
+      </div>
+
       <div class="flex items-center mb-6">
         <div class="flex-1 border-t border-gray-300"></div>
         <span class="px-3 text-sm text-gray-500">ou</span>
         <div class="flex-1 border-t border-gray-300"></div>
       </div>
 
-      <!-- Sign in form -->
-      <form 
+      <form
         [formGroup]="signInForm"
         #signInNgForm="ngForm"
         (ngSubmit)="onSubmit()"
-        class="space-y-5">
+      >
+        <mat-form-field class="w-full mb-4" appearance="outline">
+          <mat-label>Email</mat-label>
+          <input
+            id="identifier"
+            matInput
+            type="email"
+            formControlName="identifier"
+            autocomplete="username"
+            placeholder="seu@email.com"
+          />
+          <mat-icon class="icon-size-5" matSuffix [svgIcon]="'heroicons_solid:envelope'"></mat-icon>
+          <mat-error *ngIf="signInForm.get('identifier')?.hasError('required')">
+            Email é obrigatório
+          </mat-error>
+        </mat-form-field>
 
-        <!-- Email field -->
-        <div>
-          <label for="identifier" class="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-            <input
-              id="identifier"
-              type="email"
-              formControlName="identifier"
-              class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              [class.border-red-500]="signInForm.get('identifier')?.invalid && signInForm.get('identifier')?.touched"
-              [class.focus:ring-red-500]="signInForm.get('identifier')?.invalid && signInForm.get('identifier')?.touched"
-              placeholder="seu@email.com"
-              autocomplete="email">
-          </div>
-          <p *ngIf="signInForm.get('identifier')?.invalid && signInForm.get('identifier')?.touched" 
-             class="mt-1 text-sm text-red-600">
-            {{ getErrorMessage('identifier') }}
-          </p>
+        <mat-form-field class="w-full mb-2" appearance="outline">
+          <mat-label>Senha</mat-label>
+          <input
+            id="password"
+            matInput
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="••••••••"
+          />
+          <button
+            type="button"
+            mat-icon-button
+            matSuffix
+            (click)="hidePassword = !hidePassword"
+            [attr.aria-label]="hidePassword ? 'Mostrar senha' : 'Ocultar senha'"
+          >
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="signInForm.get('password')?.hasError('required')">
+            Senha é obrigatória
+          </mat-error>
+        </mat-form-field>
+
+        <div class="mt-2">
+          <mat-checkbox formControlName="remember_me" class="-ml-2 text-gray-600">
+            Lembrar-me
+          </mat-checkbox>
         </div>
 
-        <!-- Password field -->
-        <div>
-          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-            Senha
-          </label>
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <input
-              id="password"
-              [type]="hidePassword ? 'password' : 'text'"
-              formControlName="password"
-              class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              [class.border-red-500]="signInForm.get('password')?.invalid && signInForm.get('password')?.touched"
-              [class.focus:ring-red-500]="signInForm.get('password')?.invalid && signInForm.get('password')?.touched"
-              placeholder="Sua senha"
-              autocomplete="current-password">
-            <button
-              type="button"
-              (click)="hidePassword = !hidePassword"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors">
-              <svg *ngIf="hidePassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <svg *ngIf="!hidePassword" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-              </svg>
-            </button>
-          </div>
-          <p *ngIf="signInForm.get('password')?.invalid && signInForm.get('password')?.touched" 
-             class="mt-1 text-sm text-red-600">
-            {{ getErrorMessage('password') }}
-          </p>
-        </div>
-
-        <!-- Remember me + password hint (no public reset) -->
-        <div class="flex items-center justify-between gap-4">
-          <label class="flex items-center shrink-0">
-            <input
-              type="checkbox"
-              formControlName="remember_me"
-              class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-            <span class="ml-2 text-sm text-gray-700">Lembrar-me</span>
-          </label>
-          <p class="text-xs text-gray-500 text-right max-w-[240px] leading-snug">
-            Para alterar a palavra-passe, inicie sessão e use <span class="font-medium">Conta</span> → <span class="font-medium">Definições</span>.
-          </p>
-        </div>
-
-        <!-- Submit button -->
         <button
+          class="fuse-mat-button-large auth-sign-in-btn-primary w-full mt-6"
+          mat-flat-button
           type="submit"
-          [disabled]="isLoading || signInForm.invalid"
-          class="w-full py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] shadow-lg flex items-center justify-center gap-2">
-          <span *ngIf="!isLoading">Entrar</span>
-          <span *ngIf="isLoading" class="flex items-center gap-2">
-            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Entrando...
+          [disabled]="isLoading"
+        >
+          <span *ngIf="!isLoading" class="flex items-center justify-center gap-2">
+            <mat-icon class="icon-size-5">login</mat-icon>
+            Entrar no sistema
           </span>
+          <mat-progress-spinner
+            *ngIf="isLoading"
+            [diameter]="24"
+            [mode]="'indeterminate'"
+            class="inline-block"
+          ></mat-progress-spinner>
         </button>
-      </form>
 
-      <!-- Bottom Section -->
-      <div class="mt-8 pt-6 border-t border-gray-200 text-center">
-        <p class="text-sm text-gray-600">
-          Não tem conta?
-          <a 
+        <p class="text-center text-gray-600 text-sm mt-6">
+          Ainda não tem conta?
+          <a
+            class="font-medium auth-sign-in-panel-accent hover:underline ml-1"
             [routerLink]="['/auth/sign-up']"
-            class="text-blue-600 font-semibold hover:text-blue-700 hover:underline ml-1">
-            Criar Conta
+          >
+            Criar conta
           </a>
         </p>
-      </div>
+      </form>
     </div>
   </div>
+
+  <!-- Painel direito — imagem (desktop) -->
+  <div class="hidden md:block md:w-1/2 relative overflow-hidden auth-sign-in-hero-gradient">
+    <div class="absolute inset-0 opacity-10 mix-blend-overlay pointer-events-none">
+      <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <defs>
+          <pattern id="construvasco-grid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+            <path d="M0 48 V0 H48" stroke="white" stroke-width="0.5" fill="none" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#construvasco-grid)" />
+      </svg>
+    </div>
+
+    <div class="absolute inset-0 flex items-center justify-center p-10 lg:p-12">
+      <div class="relative w-full h-full min-h-[420px] rounded-3xl overflow-hidden shadow-2xl">
+        <img
+          src="images/auth/architecture-hero.jpg"
+          alt="Projecto de arquitectura e construção"
+          class="w-full h-full object-cover"
+          style="object-position: center 40%;"
+          loading="lazy"
+        />
+        <div class="absolute inset-0 auth-sign-in-hero-overlay"></div>
+        <div class="absolute bottom-0 left-0 right-0 p-8 text-white">
+          <p class="text-xs uppercase tracking-[0.2em] text-[#F2C94C] font-semibold mb-2">Construvasco</p>
+          <p class="text-xl lg:text-2xl font-bold leading-tight">
+            Projectos de obra com clareza do briefing à entrega.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute top-10 right-10 w-40 h-40 bg-[#F2C94C] opacity-15 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-10 left-10 w-60 h-60 bg-slate-900 opacity-30 rounded-full blur-3xl pointer-events-none"></div>
+  </div>
+
 </div>

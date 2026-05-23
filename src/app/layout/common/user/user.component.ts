@@ -124,7 +124,7 @@ export class UserComponent implements OnInit, OnDestroy {
      */
     signOut(): void {
         this._authService.signOut().subscribe(() => {
-            this._router.navigate(['/']);
+            this._router.navigate(['/auth/sign-in']);
         });
     }
 }

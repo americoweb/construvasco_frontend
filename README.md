@@ -1,6 +1,8 @@
 # Construvasco — Frontend (Angular)
 
-SPA em **Angular 18** (base **Fuse**) para o site público, área de cliente, autenticação e backoffice administrativo da Construvasco. Comunica com a API **Laravel** (`/api`).
+SPA em **Angular 18** (base **Fuse**) para área de cliente, autenticação e backoffice administrativo da Construvasco. Comunica com a API **Laravel** (`/api`).
+
+**Modo actual (interior):** ao abrir a app, a raiz (`/`) redirecciona para o painel admin; utilizadores não autenticados são enviados para `/auth/sign-in`. O site público/loja (`modules/landing`) está desactivado por defeito (`features.publicSiteEnabled: false` em `environment.ts`).
 
 ## Documentação
 
@@ -24,7 +26,9 @@ npm install
 npm start
 ```
 
-Abre `http://localhost:4200/` (ou a porta indicada pelo CLI).
+Abre `http://localhost:4200/#/` — redirecciona para login ou, se já autenticado, para `/admin/dashboard` (staff) ou `/conta/dashboard` (cliente).
+
+Para reactivar o site público mais tarde: `features.publicSiteEnabled: true` em [`src/environments/environment.ts`](src/environments/environment.ts) (rotas sob `/public`).
 
 Build de produção:
 
@@ -44,7 +48,7 @@ Detalhes em [docs/DESENVOLVIMENTO.md](docs/DESENVOLVIMENTO.md) e [docs/INTEGRACA
 
 | Pasta | Função |
 |-------|--------|
-| `src/app/modules/landing/` | Site público: home, catálogo, produto, checkout |
+| `src/app/modules/landing/` | Site público (opcional; desactivado com `publicSiteEnabled: false`) |
 | `src/app/modules/auth/` | Páginas auth (sign-in, sign-up, change-password) |
 | `src/app/modules/account/` | Área cliente autenticada (`/conta/...`) |
 | `src/app/modules/admin/` | Backoffice (`/admin/...`) |

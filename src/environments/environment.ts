@@ -4,15 +4,16 @@ import { AppConfig } from '../app/core/models/app-config.interface';
 export const environment: AppConfig = {
   production: false,
   apiURL: {
-    root: 'http://127.0.0.1:8081/api',
-    auth: 'http://127.0.0.1:8081/api',
-    uploads: 'http://127.0.0.1:8081/uploads'
+    root: 'http://127.0.0.1:8000/api',
+    auth: 'http://127.0.0.1:8000/api',
+    uploads: 'http://127.0.0.1:8000/uploads'
   },
   features: {
     aiEnabled: true,
     analytics: false,
     debugging: true,
-    multiTenant: true
+    multiTenant: true,
+    publicSiteEnabled: false
   },
   app: {
     name: 'Construvasco (local)',

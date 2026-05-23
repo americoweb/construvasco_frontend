@@ -1,0 +1,33 @@
+<h1 class="text-2xl font-bold text-slate-900 mb-6">Meus pedidos</h1>
+
+@if (loading) {
+  <div class="flex justify-center py-12">
+    <mat-spinner diameter="36" />
+  </div>
+} @else if (!rows.length) {
+  <mat-card>
+    <mat-card-content class="!py-10 text-center text-slate-500">
+      Ainda não tem pedidos registados. Contacte a equipa Construvasco para iniciar um briefing.
+    </mat-card-content>
+  </mat-card>
+} @else {
+  <div class="space-y-4">
+    @for (r of rows; track r.id) {
+      <mat-card>
+        <mat-card-content class="!py-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <p class="font-semibold">{{ r.title }}</p>
+            <p class="text-sm text-slate-500">
+              {{ r.reference_code }} · {{ r.project_type }} · {{ r.status }}
+            </p>
+          </div>
+          @if (pendingQuoteId(r); as quoteId) {
+            <a mat-flat-button color="primary" [routerLink]="['/conta/orcamentos', quoteId]">
+              Ver orçamento
+            </a>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}

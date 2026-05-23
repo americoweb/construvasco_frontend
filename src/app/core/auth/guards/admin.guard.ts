@@ -34,7 +34,7 @@ export const adminGuard: CanActivateFn = (route, state) => {
       if (!authenticated) {
         console.warn('[AdminGuard] Access denied: not authenticated');
         // Store the attempted URL for redirecting after login
-        const redirectUrl = state.url === '/sign-out' ? '/' : state.url;
+        const redirectUrl = state.url === '/sign-out' ? '/admin/dashboard' : state.url;
         router.navigate(['/auth/sign-in'], {
           queryParams: { redirectUrl }
         });
