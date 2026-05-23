@@ -1,0 +1,33 @@
+<div class="request-detail max-w-2xl">
+  @if (loading) {
+    <div class="flex justify-center py-12">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (request) {
+    @if (justSubmitted) {
+      <mat-card class="mb-6 border-l-4 border-l-green-600">
+        <mat-card-content class="!py-4">
+          <p class="font-semibold text-green-800 mb-1">Pedido submetido</p>
+          <p class="text-sm text-slate-600 mb-0">
+            A Construvasco vai analisar o seu pedido. Receberá actualizações por email.
+          </p>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    <h1 class="text-2xl font-bold mb-2">{{ request.title }}</h1>
+    <p class="text-slate-500 text-sm mb-4">{{ request.reference_code }} · {{ request.status }}</p>
+
+    <mat-card>
+      <mat-card-content class="!pt-4 grid gap-2 text-sm">
+        <p><span class="text-slate-500">Tipo:</span> {{ request.project_type }} / {{ request.tipologia }}</p>
+        <p><span class="text-slate-500">Local:</span> {{ request.localizacao || '—' }}</p>
+        @if (request.submitted_at) {
+          <p><span class="text-slate-500">Submetido:</span> {{ request.submitted_at | date: 'medium' }}</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <a mat-stroked-button class="mt-6" routerLink="/conta/pedidos">Voltar aos pedidos</a>
+  }
+</div>

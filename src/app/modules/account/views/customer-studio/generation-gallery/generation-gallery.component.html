@@ -1,0 +1,30 @@
+@if (!generations.length) {
+  <p class="text-slate-500 text-sm">Ainda não gerou mockups. Use «Gerar mockup» para criar a primeira versão.</p>
+} @else {
+  <div class="gallery-grid">
+    @for (g of generations; track g.id) {
+      <article class="gallery-card" [class.superseded]="isSuperseded(g)">
+        @if (g.image_url) {
+          <img [src]="g.image_url" [alt]="'Mockup ' + g.id" loading="lazy" />
+        } @else {
+          <div class="placeholder">Sem imagem</div>
+        }
+        <div class="card-actions">
+          @if (isSuperseded(g)) {
+            <mat-chip class="badge-superseded">Versão anterior</mat-chip>
+          }
+          @if (isApproved(g)) {
+            <mat-chip color="primary">Aprovado</mat-chip>
+          } @else if (!isSuperseded(g)) {
+            <button mat-stroked-button type="button" [disabled]="disabled" (click)="approve.emit(g)">
+              Aprovar
+            </button>
+            <button mat-button type="button" [disabled]="disabled" (click)="refine.emit(g)">
+              Refinar
+            </button>
+          }
+        </div>
+      </article>
+    }
+  </div>
+}

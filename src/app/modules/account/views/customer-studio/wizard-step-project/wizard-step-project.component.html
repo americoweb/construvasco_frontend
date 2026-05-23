@@ -1,0 +1,24 @@
+<form [formGroup]="form" class="grid gap-4 max-w-xl">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Título do projecto</mat-label>
+    <input matInput formControlName="title" placeholder="Ex.: Casa na Costa do Sol" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Tipo de obra</mat-label>
+    <mat-select formControlName="project_type">
+      @for (opt of projectTypes; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Tipologia</mat-label>
+    <mat-select formControlName="tipologia">
+      @for (opt of tipologias; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</form>

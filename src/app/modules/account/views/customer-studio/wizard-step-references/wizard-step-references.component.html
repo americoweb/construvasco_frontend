@@ -1,0 +1,26 @@
+<div class="max-w-xl">
+  <p class="text-slate-600 mb-4">
+    Fotos do terreno ou referências de inspiração (opcional). Ajuda a IA a compreender o contexto.
+  </p>
+
+  <label class="inline-flex items-center gap-2 px-4 py-2 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50">
+    <mat-icon>upload</mat-icon>
+    <span>Escolher imagens</span>
+    <input type="file" accept="image/*" multiple class="hidden" (change)="onFiles($event)" [disabled]="uploading" />
+  </label>
+
+  @if (uploading) {
+    <p class="text-sm text-slate-500 mt-2">A enviar ficheiros…</p>
+  }
+
+  @if (documents.length) {
+    <mat-list class="mt-4">
+      @for (doc of documents; track doc.id) {
+        <mat-list-item>
+          <mat-icon matListItemIcon>image</mat-icon>
+          <span matListItemTitle>{{ doc.original_name || 'Imagem' }}</span>
+        </mat-list-item>
+      }
+    </mat-list>
+  }
+</div>

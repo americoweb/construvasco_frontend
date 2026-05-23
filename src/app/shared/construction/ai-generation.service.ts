@@ -3,17 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from '../../core/services/config.service';
 import { API_ENDPOINTS } from '../constants/api-endpoints';
-import { ApiDataResponse } from './construction.types';
+import { ApiDataResponse, AiGenerationRecord } from './construction.types';
 
-export interface AiGenerationRecord {
-  id: number;
-  project_request_id?: number | null;
-  type: string;
-  prompt?: string | null;
-  status: string;
-  image_url?: string | null;
-  parent_generation_id?: number | null;
-}
+export type { AiGenerationRecord };
 
 @Injectable({ providedIn: 'root' })
 export class AiGenerationService {
@@ -29,10 +21,14 @@ export class AiGenerationService {
     );
   }
 
-  refine(id: number | string, feedback: string): Observable<ApiDataResponse<{ prompt: string }>> {
-    return this.http.post<ApiDataResponse<{ prompt: string }>>(
+  refine(
+    id: number | string,
+    designPrompt: string,
+    feedback?: string
+  ): Observable<ApiDataResponse<AiGenerationRecord>> {
+    return this.http.post<ApiDataResponse<AiGenerationRecord>>(
       this.config.getApiUrl(API_ENDPOINTS.AI.REFINE(id)),
-      { feedback }
+      { design_prompt: designPrompt, feedback: feedback ?? '' }
     );
   }
 

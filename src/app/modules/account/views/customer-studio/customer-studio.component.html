@@ -1,0 +1,81 @@
+<div class="customer-studio">
+  <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Estúdio de projecto</h1>
+      <p class="text-slate-600">Crie o seu briefing e gere mockups de referência.</p>
+    </div>
+    @if (!loading) {
+      <app-credits-balance-card [balance]="creditsBalance" [costPerGeneration]="costPerGeneration" />
+    }
+  </div>
+
+  <nav class="step-nav mb-6" aria-label="Passos do wizard">
+    @for (label of stepLabels; track label; let i = $index) {
+      <span class="step-pill" [class.active]="i === currentStep" [class.done]="i < currentStep">{{ i + 1 }}. {{ label }}</span>
+    }
+  </nav>
+
+  @if (loading) {
+    <div class="flex justify-center py-16">
+      <mat-spinner diameter="40" />
+    </div>
+  } @else {
+    @switch (currentStep) {
+      @case (0) {
+        <app-wizard-step-project [form]="projectForm" />
+      }
+      @case (1) {
+        <app-wizard-step-briefing [form]="briefingForm" />
+      }
+      @case (2) {
+        <app-wizard-step-references
+          [documents]="documents"
+          [uploading]="uploading"
+          (filesSelected)="onFilesSelected($event)"
+        />
+      }
+      @case (3) {
+        @if (draftId) {
+          <app-studio-workspace [requestId]="draftId" [disclaimer]="disclaimer" />
+        }
+      }
+      @case (4) {
+        <section class="review max-w-xl">
+          <h2 class="text-lg font-semibold mb-4">Revisão e submissão</h2>
+          <dl class="grid gap-2 text-sm">
+            <div><dt class="text-slate-500 inline">Título: </dt><dd class="inline">{{ projectForm.value.title }}</dd></div>
+            <div><dt class="text-slate-500 inline">Tipo: </dt><dd class="inline">{{ projectForm.value.project_type }} / {{ projectForm.value.tipologia }}</dd></div>
+            <div><dt class="text-slate-500 inline">Local: </dt><dd class="inline">{{ briefingForm.value.localizacao }}</dd></div>
+            <div><dt class="text-slate-500 inline">Área: </dt><dd class="inline">{{ briefingForm.value.area_m2 }} m², {{ briefingForm.value.num_pisos }} pisos</dd></div>
+            <div><dt class="text-slate-500 inline">Mockup aprovado: </dt><dd class="inline">{{ hasApprovedMockup ? 'Sim' : 'Não' }}</dd></div>
+          </dl>
+          <p class="text-sm text-slate-600 mt-4">
+            Ao submeter, a Construvasco analisa o pedido e entra em contacto para o orçamento de arquitectura.
+          </p>
+          <button
+            mat-flat-button
+            color="primary"
+            class="mt-4"
+            type="button"
+            [disabled]="submitting"
+            (click)="submitRequest()"
+          >
+            Pedir arquitectura
+          </button>
+        </section>
+      }
+    }
+
+    <div class="wizard-actions mt-8 flex gap-3">
+      <button mat-button type="button" [disabled]="currentStep === 0 || saving || studioState.isGenerating" (click)="prev()">
+        Anterior
+      </button>
+      @if (currentStep < 4) {
+        <button mat-flat-button color="primary" type="button" [disabled]="saving || studioState.isGenerating" (click)="next()">
+          @if (saving) { A guardar… } @else { Seguinte }
+        </button>
+      }
+      <a mat-stroked-button routerLink="/conta/dashboard">Voltar ao dashboard</a>
+    </div>
+  }
+</div>

@@ -31,6 +31,10 @@ export const API_ENDPOINTS = {
   },
   CUSTOMER: {
     DASHBOARD: 'v1/customer/dashboard',
+    STUDIO: {
+      STATE: 'v1/customer/studio/state',
+      RESET: 'v1/customer/studio/reset',
+    },
     PROJECT_REQUESTS: 'v1/customer/project-requests',
     PROJECT_REQUEST: (id: string | number) => `v1/customer/project-requests/${id}`,
     PROJECT_REQUEST_SUBMIT: (id: string | number) => `v1/customer/project-requests/${id}/submit`,

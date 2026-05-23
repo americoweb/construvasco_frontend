@@ -1,0 +1,35 @@
+<form [formGroup]="form" class="grid gap-4 max-w-xl">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Localização aproximada</mat-label>
+    <input matInput formControlName="localizacao" placeholder="Ex.: Maputo, Costa do Sol" />
+  </mat-form-field>
+
+  <div class="grid sm:grid-cols-2 gap-4">
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Área (m²)</mat-label>
+      <input matInput type="number" formControlName="area_m2" />
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Número de pisos</mat-label>
+      <input matInput type="number" formControlName="num_pisos" />
+    </mat-form-field>
+  </div>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Estilo arquitectónico</mat-label>
+    <mat-select formControlName="estilo_arquitectonico">
+      @for (opt of styles; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Paleta de acabamentos</mat-label>
+    <mat-select formControlName="paleta_acabamento">
+      @for (opt of palettes; track opt.value) {
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+</form>

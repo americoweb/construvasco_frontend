@@ -56,6 +56,11 @@ export interface ProjectRequest {
   localizacao?: string;
   status?: string;
   briefing_data?: Record<string, unknown>;
+  approved_ai_generation_id?: number | null;
+  area_m2?: number | string | null;
+  num_pisos?: number | null;
+  estilo_arquitectonico?: string;
+  paleta_acabamento?: string;
   submitted_at?: string;
   reviewed_at?: string;
   converted_project_id?: number | null;
@@ -102,4 +107,24 @@ export interface CustomerDashboard {
   credits_balance?: number;
   project_requests_count: number;
   pending_quotes: number;
+}
+
+export interface AiGenerationRecord {
+  id: number;
+  project_request_id?: number | null;
+  type: string;
+  prompt?: string | null;
+  status: string;
+  image_url?: string | null;
+  parent_generation_id?: number | null;
+  created_at?: string;
+}
+
+export interface StudioState {
+  draft: ProjectRequest;
+  has_meaningful_content: boolean;
+  credits_balance: number;
+  cost_per_generation: number;
+  generations: AiGenerationRecord[];
+  disclaimer: string;
 }

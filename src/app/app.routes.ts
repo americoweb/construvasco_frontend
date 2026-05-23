@@ -6,6 +6,7 @@ import { noAuthGuard } from './core/auth/guards/no-auth.guard';
 import { LayoutComponent } from './layout/layout.component';
 import { landingRoutes } from './modules/landing/landing.routes';
 import { environment } from '../environments/environment';
+import { studioCanDeactivateGuard } from './modules/account/views/customer-studio/studio-can-deactivate.guard';
 
 // @formatter:off
 /* eslint-disable max-len */
@@ -116,6 +117,21 @@ export const routes: Route[] = [
                         loadComponent: () =>
                             import('./modules/account/views/customer-requests/customer-requests.component').then(
                                 (m) => m.CustomerRequestsComponent
+                            ),
+                    },
+                    {
+                        path: 'pedidos/:id',
+                        loadComponent: () =>
+                            import('./modules/account/views/customer-request-detail/customer-request-detail.component').then(
+                                (m) => m.CustomerRequestDetailComponent
+                            ),
+                    },
+                    {
+                        path: 'estudio',
+                        canDeactivate: [studioCanDeactivateGuard],
+                        loadComponent: () =>
+                            import('./modules/account/views/customer-studio/customer-studio.component').then(
+                                (m) => m.CustomerStudioComponent
                             ),
                     },
                     {

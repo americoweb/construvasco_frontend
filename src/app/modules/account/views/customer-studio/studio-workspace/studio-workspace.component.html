@@ -1,0 +1,53 @@
+<div class="studio-workspace relative">
+  @if (isGenerating) {
+    <div class="generating-overlay">
+      <mat-spinner diameter="48" />
+      <p class="mt-4 font-medium">A gerar mockup… pode demorar até 60 segundos.</p>
+      <p class="text-sm text-slate-500">Não feche nem actualize esta página.</p>
+    </div>
+  }
+
+  <div class="flex flex-wrap gap-3 mb-4">
+    <button mat-flat-button color="primary" type="button" [disabled]="isGenerating" (click)="generate()">
+      Gerar mockup
+    </button>
+    <mat-checkbox [checked]="showSuperseded" [disabled]="isGenerating" (change)="showSuperseded = $event.checked">
+      Mostrar versões anteriores
+    </mat-checkbox>
+  </div>
+
+  <app-generation-gallery
+    [generations]="generations"
+    [approvedId]="approvedId"
+    [disabled]="isGenerating"
+    [showSuperseded]="showSuperseded"
+    (approve)="approve($event)"
+    (refine)="onRefineClick($event)"
+  />
+
+  @if (selectedForRefine) {
+    <section class="refine-section mt-6 p-4 border border-slate-200 rounded-lg bg-slate-50">
+      <h3 class="font-semibold mb-2">Refinar versão #{{ selectedForRefine.id }}</h3>
+      <mat-form-field appearance="outline" class="w-full">
+        <mat-label>O que quer alterar?</mat-label>
+        <textarea matInput rows="3" [formControl]="refineFeedback" placeholder="Ex.: mais janelas na fachada, telhado mais inclinado…"></textarea>
+      </mat-form-field>
+      <div class="flex gap-2">
+        <button mat-flat-button color="accent" type="button" [disabled]="isGenerating" (click)="confirmRefine()">
+          Confirmar refinamento
+        </button>
+        <button mat-button type="button" [disabled]="isGenerating" (click)="selectedForRefine = null">
+          Cancelar
+        </button>
+      </div>
+    </section>
+  }
+
+  @if (errorMessage) {
+    <p class="text-red-600 text-sm mt-3">{{ errorMessage }}</p>
+  }
+
+  <footer class="disclaimer mt-8 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+    {{ disclaimer }}
+  </footer>
+</div>

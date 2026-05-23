@@ -27,8 +27,20 @@
         </mat-card-content>
       </mat-card>
     </div>
+    <mat-card class="mb-6 bg-blue-50 border border-blue-100">
+      <mat-card-content class="!py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900 mb-1">Novo projecto</h2>
+          <p class="text-sm text-slate-600 mb-0">Briefing guiado + mockups de referência com IA.</p>
+        </div>
+        <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
+          Começar novo projecto
+        </a>
+      </mat-card-content>
+    </mat-card>
+
     <div class="flex flex-wrap gap-3">
-      <a mat-flat-button color="primary" routerLink="/conta/pedidos">Ver pedidos</a>
+      <a mat-stroked-button routerLink="/conta/pedidos">Ver pedidos</a>
       <a mat-stroked-button routerLink="/conta/projectos">Ver projectos</a>
     </div>
   }
