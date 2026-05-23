@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>Enviar orçamento de arquitectura</h2>
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <mat-dialog-content class="!pt-2 grid gap-3 min-w-[min(100%,22rem)]">
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Tipo</mat-label>
+      <input matInput value="Arquitectura" readonly tabindex="-1" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Valor (MT)</mat-label>
+      <input matInput type="number" formControlName="total_amount_mt" min="0" step="1" />
+      @if (fieldError('total_amount_mt'); as err) {
+        <mat-error>{{ err }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Prazo (dias)</mat-label>
+      <input matInput type="number" formControlName="delivery_days" min="1" />
+      @if (fieldError('delivery_days'); as err) {
+        <mat-error>{{ err }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Validade do orçamento</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="valid_until" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      @if (fieldError('valid_until'); as err) {
+        <mat-error>{{ err }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="w-full">
+      <mat-label>Condições</mat-label>
+      <textarea matInput rows="3" formControlName="conditions" placeholder="Ex: 50% sinal, 50% entrega"></textarea>
+    </mat-form-field>
+
+    @if (serverErrors['quote_type']) {
+      <p class="text-sm text-red-600">{{ serverErrors['quote_type'][0] }}</p>
+    }
+    @if (serverErrors['status']) {
+      <p class="text-sm text-red-600">{{ serverErrors['status'][0] }}</p>
+    }
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()" [disabled]="saving">Cancelar</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="saving">
+      @if (saving) {
+        <mat-spinner diameter="20" class="inline-block" />
+      } @else {
+        Enviar ao cliente
+      }
+    </button>
+  </mat-dialog-actions>
+</form>

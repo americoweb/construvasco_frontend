@@ -21,13 +21,13 @@
               {{ r.reference_code }} · {{ r.project_type }} · {{ r.status }}
             </p>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <a mat-stroked-button [routerLink]="['/conta/pedidos', r.id]">Detalhe</a>
-            @if (pendingQuoteId(r); as quoteId) {
-              <a mat-flat-button color="primary" [routerLink]="['/conta/orcamentos', quoteId]">
-                Ver orçamento
-              </a>
+          <div class="flex flex-wrap items-center gap-2">
+            @if (pendingQuoteId(r)) {
+              <span class="text-xs font-semibold bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                Novo orçamento
+              </span>
             }
+            <a mat-stroked-button [routerLink]="['/conta/pedidos', r.id]">Detalhe</a>
           </div>
         </mat-card-content>
       </mat-card>

@@ -21,6 +21,28 @@
   }
 }
 
+.quote-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.quote-status--sent {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.quote-status--accepted {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.quote-status--rejected {
+  background: #e2e8f0;
+  color: #475569;
+}
+
 .submit-banner {
   animation: fadeIn 0.25s ease-out;
 }

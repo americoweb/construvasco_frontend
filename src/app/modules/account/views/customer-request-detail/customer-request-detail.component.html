@@ -100,13 +100,61 @@
       </mat-card>
     }
 
+    @if (architectureQuotes.length) {
+      <mat-card class="mb-4">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Orçamentos recebidos</h2>
+          <ul class="space-y-4">
+            @for (q of architectureQuotes; track q.id) {
+              <li class="border rounded-lg p-4 text-sm">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <span class="font-medium">Orçamento de {{ quoteTypeLabel() }}</span>
+                  <span class="quote-status" [ngClass]="quoteStatusClass(q.status)">
+                    {{ quoteStatusLabel(q.status) }}
+                  </span>
+                </div>
+                <p class="mb-1"><strong>Valor:</strong> {{ formatMt(q.total_amount_mt) }}</p>
+                @if (q.delivery_days) {
+                  <p class="mb-1"><strong>Prazo:</strong> {{ q.delivery_days }} dias</p>
+                }
+                @if (q.expires_at) {
+                  <p class="mb-1"><strong>Validade:</strong> {{ q.expires_at | date: 'mediumDate' }}</p>
+                }
+                @if (q.conditions) {
+                  <p class="mb-1 text-slate-600">{{ q.conditions }}</p>
+                }
+                @if (canRespond(q)) {
+                  <div class="flex flex-wrap gap-2 mt-3">
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      type="button"
+                      (click)="acceptQuote(q)"
+                      [disabled]="quoteActionId === q.id"
+                    >
+                      Aceitar orçamento
+                    </button>
+                    <button
+                      mat-stroked-button
+                      type="button"
+                      (click)="rejectQuote(q)"
+                      [disabled]="quoteActionId === q.id"
+                    >
+                      Recusar
+                    </button>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    }
+
     <mat-card class="mb-6 bg-blue-50 border border-blue-100">
       <mat-card-content class="!py-4 text-sm text-slate-700">
         <p class="font-semibold text-slate-900 mb-2">Próximos passos</p>
-        <p class="mb-0">
-          Pedido submetido. A Construvasco vai analisar o seu pedido e enviar uma proposta de arquitectura.
-          Receberá notificação por email quando estiver disponível.
-        </p>
+        <p class="mb-0">{{ nextStepsMessage }}</p>
       </mat-card-content>
     </mat-card>
 

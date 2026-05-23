@@ -1,3 +1,44 @@
-:host {
-  display: block;
+.mockup-featured img {
+  max-height: 28rem;
+  object-fit: cover;
+}
+
+.doc-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+.doc-thumb {
+  margin: 0;
+
+  img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+  }
+}
+
+.quote-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.quote-status--sent {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.quote-status--accepted {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.quote-status--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
 }

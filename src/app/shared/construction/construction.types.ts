@@ -34,15 +34,33 @@ export interface ProjectDocument {
 export interface Quote {
   id: number;
   project_request_id: number;
+  quote_type?: string;
   total_amount_mt: number | string;
   delivery_days?: number;
   conditions?: string;
   status?: string;
   sent_at?: string;
   responded_at?: string;
+  expires_at?: string;
   rejection_reason?: string;
   breakdown?: Record<string, unknown>;
   project_request?: ProjectRequest;
+}
+
+export interface ProjectRequestClient {
+  id?: number;
+  name?: string;
+  email?: string;
+  phone?: string;
+}
+
+export interface ProjectRequestProjectSummary {
+  id: number;
+  name?: string;
+  contract_phase?: string;
+  status?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ProjectRequest {
@@ -64,11 +82,14 @@ export interface ProjectRequest {
   submitted_at?: string;
   reviewed_at?: string;
   converted_project_id?: number | null;
+  whatsapp?: string;
   user?: ProjectRequestUser;
+  client?: ProjectRequestClient;
   quotes?: Quote[];
   documents?: ProjectDocument[];
   ai_generations?: AiGenerationRecord[];
   approved_ai_generation?: AiGenerationRecord | null;
+  projects?: ProjectRequestProjectSummary[];
 }
 
 export interface ConstructionProject {
@@ -100,8 +121,10 @@ export interface AssignableUser {
 
 export interface StoreQuotePayload {
   total_amount_mt: number;
-  delivery_days?: number;
+  delivery_days: number;
   conditions?: string;
+  valid_until?: string;
+  quote_type?: 'architecture';
   breakdown?: Record<string, unknown>;
 }
 
