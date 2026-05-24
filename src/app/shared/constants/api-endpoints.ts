@@ -39,6 +39,13 @@ export const API_ENDPOINTS = {
     PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
       `v1/manager/projects/${projectId}/deliverables/${deliverableId}/download`,
     MARK_ARCHITECTURE_DELIVERED: (id: string | number) => `v1/manager/projects/${id}/mark-architecture-delivered`,
+    PAYMENTS_PENDING: 'v1/manager/payments/pending',
+    PROJECT_PAYMENT_CONFIRM: (projectId: string | number, paymentId: string | number) =>
+      `v1/manager/projects/${projectId}/payments/${paymentId}/confirm`,
+    PROJECT_PAYMENT_REJECT: (projectId: string | number, paymentId: string | number) =>
+      `v1/manager/projects/${projectId}/payments/${paymentId}/reject`,
+    PROJECT_PAYMENT_PROOF_DOWNLOAD: (projectId: string | number, paymentId: string | number) =>
+      `v1/manager/projects/${projectId}/payments/${paymentId}/proof/download`,
   },
   CUSTOMER: {
     DASHBOARD: 'v1/customer/dashboard',
@@ -58,6 +65,8 @@ export const API_ENDPOINTS = {
     PROJECT_DELIVERABLES: (id: string | number) => `v1/customer/projects/${id}/deliverables`,
     PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
       `v1/customer/projects/${projectId}/deliverables/${deliverableId}/download`,
+    PROJECT_PAYMENT_PROOF: (projectId: string | number, paymentId: string | number) =>
+      `v1/customer/projects/${projectId}/payments/${paymentId}/proof`,
     CREDITS: {
       BALANCE: 'v1/customer/credits/balance',
       HISTORY: 'v1/customer/credits/history',

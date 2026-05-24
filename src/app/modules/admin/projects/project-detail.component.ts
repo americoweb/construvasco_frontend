@@ -20,6 +20,8 @@ import { NotificationService } from '../../../shared/components/feedback/notific
 import { ConfirmDialogComponent } from '../../../shared/components/feedback/confirm-dialog/confirm-dialog.component';
 import { SubmitDeliverableDialogComponent } from './submit-deliverable-dialog.component';
 import { RejectDeliverableDialogComponent } from './reject-deliverable-dialog.component';
+import { RejectPaymentProofDialogComponent } from './reject-payment-proof-dialog.component';
+import { formatMoneyMt, paymentStatusLabel } from '../../../shared/construction/payment.util';
 import {
   approvedMockupUrl,
   briefingRowsFromRequest,
@@ -60,6 +62,7 @@ export class ProjectDetailComponent implements OnInit {
   assigning = false;
   actionDeliverableId: number | null = null;
   markingArchitecture = false;
+  actionPayment = false;
 
   project: ConstructionProject | null = null;
   deliverables: ProjectDeliverable[] = [];
@@ -321,6 +324,83 @@ export class ProjectDetailComponent implements OnInit {
           this.cdr.markForCheck();
         },
       });
+    });
+  }
+
+  get payment() {
+    return this.project?.payment;
+  }
+
+  formatMoney(v?: number | string): string {
+    return formatMoneyMt(v);
+  }
+
+  paymentStatus(s?: string): string {
+    return paymentStatusLabel(s);
+  }
+
+  confirmPayment(): void {
+    if (!this.project?.payment?.id) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: 'Confirmar pagamento?',
+        message: 'O cliente receberá notificação e poderá descarregar os entregáveis.',
+        confirmText: 'Confirmar',
+        cancelText: 'Cancelar',
+        type: 'info',
+      },
+    });
+    ref.afterClosed().subscribe((r) => {
+      if (!r?.confirmed) return;
+      this.actionPayment = true;
+      this.projects.confirmPayment(this.project!.id, this.project!.payment!.id).subscribe({
+        next: () => {
+          this.actionPayment = false;
+          this.notify.success('Pagamento confirmado.');
+          this.reloadAll();
+        },
+        error: () => {
+          this.actionPayment = false;
+          this.notify.error('Não foi possível confirmar.');
+          this.cdr.markForCheck();
+        },
+      });
+    });
+  }
+
+  rejectPayment(): void {
+    if (!this.project?.payment?.id) return;
+    const ref = this.dialog.open(RejectPaymentProofDialogComponent, { width: '480px' });
+    ref.afterClosed().subscribe((reason) => {
+      if (!reason) return;
+      this.actionPayment = true;
+      this.projects.rejectPayment(this.project!.id, this.project!.payment!.id, reason).subscribe({
+        next: () => {
+          this.actionPayment = false;
+          this.notify.success('Comprovativo rejeitado. Cliente notificado para resubmeter.');
+          this.reloadAll();
+        },
+        error: () => {
+          this.actionPayment = false;
+          this.notify.error('Não foi possível rejeitar.');
+          this.cdr.markForCheck();
+        },
+      });
+    });
+  }
+
+  downloadProof(): void {
+    if (!this.project?.payment?.id) return;
+    this.projects.downloadPaymentProof(this.project.id, this.project.payment.id).subscribe({
+      next: (res) => {
+        const name = parseFilenameFromDisposition(
+          res.headers.get('Content-Disposition'),
+          this.project!.payment!.proof_file_name ?? 'comprovativo'
+        );
+        triggerBlobDownload(res.body!, name);
+      },
+      error: () => this.notify.error('Não foi possível descarregar o comprovativo.'),
     });
   }
 

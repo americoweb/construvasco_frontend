@@ -5,6 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CustomerPortalService } from '../../../../shared/construction/customer-portal.service';
 import { ConstructionProjectService } from '../../../../shared/construction/construction-project.service';
 import {
@@ -23,6 +25,15 @@ import {
   parseFilenameFromDisposition,
   triggerBlobDownload,
 } from '../../../../shared/construction/deliverable.util';
+import {
+  BANK_DETAILS_PLACEHOLDER,
+  canCustomerDownload,
+  downloadBlockedTooltip,
+  formatMoneyMt,
+  paymentCardClass,
+  paymentStatusLabel,
+} from '../../../../shared/construction/payment.util';
+import { SubmitPaymentProofDialogComponent } from './submit-payment-proof-dialog.component';
 
 @Component({
   selector: 'app-customer-project-detail',
@@ -34,6 +45,8 @@ import {
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
+    MatTooltipModule,
   ],
   templateUrl: './customer-project-detail.component.html',
   styleUrls: ['./customer-project-detail.component.scss'],
@@ -51,8 +64,11 @@ export class CustomerProjectDetailComponent implements OnInit {
     private portal: CustomerPortalService,
     private projects: ConstructionProjectService,
     private notify: NotificationService,
+    private dialog: MatDialog,
     private cdr: ChangeDetectorRef
   ) {}
+
+  readonly bankDetails = BANK_DETAILS_PLACEHOLDER;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -113,10 +129,52 @@ export class CustomerProjectDetailComponent implements OnInit {
     if (this.project?.architecture_completed_at) {
       return 'Arquitectura concluída. Pode agora solicitar o orçamento de obra.';
     }
-    if (this.deliverables.length) {
+    if (this.deliverables.length && this.canDownload) {
       return 'Tem entregáveis disponíveis para descarregar.';
     }
+    if (this.deliverables.length && !this.canDownload) {
+      return 'Há entregáveis aprovados, mas o download fica disponível após confirmação do pagamento.';
+    }
     return 'A nossa equipa está a trabalhar no seu projecto. Será notificado quando os primeiros entregáveis estiverem disponíveis.';
+  }
+
+  get payment() {
+    return this.project?.payment;
+  }
+
+  get canDownload(): boolean {
+    return canCustomerDownload(this.payment);
+  }
+
+  paymentLabel(status?: string): string {
+    return paymentStatusLabel(status);
+  }
+
+  paymentClass(status?: string): string {
+    return paymentCardClass(status);
+  }
+
+  formatMoney(v?: number | string): string {
+    return formatMoneyMt(v);
+  }
+
+  downloadTooltip(): string {
+    return downloadBlockedTooltip(this.payment);
+  }
+
+  openProofDialog(): void {
+    if (!this.project?.payment?.id) return;
+    const ref = this.dialog.open(SubmitPaymentProofDialogComponent, {
+      width: '520px',
+      data: {
+        projectId: this.project.id,
+        paymentId: this.project.payment.id,
+        amount: this.project.payment.amount,
+      },
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (ok) this.reloadAll();
+    });
   }
 
   get briefingRows() {

@@ -8,7 +8,9 @@ import {
   AssignableUser,
   ConstructionProject,
   PaginatedResponse,
+  PendingPaymentRow,
   ProjectDeliverable,
+  ProjectPayment,
 } from './construction.types';
 
 export type ProjectApiRole = 'manager' | 'technician' | 'customer' | 'admin';
@@ -154,6 +156,67 @@ export class ConstructionProjectService {
       return API_ENDPOINTS.CUSTOMER.PROJECT_DELIVERABLE_DOWNLOAD(projectId, deliverableId);
     }
     return API_ENDPOINTS.MANAGER.PROJECT_DELIVERABLE_DOWNLOAD(projectId, deliverableId);
+  }
+
+  uploadPaymentProof(
+    projectId: number | string,
+    paymentId: number | string,
+    form: FormData
+  ): Observable<HttpEvent<ApiDataResponse<ProjectPayment>>> {
+    return this.http.post<ApiDataResponse<ProjectPayment>>(
+      this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.PROJECT_PAYMENT_PROOF(projectId, paymentId)),
+      form,
+      { reportProgress: true, observe: 'events' }
+    );
+  }
+
+  confirmPayment(projectId: number | string, paymentId: number | string): Observable<ApiDataResponse<ProjectPayment>> {
+    return this.http.post<ApiDataResponse<ProjectPayment>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.PROJECT_PAYMENT_CONFIRM(projectId, paymentId)),
+      {}
+    );
+  }
+
+  rejectPayment(
+    projectId: number | string,
+    paymentId: number | string,
+    rejectionReason: string
+  ): Observable<ApiDataResponse<ProjectPayment>> {
+    return this.http.post<ApiDataResponse<ProjectPayment>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.PROJECT_PAYMENT_REJECT(projectId, paymentId)),
+      { rejection_reason: rejectionReason }
+    );
+  }
+
+  downloadPaymentProof(projectId: number | string, paymentId: number | string): Observable<HttpResponse<Blob>> {
+    return this.http.get(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.PROJECT_PAYMENT_PROOF_DOWNLOAD(projectId, paymentId)),
+      { responseType: 'blob', observe: 'response' }
+    );
+  }
+
+  listPendingPayments(): Observable<ApiDataResponse<PendingPaymentRow[]>> {
+    return this.http.get<ApiDataResponse<PendingPaymentRow[]>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.PAYMENTS_PENDING)
+    );
+  }
+
+  getManagerDashboard(): Observable<
+    ApiDataResponse<{
+      pending_payments_count?: number;
+      pending_payments?: PendingPaymentRow[];
+      pending_requests?: number;
+      active_projects?: number;
+    }>
+  > {
+    return this.http.get<
+      ApiDataResponse<{
+        pending_payments_count?: number;
+        pending_payments?: PendingPaymentRow[];
+        pending_requests?: number;
+        active_projects?: number;
+      }>
+    >(this.config.getApiUrl(API_ENDPOINTS.MANAGER.DASHBOARD));
   }
 
   resolveApiRole(userRole: string): ProjectApiRole {

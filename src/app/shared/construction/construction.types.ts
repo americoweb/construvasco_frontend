@@ -92,6 +92,22 @@ export interface ProjectRequest {
   projects?: ProjectRequestProjectSummary[];
 }
 
+export interface ProjectPayment {
+  id: number;
+  project_id?: number;
+  amount?: number | string;
+  currency?: string;
+  status?: 'pending' | 'proof_submitted' | 'confirmed' | 'rejected' | string;
+  phase?: string;
+  notes?: string;
+  proof_file_name?: string;
+  proof_uploaded_at?: string;
+  confirmed_at?: string;
+  rejected_reason?: string;
+  confirmed_by?: { id?: number; name?: string } | null;
+  user?: { id?: number; name?: string; identifier?: string };
+}
+
 export interface ProjectDeliverable {
   id: number;
   project_id?: number;
@@ -131,7 +147,12 @@ export interface ConstructionProject {
   }[];
   milestones?: { id: number; title?: string; status?: string }[];
   deliverables?: ProjectDeliverable[];
+  payment?: ProjectPayment;
   quote?: Quote;
+}
+
+export interface PendingPaymentRow extends ProjectPayment {
+  project?: { id: number; name?: string; client?: { name?: string } };
 }
 
 export interface AssignableUser {

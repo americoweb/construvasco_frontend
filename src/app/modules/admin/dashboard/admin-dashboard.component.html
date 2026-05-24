@@ -58,6 +58,39 @@
         </div>
       </div>
 
+      @if (isManager && pendingPaymentsCount > 0) {
+        <div class="bg-white rounded-2xl border border-orange-200 shadow-sm overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-orange-100 bg-orange-50">
+            <div>
+              <h2 class="text-base font-semibold text-gray-900">Pagamentos pendentes de confirmação</h2>
+              <p class="text-3xl font-bold text-orange-700 mt-1">{{ pendingPaymentsCount }}</p>
+            </div>
+          </div>
+          <ul class="divide-y divide-gray-100">
+            @for (p of pendingPayments; track p.id) {
+              <li class="px-6 py-3 flex items-center justify-between gap-4 hover:bg-gray-50">
+                <div class="min-w-0">
+                  <p class="font-medium text-gray-900 truncate">{{ paymentClientLabel(p) }}</p>
+                  <p class="text-sm text-gray-500">
+                    {{ formatMoney(p.amount) }} · {{ formatDate(p.proof_uploaded_at) }}
+                  </p>
+                </div>
+                @if (p.project_id) {
+                  <a
+                    [routerLink]="['/admin/projectos', p.project_id]"
+                    class="text-sm font-medium text-indigo-600 hover:text-indigo-800 shrink-0">
+                    Ver projecto
+                  </a>
+                }
+              </li>
+            }
+          </ul>
+          <div class="px-6 py-3 border-t border-gray-100 text-sm">
+            <span class="text-gray-500">Abra cada projecto para confirmar ou rejeitar o comprovativo.</span>
+          </div>
+        </div>
+      }
+
       @if (!isTechnician) {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <a routerLink="/admin/financas" class="stat-card">

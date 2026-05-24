@@ -12,8 +12,10 @@ import { PageHeaderComponent } from '../../../shared/components/layout/page-head
 import {
   AdminDashboardService,
   AdminDashboardStats,
-  AdminProjectSummary
+  AdminProjectSummary,
 } from './admin-dashboard.service';
+import { PendingPaymentRow } from '../../../shared/construction/construction.types';
+import { formatMoneyMt } from '../../../shared/construction/payment.util';
 import { ApiResponse } from '../../../core/models/api.types';
 import { UserService } from '../../../core/auth/services/user.service';
 
@@ -31,6 +33,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   recentProjects: AdminProjectSummary[] = [];
   userRole = '';
   isTechnician = false;
+  isManager = false;
+  pendingPayments: PendingPaymentRow[] = [];
+  pendingPaymentsCount = 0;
 
   today = new Date().toLocaleDateString('pt-MZ', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
@@ -46,6 +51,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   ) {
     this.userRole = String(this.userService.user?.current_tenant_context?.role ?? '').toLowerCase().trim();
     this.isTechnician = ['technician', 'designer', 'tecnico', 'desenhista'].includes(this.userRole);
+    this.isManager = ['admin', 'project_manager', 'gestor'].includes(this.userRole);
   }
 
   ngOnInit(): void {
@@ -62,13 +68,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .toLowerCase()
       .trim();
     this.isTechnician = ['technician', 'designer', 'tecnico', 'desenhista'].includes(this.userRole);
+    this.isManager = ['admin', 'project_manager', 'gestor'].includes(this.userRole);
 
     this.loading = true;
     this.cdr.markForCheck();
 
     forkJoin({
       stats: this.adminDashboardService.getStats(this.userRole).pipe(
-        catchError(() => of({ data: undefined } as ApiResponse<AdminDashboardStats>))
+        catchError(() => of({ data: null, pending_payments: [] }))
       ),
       projects: this.adminDashboardService.getRecentProjects(this.userRole).pipe(
         catchError(() => of({ data: [] }))
@@ -78,6 +85,9 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
       .subscribe({
         next: ({ stats, projects }) => {
           this.stats = stats.data ?? null;
+          this.pendingPaymentsCount =
+            stats.data?.pending_payments_count ?? stats.data?.payments_pending ?? 0;
+          this.pendingPayments = (stats.pending_payments ?? []).slice(0, 5);
           const list = projects.data ?? [];
           this.recentProjects = list.slice(0, 8);
           this.loading = false;
@@ -94,6 +104,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
   projectLabel(project: AdminProjectSummary): string {
     return project.title || project.name || `Projecto #${project.id}`;
+  }
+
+  formatMoney(value?: number | string): string {
+    return formatMoneyMt(value);
+  }
+
+  paymentClientLabel(row: PendingPaymentRow): string {
+    return row.user?.name || row.project?.client?.name || 'Cliente';
   }
 
   formatDate(value: string | undefined): string {
