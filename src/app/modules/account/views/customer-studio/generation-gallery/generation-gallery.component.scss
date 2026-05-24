@@ -1,17 +1,27 @@
 .gallery-grid {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
 .gallery-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
   overflow: hidden;
-  background: #fff;
+  background: var(--app-surface);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover:not(.superseded) {
+    border-color: color-mix(in srgb, var(--app-primary) 35%, var(--app-border));
+    box-shadow: var(--app-shadow-md);
+  }
+
+  &.approved {
+    border-color: color-mix(in srgb, var(--app-primary) 45%, var(--app-border));
+  }
 
   &.superseded {
-    opacity: 0.65;
+    opacity: 0.72;
   }
 
   img {
@@ -25,8 +35,8 @@
     aspect-ratio: 4 / 3;
     display: grid;
     place-items: center;
-    background: #f1f5f9;
-    color: #64748b;
+    background: var(--app-muted);
+    color: var(--app-muted-foreground);
     font-size: 0.875rem;
   }
 
@@ -34,11 +44,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    padding: 0.75rem;
+    padding: 1rem;
     align-items: center;
   }
-}
-
-.badge-superseded {
-  font-size: 0.75rem;
 }

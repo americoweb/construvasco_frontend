@@ -6,3 +6,18 @@
   overscroll-behavior: contain;
 }
 
+.account-nav-link {
+  color: var(--app-foreground-secondary);
+  text-decoration: none;
+
+  &:hover {
+    background: var(--app-muted);
+    color: var(--app-foreground);
+  }
+}
+
+.account-nav-link--active {
+  background: var(--app-primary-muted) !important;
+  color: var(--app-primary) !important;
+  font-weight: 600;
+}

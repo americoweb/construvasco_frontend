@@ -1,193 +1,102 @@
-<div class="customer-project-detail max-w-3xl pb-10">
-  <a mat-button routerLink="/conta/projectos" class="!mb-4">
+<div class="customer-page customer-project-detail pb-10">
+  <a mat-stroked-button class="cp-btn-secondary !mb-6" routerLink="/conta/projectos">
     <mat-icon>arrow_back</mat-icon>
     Voltar aos projectos
   </a>
 
   @if (loading) {
-    <div class="flex justify-center py-16">
+    <div class="cp-loading">
       <mat-spinner diameter="40" />
     </div>
   } @else if (project) {
-    <header class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-900">{{ referenceLabel }}</h1>
-      <p class="text-slate-600 text-sm mt-1">{{ phaseStatusLabel }}</p>
+    <header class="cp-page-header">
+      <p class="cp-list-card__ref mb-1">{{ referenceLabel }}</p>
+      <h1 class="cp-page-title">{{ project.name || referenceLabel }}</h1>
+      <span class="cp-badge text-sm mt-2" [ngClass]="phaseBadgeClass()">{{ phaseStatusLabel }}</span>
     </header>
 
-    <mat-card class="!mb-4">
-      <mat-card-content class="!pt-4 text-sm text-slate-700">
-        <p class="mb-0">{{ statusMessage }}</p>
+    <section class="cp-card cp-section">
+      <div class="cp-card__body">
+        <h2 class="cp-card__title">Estado actual</h2>
+        <p class="text-sm text-stone-700 m-0">{{ statusMessage }}</p>
         @if (canRequestConstructionQuoteBtn) {
           <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="requestConstructionQuote()">
             Pedir orçamento de obra
           </button>
         } @else if (requestConstructionTooltip) {
-          <button mat-stroked-button type="button" class="!mt-4" disabled [matTooltip]="requestConstructionTooltip">
+          <button mat-stroked-button type="button" class="cp-btn-secondary !mt-4" disabled [matTooltip]="requestConstructionTooltip">
             Pedir orçamento de obra
           </button>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </section>
 
     @if (showMockup) {
-      <mat-card class="!mb-4">
-        <mat-card-content class="!pt-4">
-          <p class="text-sm font-semibold text-slate-700 mb-3">Mockup aprovado</p>
-          <img [src]="mockupUrl!" alt="Mockup" class="w-full rounded-lg border border-slate-200" />
-        </mat-card-content>
-      </mat-card>
+      <app-approved-mockup-card [imageUrl]="mockupUrl!" caption="Mockup aprovado" />
     }
 
     @if (briefingRows.length) {
-      <mat-card class="!mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Resumo do pedido</h2>
-          <dl class="grid gap-2 text-sm">
-            @for (row of briefingRows; track row.label) {
-              <div class="flex gap-2">
-                <dt class="text-slate-500 min-w-[9rem] shrink-0">{{ row.label }}</dt>
-                <dd class="text-slate-900">{{ row.value }}</dd>
-              </div>
-            }
-          </dl>
-        </mat-card-content>
-      </mat-card>
-    }
-
-    @if (showConstructionSection) {
-      <mat-card class="!mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-800 mb-2">Fase de Obra</h2>
-          @if (project.contract_phase === 'execution_quote' && !constructionQuote) {
-            <p class="text-sm">Pedido de orçamento enviado em {{ formatDate(project.construction_quote_requested_at) }}.</p>
-            @if (project.suggested_visit_date) {
-              <p class="text-sm mt-1">Data sugerida para visita: {{ formatDate(project.suggested_visit_date) }}</p>
-            }
-            @if (project.construction_request_notes) {
-              <p class="text-sm mt-1">Notas: {{ project.construction_request_notes }}</p>
-            }
-            <p class="text-sm text-slate-600 mt-2">A Construvasco vai contactá-lo brevemente para agendar a visita.</p>
-          }
-          @if (constructionQuote?.status === 'sent') {
-            <div class="border border-amber-200 bg-amber-50 rounded-lg p-4 mt-2">
-              <p class="font-medium text-sm">Orçamento de obra recebido</p>
-              <p class="text-sm mt-2">Valor: {{ formatMoney(constructionQuote?.total_amount_mt) }}</p>
-              <p class="text-sm">Prazo: {{ constructionQuote?.delivery_days }} dias</p>
-              @if (constructionQuote?.conditions) {
-                <p class="text-sm mt-2">{{ constructionQuote?.conditions }}</p>
-              }
-              <div class="flex gap-2 mt-4">
-                <button mat-flat-button color="primary" type="button" (click)="acceptConstructionQuote()">Aceitar</button>
-                <button mat-stroked-button type="button" (click)="rejectConstructionQuote()">Recusar</button>
-              </div>
-            </div>
-          }
-          @if (project.contract_phase === 'construction') {
-            <p class="text-sm text-emerald-800 mt-2">Orçamento aceite. Obra a iniciar.</p>
-            @if (constructionPayment?.status === 'confirmed') {
-              <p class="text-sm mt-2">Pagamento de obra confirmado em {{ formatDate(constructionPayment?.confirmed_at) }}.</p>
-              <p class="text-sm text-slate-600 mt-1">Acompanhamento detalhado da obra é feito directamente com a equipa da Construvasco.</p>
-            }
-          }
-          @if (project.contract_phase === 'completed') {
-            <p class="text-sm font-medium text-emerald-900 mt-2">Obra concluída em {{ formatDate(project.construction_completed_at) }}.</p>
-            <p class="text-sm mt-1">Obrigado por ter confiado na Construvasco.</p>
-          }
-          @if (project.contract_phase === 'closed' && constructionQuote?.status === 'rejected') {
-            <p class="text-sm text-slate-600 mt-2">Orçamento de obra recusado. Motivo: {{ constructionQuote?.rejection_reason }}</p>
-          }
-        </mat-card-content>
-      </mat-card>
-    }
-
-    @if (constructionPayment && project.contract_phase === 'construction') {
-      <mat-card class="!mb-4" [ngClass]="paymentClass(constructionPayment.status)">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-800 mb-2">Pagamento — Fase de Obra</h2>
-          @if (constructionPayment.status === 'pending') {
-            <p class="text-sm mb-2">Valor a pagar: <strong>{{ formatMoney(constructionPayment.amount) }}</strong></p>
-            <pre class="text-xs bg-slate-50 border rounded p-3 mb-4 whitespace-pre-wrap">{{ bankDetails }}</pre>
-            <button mat-flat-button color="primary" type="button" (click)="openConstructionProofDialog()">Submeter comprovativo</button>
-          } @else if (constructionPayment.status === 'proof_submitted') {
-            <p class="text-sm">Comprovativo submetido — aguarda confirmação do gestor.</p>
-          } @else if (constructionPayment.status === 'rejected') {
-            <p class="text-sm text-red-800">Comprovativo rejeitado. Motivo: {{ constructionPayment.rejected_reason }}</p>
-            <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="openConstructionProofDialog()">Submeter novo comprovativo</button>
-          }
-        </mat-card-content>
-      </mat-card>
+      <app-briefing-panel title="Resumo do projecto" [rows]="briefingRows" />
     }
 
     @if (payment) {
-      <mat-card class="!mb-4" [ngClass]="paymentClass(payment.status)">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-800 mb-2">Pagamento — Fase de Arquitectura</h2>
+      <section class="cp-card cp-section payment-section" [ngClass]="paymentClass(payment.status)">
+        <div class="cp-card__body">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <h2 class="cp-card__title mb-0">Pagamento — Arquitectura</h2>
+            <span class="cp-badge cp-badge--neutral">{{ paymentLabel(payment.status) }}</span>
+          </div>
           @if (payment.status === 'pending') {
-            <p class="text-sm mb-2">Valor a pagar: <strong>{{ formatMoney(payment.amount) }}</strong></p>
-            <p class="text-sm text-slate-600 mb-3">
+            <p class="text-sm mb-2">Valor a pagar: <strong class="text-primary" style="color: var(--app-primary)">{{ formatMoney(payment.amount) }}</strong></p>
+            <p class="text-sm text-stone-600 mb-3">
               Pode efectuar o pagamento por M-Pesa, e-Mola ou transferência bancária. Depois, submeta o comprovativo.
             </p>
-            <pre class="text-xs bg-slate-50 border rounded p-3 mb-4 whitespace-pre-wrap">{{ bankDetails }}</pre>
+            <pre class="payment-pre">{{ bankDetails }}</pre>
             <button mat-flat-button color="primary" type="button" (click)="openProofDialog()">Submeter comprovativo</button>
           } @else if (payment.status === 'proof_submitted') {
-            <p class="text-sm">
-              Comprovativo submetido em {{ formatDate(payment.proof_uploaded_at) }} — aguarda confirmação do gestor.
-            </p>
-            @if (payment.proof_file_name) {
-              <p class="text-xs text-slate-600 mt-2">Ficheiro: {{ payment.proof_file_name }}</p>
-            }
-            @if (payment.notes) {
-              <p class="text-xs text-slate-600 mt-1">{{ payment.notes }}</p>
-            }
+            <p class="text-sm m-0">Comprovativo submetido em {{ formatDate(payment.proof_uploaded_at) }} — aguarda confirmação.</p>
           } @else if (payment.status === 'confirmed') {
-            <p class="text-sm font-medium text-emerald-800">
-              Pagamento confirmado em {{ formatDate(payment.confirmed_at) }}.
-            </p>
-            <p class="text-sm text-slate-600 mt-1">Já pode descarregar os entregáveis aprovados.</p>
+            <p class="text-sm m-0" style="color: var(--app-success)">Pagamento confirmado em {{ formatDate(payment.confirmed_at) }}. Pode descarregar os entregáveis.</p>
           } @else if (payment.status === 'rejected') {
-            <p class="text-sm font-medium text-red-800">
-              Comprovativo rejeitado{{ payment.proof_uploaded_at ? ' em ' + formatDate(payment.proof_uploaded_at) : '' }}.
-            </p>
-            @if (payment.rejected_reason) {
-              <p class="text-sm mt-2"><strong>Motivo:</strong> {{ payment.rejected_reason }}</p>
-            }
-            <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="openProofDialog()">
-              Submeter novo comprovativo
-            </button>
+            <p class="text-sm m-0" style="color: var(--app-error)">Comprovativo rejeitado. {{ payment.rejected_reason }}</p>
+            <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="openProofDialog()">Submeter novo comprovativo</button>
           }
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </section>
     }
 
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>Entregáveis disponíveis</mat-card-title>
-      </mat-card-header>
-      <mat-card-content class="!pt-4">
+    <section class="cp-card cp-section">
+      <div class="cp-card__body">
+        <h2 class="cp-card__title">Entregáveis</h2>
         @if (deliverablesLoading) {
-          <div class="flex justify-center py-8">
+          <div class="cp-loading py-6">
             <mat-spinner diameter="32" />
           </div>
         } @else if (!deliverables.length) {
-          <p class="text-sm text-slate-500">Ainda não há ficheiros disponíveis para descarregar.</p>
+          <div class="cp-empty py-6">
+            <mat-icon class="cp-empty__icon">folder_open</mat-icon>
+            <p class="cp-empty__text mb-0">Ainda não há ficheiros disponíveis para descarregar.</p>
+          </div>
         } @else {
-          <ul class="space-y-4">
+          <ul class="deliverable-list">
             @for (d of deliverables; track d.id) {
-              <li class="border rounded-lg p-4">
-                <p class="font-semibold">{{ d.title }}</p>
-                @if (d.description) {
-                  <p class="text-sm text-slate-600 mt-1">{{ d.description }}</p>
-                }
-                <p class="text-xs text-slate-500 mt-2">
-                  {{ d.file_name }} · {{ fileSize(d) }}
-                  @if (d.approved_at) {
-                    · Disponível desde {{ formatDate(d.approved_at) }}
+              <li class="deliverable-item">
+                <div>
+                  <p class="font-semibold text-stone-900 m-0">{{ d.title }}</p>
+                  @if (d.description) {
+                    <p class="text-sm text-stone-600 mt-1 mb-0">{{ d.description }}</p>
                   }
-                </p>
+                  <p class="text-xs text-stone-500 mt-2 mb-0">
+                    {{ d.file_name }} · {{ fileSize(d) }}
+                    @if (d.approved_at) {
+                      · {{ formatDate(d.approved_at) }}
+                    }
+                  </p>
+                </div>
                 <button
-                  mat-stroked-button
+                  mat-flat-button
+                  color="primary"
                   type="button"
-                  class="!mt-3"
                   [disabled]="!canDownload"
                   [matTooltip]="canDownload ? '' : downloadTooltip()"
                   (click)="download(d)"
@@ -199,7 +108,62 @@
             }
           </ul>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </section>
+
+    @if (showConstructionSection) {
+      <section class="cp-card cp-section">
+        <div class="cp-card__body">
+          <h2 class="cp-card__title">Fase de obra</h2>
+          @if (project.contract_phase === 'execution_quote' && !constructionQuote) {
+            <p class="text-sm m-0">Pedido enviado em {{ formatDate(project.construction_quote_requested_at) }}.</p>
+            @if (project.suggested_visit_date) {
+              <p class="text-sm mt-2 mb-0">Visita sugerida: {{ formatDate(project.suggested_visit_date) }}</p>
+            }
+            <p class="text-sm text-stone-600 mt-2 mb-0">A Construvasco vai contactá-lo para agendar a visita.</p>
+          }
+          @if (constructionQuote?.status === 'sent') {
+            <div class="construction-quote-box mt-3">
+              <p class="font-semibold text-sm m-0">Orçamento de obra recebido</p>
+              <p class="cp-quote-card__amount !text-2xl !mt-2">{{ formatMoney(constructionQuote?.total_amount_mt) }}</p>
+              <p class="text-sm m-0">Prazo: {{ constructionQuote?.delivery_days }} dias</p>
+              @if (constructionQuote?.conditions) {
+                <p class="text-sm mt-2 mb-0">{{ constructionQuote?.conditions }}</p>
+              }
+              <div class="flex gap-2 mt-4">
+                <button mat-flat-button color="primary" type="button" (click)="acceptConstructionQuote()">Aceitar</button>
+                <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="rejectConstructionQuote()">Recusar</button>
+              </div>
+            </div>
+          }
+          @if (project.contract_phase === 'construction') {
+            <p class="text-sm mt-2 mb-0" style="color: var(--app-success)">Orçamento aceite. Obra a iniciar.</p>
+          }
+          @if (project.contract_phase === 'completed') {
+            <p class="text-sm font-medium mt-2 mb-0" style="color: var(--app-success)">
+              Obra concluída em {{ formatDate(project.construction_completed_at) }}.
+            </p>
+          }
+        </div>
+      </section>
+
+      @if (constructionPayment && project.contract_phase === 'construction') {
+        <section class="cp-card cp-section payment-section" [ngClass]="paymentClass(constructionPayment.status)">
+          <div class="cp-card__body">
+            <h2 class="cp-card__title">Pagamento — Obra</h2>
+            @if (constructionPayment.status === 'pending') {
+              <p class="text-sm mb-2">Valor: <strong style="color: var(--app-primary)">{{ formatMoney(constructionPayment.amount) }}</strong></p>
+              <pre class="payment-pre">{{ bankDetails }}</pre>
+              <button mat-flat-button color="primary" type="button" (click)="openConstructionProofDialog()">Submeter comprovativo</button>
+            } @else if (constructionPayment.status === 'proof_submitted') {
+              <p class="text-sm m-0">Comprovativo submetido — aguarda confirmação.</p>
+            } @else if (constructionPayment.status === 'rejected') {
+              <p class="text-sm m-0" style="color: var(--app-error)">Comprovativo rejeitado. {{ constructionPayment.rejected_reason }}</p>
+              <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="openConstructionProofDialog()">Submeter novo comprovativo</button>
+            }
+          </div>
+        </section>
+      }
+    }
   }
 </div>

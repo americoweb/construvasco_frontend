@@ -1,30 +1,44 @@
-<h1 class="text-2xl font-bold text-slate-900 mb-6">Meus projectos</h1>
+<div class="customer-page">
+  <header class="cp-page-header">
+    <h1 class="cp-page-title">Meus projectos</h1>
+    <p class="cp-page-subtitle">Projectos activos após aceitar um orçamento de arquitectura.</p>
+  </header>
 
-@if (loading) {
-  <div class="flex justify-center py-12">
-    <mat-spinner diameter="36" />
-  </div>
-} @else if (!rows.length) {
-  <mat-card>
-    <mat-card-content class="!py-10 text-center text-slate-500">
-      Ainda não tem projectos activos. Após aceitar um orçamento, o projecto aparecerá aqui.
-    </mat-card-content>
-  </mat-card>
-} @else {
-  <div class="space-y-4">
-    @for (p of rows; track p.id) {
-      <mat-card>
-        <mat-card-content class="!py-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p class="font-semibold">{{ p.name || 'Projecto #' + p.id }}</p>
-            <p class="text-sm text-slate-500 flex flex-wrap items-center gap-2">
-              <span class="phase-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
-              <span>{{ p.location || '—' }}</span>
-            </p>
+  @if (loading) {
+    <div class="cp-loading">
+      <mat-spinner diameter="36" />
+    </div>
+  } @else if (!rows.length) {
+    <div class="cp-empty">
+      <mat-icon class="cp-empty__icon">apartment</mat-icon>
+      <p class="cp-empty__title">Ainda não tem projectos activos</p>
+      <p class="cp-empty__text">
+        Após aceitar um orçamento, o projecto aparecerá aqui. Pode também consultar os seus pedidos ou iniciar um novo no Estúdio.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">Estúdio</a>
+        <a mat-stroked-button class="cp-btn-secondary" routerLink="/conta/pedidos">Meus pedidos</a>
+      </div>
+    </div>
+  } @else {
+    <div class="grid gap-4 sm:grid-cols-2">
+      @for (p of rows; track p.id) {
+        <a class="cp-list-card" [routerLink]="['/conta/projectos', p.id]">
+          <div class="cp-list-card__body">
+            <p class="cp-list-card__ref">{{ reference(p) }}</p>
+            <p class="cp-list-card__title">{{ p.name || 'Projecto #' + p.id }}</p>
+            <div class="cp-list-card__meta">
+              <span class="cp-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
+              @if (p.updated_at) {
+                <span>Actualizado {{ p.updated_at | date: 'mediumDate' }}</span>
+              }
+              @if (p.location) {
+                <span>{{ p.location }}</span>
+              }
+            </div>
           </div>
-          <a mat-stroked-button [routerLink]="['/conta/projectos', p.id]">Ver detalhes</a>
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
-}
+        </a>
+      }
+    </div>
+  }
+</div>

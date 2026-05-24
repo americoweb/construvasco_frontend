@@ -44,6 +44,9 @@ import { SubmitPaymentProofDialogComponent } from './submit-payment-proof-dialog
 import { RequestConstructionQuoteDialogComponent } from './request-construction-quote-dialog.component';
 import { RejectQuoteDialogComponent } from '../customer-request-detail/reject-quote-dialog.component';
 import { ConfirmDialogComponent } from '../../../../shared/components/feedback/confirm-dialog/confirm-dialog.component';
+import { ApprovedMockupCardComponent } from '../../components/customer-shared/approved-mockup-card.component';
+import { BriefingPanelComponent } from '../../components/customer-shared/briefing-panel.component';
+import { contractPhaseBadgeClass } from '../../../../shared/construction/contract-phase.util';
 
 @Component({
   selector: 'app-customer-project-detail',
@@ -57,6 +60,8 @@ import { ConfirmDialogComponent } from '../../../../shared/components/feedback/c
     MatProgressSpinnerModule,
     MatDialogModule,
     MatTooltipModule,
+    ApprovedMockupCardComponent,
+    BriefingPanelComponent,
   ],
   templateUrl: './customer-project-detail.component.html',
   styleUrls: ['./customer-project-detail.component.scss'],
@@ -128,6 +133,19 @@ export class CustomerProjectDetailComponent implements OnInit {
   get phaseStatusLabel(): string {
     if (this.project?.contract_phase_label) return this.project.contract_phase_label;
     return contractPhaseLabel(this.project?.contract_phase, this.project?.current_phase);
+  }
+
+  phaseBadgeClass(): string {
+    const legacy = contractPhaseBadgeClass(this.project?.contract_phase);
+    const map: Record<string, string> = {
+      'phase-badge--architecture': 'cp-badge--primary',
+      'phase-badge--execution-quote': 'cp-badge--warning',
+      'phase-badge--construction': 'cp-badge--primary',
+      'phase-badge--completed': 'cp-badge--success',
+      'phase-badge--closed': 'cp-badge--neutral',
+      'phase-badge--default': 'cp-badge--neutral',
+    };
+    return map[legacy] ?? 'cp-badge--neutral';
   }
 
   get statusMessage(): string {

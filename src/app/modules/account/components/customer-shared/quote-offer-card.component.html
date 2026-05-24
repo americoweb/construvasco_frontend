@@ -1,0 +1,28 @@
+<article class="cp-quote-card">
+  <div class="flex flex-wrap items-center gap-2 mb-2">
+    <span class="font-semibold text-stone-900">Orçamento de {{ typeLabel }}</span>
+    @if (statusLabel) {
+      <span class="cp-badge" [ngClass]="statusClass">{{ statusLabel }}</span>
+    }
+  </div>
+  <p class="cp-quote-card__amount">{{ amountFormatted }}</p>
+  @if (quote.delivery_days) {
+    <p class="text-sm text-stone-600 m-0"><strong>Prazo:</strong> {{ quote.delivery_days }} dias</p>
+  }
+  @if (quote.expires_at) {
+    <p class="text-sm text-stone-600 m-0 mt-1"><strong>Validade:</strong> {{ quote.expires_at | date: 'mediumDate' }}</p>
+  }
+  @if (quote.conditions) {
+    <p class="text-sm text-stone-600 mt-2 mb-0">{{ quote.conditions }}</p>
+  }
+  @if (canRespond) {
+    <div class="cp-quote-card__actions">
+      <button mat-flat-button color="primary" type="button" [disabled]="actionDisabled" (click)="accept.emit(quote)">
+        Aceitar
+      </button>
+      <button mat-stroked-button type="button" class="cp-btn-secondary" [disabled]="actionDisabled" (click)="reject.emit(quote)">
+        Recusar
+      </button>
+    </div>
+  }
+</article>

@@ -1,18 +1,53 @@
-.payment-card--pending {
-  border-left: 4px solid #3b82f6;
+.payment-pre {
+  font-size: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--app-radius-sm);
+  border: 1px solid var(--app-border);
+  background: var(--app-muted);
+  white-space: pre-wrap;
 }
 
-.payment-card--submitted {
-  border-left: 4px solid #f97316;
-  background: #fff7ed;
+.construction-quote-box {
+  padding: 1.25rem;
+  border-radius: var(--app-radius);
+  border: 1px solid color-mix(in srgb, var(--app-warning) 40%, var(--app-border));
+  background: var(--app-warning-light);
 }
 
-.payment-card--confirmed {
-  border-left: 4px solid #16a34a;
-  background: #f0fdf4;
+.deliverable-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.payment-card--rejected {
-  border-left: 4px solid #dc2626;
-  background: #fef2f2;
+.deliverable-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+}
+
+.payment-section.payment-card--pending {
+  border-color: color-mix(in srgb, var(--app-warning) 45%, var(--app-border));
+}
+
+.payment-section.payment-card--submitted {
+  border-color: color-mix(in srgb, var(--app-accent) 35%, var(--app-border));
+}
+
+.payment-section.payment-card--confirmed {
+  border-color: color-mix(in srgb, var(--app-success) 40%, var(--app-border));
+  background: var(--app-primary-light);
+}
+
+.payment-section.payment-card--rejected {
+  border-color: color-mix(in srgb, var(--app-error) 35%, var(--app-border));
 }

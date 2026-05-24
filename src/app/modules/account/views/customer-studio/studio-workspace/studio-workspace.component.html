@@ -1,13 +1,15 @@
 <div class="studio-workspace relative">
   @if (isGenerating) {
-    <div class="generating-overlay">
+    <div class="cp-studio-overlay">
       <mat-spinner diameter="48" />
-      <p class="mt-4 font-medium">A gerar mockup… pode demorar até 60 segundos.</p>
-      <p class="text-sm text-slate-500">Não feche nem actualize esta página.</p>
+      <p class="cp-studio-overlay__title">A gerar o seu mockup</p>
+      <p class="cp-studio-overlay__text">
+        Isto pode demorar até 1 minuto. Não feche nem actualize esta página.
+      </p>
     </div>
   }
 
-  <div class="flex flex-wrap gap-3 mb-4">
+  <div class="flex flex-wrap gap-3 mb-6">
     <button mat-flat-button color="primary" type="button" [disabled]="isGenerating" (click)="generate()">
       Gerar mockup
     </button>
@@ -26,28 +28,28 @@
   />
 
   @if (selectedForRefine) {
-    <section class="refine-section mt-6 p-4 border border-slate-200 rounded-lg bg-slate-50">
-      <h3 class="font-semibold mb-2">Refinar versão #{{ selectedForRefine.id }}</h3>
-      <mat-form-field appearance="outline" class="w-full">
+    <section class="mt-6 p-5 border border-stone-200 rounded-xl bg-stone-50">
+      <h3 class="font-semibold text-stone-900 mb-3">Refinar versão #{{ selectedForRefine.id }}</h3>
+      <mat-form-field appearance="outline" class="w-full cp-form-step">
         <mat-label>O que quer alterar?</mat-label>
         <textarea matInput rows="3" [formControl]="refineFeedback" placeholder="Ex.: mais janelas na fachada, telhado mais inclinado…"></textarea>
       </mat-form-field>
       <div class="flex gap-2">
-        <button mat-flat-button color="accent" type="button" [disabled]="isGenerating" (click)="confirmRefine()">
-          Confirmar refinamento
-        </button>
-        <button mat-button type="button" [disabled]="isGenerating" (click)="selectedForRefine = null">
+        <button mat-stroked-button type="button" class="cp-btn-secondary" [disabled]="isGenerating" (click)="selectedForRefine = null">
           Cancelar
+        </button>
+        <button mat-flat-button color="primary" type="button" [disabled]="isGenerating" (click)="confirmRefine()">
+          Confirmar refinamento
         </button>
       </div>
     </section>
   }
 
   @if (errorMessage) {
-    <p class="text-red-600 text-sm mt-3">{{ errorMessage }}</p>
+    <p class="text-sm mt-3" style="color: var(--app-error)">{{ errorMessage }}</p>
   }
 
-  <footer class="disclaimer mt-8 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-900">
+  <footer class="mt-8 p-4 rounded-lg text-sm border" style="border-color: var(--app-border); background: var(--app-warning-light); color: #5c5748">
     {{ disclaimer }}
   </footer>
 </div>

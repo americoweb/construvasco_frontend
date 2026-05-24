@@ -1,262 +1,188 @@
-<div class="settings-container w-full min-w-0">
-  <header class="mb-8">
-    <h1 class="settings-page__title">Definições</h1>
-    <p class="settings-page__subtitle">Perfil, endereços, segurança e preferências da sua conta.</p>
+<div class="customer-page customer-page--narrow settings-container">
+  <header class="cp-page-header">
+    <h1 class="cp-page-title">Definições</h1>
+    <p class="cp-page-subtitle">Perfil, endereços e segurança da sua conta.</p>
   </header>
 
-  <!-- Informações Pessoais -->
-  <section class="settings-card mb-6">
-    <h2 class="settings-card__title">Informações pessoais</h2>
+  <nav class="cp-settings-tabs" aria-label="Secções de definições">
+    <button type="button" class="cp-settings-tab" [class.active]="activeTab === 'profile'" (click)="setTab('profile')">Perfil</button>
+    <button type="button" class="cp-settings-tab" [class.active]="activeTab === 'addresses'" (click)="setTab('addresses')">Endereços</button>
+    <button type="button" class="cp-settings-tab" [class.active]="activeTab === 'security'" (click)="setTab('security')">Segurança</button>
+  </nav>
 
-    <div class="mb-6">
-      <span class="text-sm font-medium text-slate-700 block mb-2">Foto de perfil</span>
-      <div class="flex flex-wrap items-center gap-4">
-        <app-profile-photo [size]="120" [user]="user"></app-profile-photo>
-        <div>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            (change)="onFileSelected($event)"
-            class="hidden"
-            id="photo-upload">
-          <button mat-stroked-button type="button" (click)="openPhotoPicker()">
-            <mat-icon class="settings-btn-icon">photo_camera</mat-icon>
-            Alterar foto
-          </button>
-          <p class="text-xs text-slate-500 mt-2">JPG, PNG ou WebP (máx. 2MB)</p>
+  @if (activeTab === 'profile') {
+    <section class="cp-card cp-section">
+      <div class="cp-card__body settings-form">
+        <h2 class="cp-section-title">Informações pessoais</h2>
+
+        <div class="mb-6">
+          <span class="text-sm font-medium text-stone-600 block mb-2">Foto de perfil</span>
+          <div class="flex flex-wrap items-center gap-4">
+            <app-profile-photo [size]="120" [user]="user"></app-profile-photo>
+            <div>
+              <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" class="hidden" id="photo-upload" />
+              <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="openPhotoPicker()">
+                <mat-icon class="settings-btn-icon">photo_camera</mat-icon>
+                Alterar foto
+              </button>
+              <p class="text-xs text-stone-500 mt-2 mb-0">JPG, PNG ou WebP (máx. 2MB)</p>
+            </div>
+            @if (selectedFile) {
+              <button mat-flat-button color="primary" type="button" (click)="uploadPhoto()" [disabled]="isUploadingPhoto">
+                {{ isUploadingPhoto ? 'A enviar…' : 'Guardar foto' }}
+              </button>
+            }
+          </div>
         </div>
-        <button
-          *ngIf="selectedFile"
-          mat-flat-button
-          color="primary"
-          type="button"
-          (click)="uploadPhoto()"
-          [disabled]="isUploadingPhoto">
-          {{ isUploadingPhoto ? 'A enviar…' : 'Guardar foto' }}
-        </button>
+
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Nome completo</mat-label>
+            <input matInput formControlName="name" type="text" />
+            @if (profileForm.get('name')?.invalid && profileForm.get('name')?.touched) {
+              <mat-error>O nome é obrigatório</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>E-mail</mat-label>
+            <input matInput [value]="user?.email || user?.identifier || ''" type="email" disabled />
+            <mat-hint>Contacte o suporte para alterar</mat-hint>
+          </mat-form-field>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>Telefone</mat-label>
+              <input matInput formControlName="phone" type="tel" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>WhatsApp</mat-label>
+              <input matInput formControlName="whatsapp" type="tel" />
+            </mat-form-field>
+          </div>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="isSavingProfile || profileForm.invalid">
+            {{ isSavingProfile ? 'A guardar…' : 'Guardar perfil' }}
+          </button>
+        </form>
       </div>
-    </div>
+    </section>
+  }
 
-    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="settings-form">
-      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-        <mat-label>Nome completo</mat-label>
-        <input matInput formControlName="name" type="text" />
-        @if (profileForm.get('name')?.invalid && profileForm.get('name')?.touched) {
-          <mat-error>O nome é obrigatório</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-        <mat-label>E-mail</mat-label>
-        <input matInput [value]="user?.email || user?.identifier || ''" type="email" disabled />
-        <mat-hint>Contacte o suporte para alterar</mat-hint>
-      </mat-form-field>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4">
-        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-          <mat-label>Telefone</mat-label>
-          <input matInput formControlName="phone" type="tel" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-          <mat-label>WhatsApp</mat-label>
-          <input matInput formControlName="whatsapp" type="tel" />
-        </mat-form-field>
-      </div>
-
-      <button
-        mat-flat-button
-        color="primary"
-        type="submit"
-        [disabled]="isSavingProfile || profileForm.invalid">
-        {{ isSavingProfile ? 'A guardar…' : 'Guardar perfil' }}
-      </button>
-    </form>
-  </section>
-
-  <!-- Endereços -->
-  <section class="settings-card mb-6">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <h2 class="settings-card__title mb-0">Endereços</h2>
-      <button
-        mat-flat-button
-        color="primary"
-        type="button"
-        (click)="addNewAddress()"
-        *ngIf="!showAddressForm">
-        <mat-icon>add</mat-icon>
-        Adicionar
-      </button>
-    </div>
-
-    <div *ngIf="showAddressForm" class="mb-6 pb-6 border-b border-slate-200">
-      <h3 class="text-lg font-semibold text-slate-900 mb-4">
-        {{ editingAddress ? 'Editar endereço' : 'Novo endereço' }}
-      </h3>
-      <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" class="settings-form">
-        <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-          <mat-label>Morada</mat-label>
-          <input matInput formControlName="address" type="text" placeholder="Rua, número, bairro" />
-          @if (addressForm.get('address')?.invalid && addressForm.get('address')?.touched) {
-            <mat-error>Obrigatório</mat-error>
+  @if (activeTab === 'addresses') {
+    <section class="cp-card cp-section">
+      <div class="cp-card__body">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <h2 class="cp-section-title mb-0">Endereços</h2>
+          @if (!showAddressForm) {
+            <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="addNewAddress()">
+              <mat-icon>add</mat-icon>
+              Adicionar endereço
+            </button>
           }
-        </mat-form-field>
+        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-0 md:gap-4">
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Cidade</mat-label>
-            <input matInput formControlName="city" type="text" />
-            @if (addressForm.get('city')?.invalid && addressForm.get('city')?.touched) {
-              <mat-error>Obrigatório</mat-error>
+        @if (showAddressForm) {
+          <div class="mb-6 pb-6 border-b border-stone-200 settings-form">
+            <h3 class="text-base font-semibold text-stone-900 mb-4">
+              {{ editingAddress ? 'Editar endereço' : 'Novo endereço' }}
+            </h3>
+            <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
+              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                <mat-label>Morada</mat-label>
+                <input matInput formControlName="address" type="text" placeholder="Rua, número, bairro" />
+              </mat-form-field>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Cidade</mat-label>
+                  <input matInput formControlName="city" type="text" />
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                  <mat-label>Província</mat-label>
+                  <mat-select formControlName="province">
+                    <mat-option value="">Selecione</mat-option>
+                    <mat-option *ngFor="let prov of provinces" [value]="prov">{{ prov }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+              <mat-checkbox formControlName="is_primary" color="primary">Endereço principal</mat-checkbox>
+              <div class="flex flex-wrap gap-3 pt-4">
+                <button mat-flat-button color="primary" type="submit" [disabled]="addressForm.invalid">Guardar</button>
+                <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="cancelAddressForm()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        }
+
+        @if (addresses.length === 0 && !showAddressForm) {
+          <div class="cp-empty py-6">
+            <mat-icon class="cp-empty__icon">location_off</mat-icon>
+            <p class="cp-empty__text mb-0">Nenhum endereço registado.</p>
+          </div>
+        }
+
+        @if (addresses.length > 0) {
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            @for (address of addresses; track address.id) {
+              <div class="settings-address-card">
+                @if (address.is_primary) {
+                  <span class="cp-badge cp-badge--primary absolute top-3 right-3">Principal</span>
+                }
+                <p class="font-medium text-stone-900 m-0">{{ address.address }}</p>
+                <p class="text-sm text-stone-600 mt-1 mb-0">{{ address.city }}, {{ address.province }}</p>
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <button mat-button type="button" (click)="editAddress(address)">Editar</button>
+                  @if (!address.is_primary) {
+                    <button mat-button type="button" (click)="setAsPrimary(address)">Definir principal</button>
+                  }
+                  <button mat-button type="button" style="color: var(--app-error)" (click)="deleteAddress(address)">Excluir</button>
+                </div>
+              </div>
             }
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  @if (activeTab === 'security') {
+    <section class="cp-card cp-section">
+      <div class="cp-card__body settings-form">
+        <h2 class="cp-section-title">Alterar senha</h2>
+        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Senha actual</mat-label>
+            <input matInput formControlName="current_password" type="password" autocomplete="current-password" />
           </mat-form-field>
           <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Província</mat-label>
-            <mat-select formControlName="province">
-              <mat-option value="">Selecione</mat-option>
-              <mat-option *ngFor="let prov of provinces" [value]="prov">{{ prov }}</mat-option>
-            </mat-select>
-            @if (addressForm.get('province')?.invalid && addressForm.get('province')?.touched) {
-              <mat-error>Obrigatório</mat-error>
-            }
+            <mat-label>Nova senha</mat-label>
+            <input matInput formControlName="password" type="password" autocomplete="new-password" />
+            <mat-hint>Mínimo 8 caracteres</mat-hint>
           </mat-form-field>
-        </div>
-
-        <mat-checkbox formControlName="is_primary" color="primary">
-          Endereço principal
-        </mat-checkbox>
-
-        <div class="flex flex-wrap gap-3 pt-2">
-          <button mat-flat-button color="primary" type="submit" [disabled]="addressForm.invalid">
-            Guardar
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Confirmar nova senha</mat-label>
+            <input matInput formControlName="password_confirmation" type="password" autocomplete="new-password" />
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" [disabled]="isChangingPassword || passwordForm.invalid">
+            {{ isChangingPassword ? 'A actualizar…' : 'Actualizar senha' }}
           </button>
-          <button mat-stroked-button type="button" (click)="cancelAddressForm()">
-            Cancelar
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <div *ngIf="addresses.length === 0 && !showAddressForm" class="text-center py-8 text-slate-500">
-      <mat-icon class="settings-empty-icon">location_off</mat-icon>
-      <p class="mt-2">Nenhum endereço registado</p>
-    </div>
-
-    <div *ngIf="addresses.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-      <div *ngFor="let address of addresses" class="settings-address-card">
-        <div *ngIf="address.is_primary" class="absolute top-2 right-2">
-          <span class="px-2 py-1 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">Principal</span>
-        </div>
-        <div class="space-y-2 pr-16">
-          <p class="font-medium text-slate-900">{{ address.address }}</p>
-          <p class="text-sm text-slate-600">{{ address.city }}, {{ address.province }}</p>
-        </div>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button mat-button color="primary" type="button" (click)="editAddress(address)">Editar</button>
-          <button
-            *ngIf="!address.is_primary"
-            mat-button
-            type="button"
-            (click)="setAsPrimary(address)">
-            Definir principal
-          </button>
-          <button mat-button color="warn" type="button" (click)="deleteAddress(address)">Excluir</button>
-        </div>
+        </form>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Alterar Senha -->
-  <section class="settings-card mb-6">
-    <h2 class="settings-card__title">Alterar senha</h2>
-    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="settings-form">
-      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-        <mat-label>Senha actual</mat-label>
-        <input matInput formControlName="current_password" type="password" autocomplete="current-password" />
-        @if (passwordForm.get('current_password')?.invalid && passwordForm.get('current_password')?.touched) {
-          <mat-error>Obrigatório</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-        <mat-label>Nova senha</mat-label>
-        <input matInput formControlName="password" type="password" autocomplete="new-password" />
-        <mat-hint>Mínimo 8 caracteres</mat-hint>
-        @if (passwordForm.get('password')?.invalid && passwordForm.get('password')?.touched) {
-          <mat-error>Senha inválida (mín. 8 caracteres)</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-        <mat-label>Confirmar nova senha</mat-label>
-        <input matInput formControlName="password_confirmation" type="password" autocomplete="new-password" />
-        @if (passwordForm.hasError('passwordMismatch') && passwordForm.get('password_confirmation')?.touched) {
-          <mat-error>As senhas não coincidem</mat-error>
-        }
-      </mat-form-field>
-
-      <button
-        mat-flat-button
-        color="primary"
-        type="submit"
-        [disabled]="isChangingPassword || passwordForm.invalid">
-        {{ isChangingPassword ? 'A actualizar…' : 'Actualizar senha' }}
-      </button>
-    </form>
-  </section>
-
-  <!-- Preferências de Comunicação -->
-  <section class="settings-card mb-6">
-    <h2 class="settings-card__title">Preferências de comunicação</h2>
-    <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()" class="settings-form">
-      <div class="settings-checkboxes">
-        <mat-checkbox formControlName="email_promotions" color="primary">
-          Receber e-mails de promoções
-        </mat-checkbox>
-        <mat-checkbox formControlName="sms_updates" color="primary">
-          Receber SMS de actualizações de pedidos
-        </mat-checkbox>
-        <mat-checkbox formControlName="whatsapp_notifications" color="primary">
-          Receber notificações WhatsApp
-        </mat-checkbox>
-        <mat-checkbox formControlName="weekly_newsletter" color="primary">
-          Newsletter semanal
-        </mat-checkbox>
+    <section class="cp-card cp-section">
+      <div class="cp-card__body settings-form">
+        <h2 class="cp-section-title">Preferências de comunicação</h2>
+        <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
+          <div class="settings-checkboxes">
+            <mat-checkbox formControlName="email_promotions" color="primary">E-mails de promoções</mat-checkbox>
+            <mat-checkbox formControlName="sms_updates" color="primary">SMS de actualizações</mat-checkbox>
+            <mat-checkbox formControlName="whatsapp_notifications" color="primary">Notificações WhatsApp</mat-checkbox>
+            <mat-checkbox formControlName="weekly_newsletter" color="primary">Newsletter semanal</mat-checkbox>
+          </div>
+          <button mat-flat-button color="primary" type="submit">Guardar preferências</button>
+        </form>
       </div>
-      <button mat-flat-button color="primary" type="submit">Guardar preferências</button>
-    </form>
-  </section>
-
-  <!-- Idioma e Região -->
-  <section class="settings-card mb-6">
-    <h2 class="settings-card__title">Idioma e região</h2>
-    <form [formGroup]="preferencesForm" class="settings-form">
-      <mat-form-field appearance="outline" class="w-full md:max-w-xs" subscriptSizing="dynamic">
-        <mat-label>Idioma</mat-label>
-        <mat-select formControlName="language">
-          <mat-option *ngFor="let lang of languages" [value]="lang.code">{{ lang.name }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="w-full md:max-w-xs" subscriptSizing="dynamic">
-        <mat-label>Moeda</mat-label>
-        <mat-select formControlName="currency">
-          <mat-option *ngFor="let curr of currencies" [value]="curr.code">{{ curr.name }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </form>
-  </section>
-
-  <!-- Conta -->
-  <section class="settings-card">
-    <h2 class="settings-card__title">Conta</h2>
-    <div class="flex flex-wrap gap-3">
-      <button mat-stroked-button type="button" (click)="exportData()">
-        <mat-icon>download</mat-icon>
-        Exportar meus dados
-      </button>
-      <button mat-flat-button color="warn" type="button" (click)="deleteAccount()">
-        <mat-icon>delete_forever</mat-icon>
-        Eliminar minha conta
-      </button>
-    </div>
-  </section>
+    </section>
+  }
 </div>

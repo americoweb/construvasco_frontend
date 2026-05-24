@@ -13,6 +13,10 @@ import { NotificationService } from '../../../../shared/components/feedback/noti
 import { ModalService } from '../../../../shared/components/feedback/modal.service';
 import { ProjectDocument, ProjectRequest, Quote } from '../../../../shared/construction/construction.types';
 import { RejectQuoteDialogComponent } from './reject-quote-dialog.component';
+import { ApprovedMockupCardComponent } from '../../components/customer-shared/approved-mockup-card.component';
+import { BriefingPanelComponent } from '../../components/customer-shared/briefing-panel.component';
+import { QuoteOfferCardComponent } from '../../components/customer-shared/quote-offer-card.component';
+import { requestStatusBadgeClass } from '../../../../shared/construction/request-status.util';
 import {
   STUDIO_PALETTES,
   STUDIO_PROJECT_TYPES,
@@ -52,6 +56,9 @@ const BRIEFING_COLUMN_KEYS = new Set([
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
+    ApprovedMockupCardComponent,
+    BriefingPanelComponent,
+    QuoteOfferCardComponent,
   ],
   templateUrl: './customer-request-detail.component.html',
   styleUrls: ['./customer-request-detail.component.scss'],
@@ -245,10 +252,14 @@ export class CustomerRequestDetailComponent implements OnInit, OnDestroy {
   }
 
   quoteStatusClass(status?: string): string {
-    if (status === 'sent') return 'quote-status--sent';
-    if (status === 'accepted') return 'quote-status--accepted';
-    if (status === 'rejected') return 'quote-status--rejected';
-    return '';
+    if (status === 'sent') return 'cp-badge--warning';
+    if (status === 'accepted') return 'cp-badge--success';
+    if (status === 'rejected') return 'cp-badge--error';
+    return 'cp-badge--neutral';
+  }
+
+  headerStatusClass(): string {
+    return requestStatusBadgeClass(this.request?.status);
   }
 
   formatMt(amount: number | string | undefined): string {

@@ -13,6 +13,8 @@ import { AuthService } from '../../../../core/auth/services/auth.service';
 import { User } from '../../../../core/auth/models/user.interface';
 import { ProfilePhotoComponent } from '../../../../shared/components/ui/profile-photo/profile-photo.component';
 
+export type SettingsTab = 'profile' | 'addresses' | 'security';
+
 @Component({
   selector: 'app-settings',
   standalone: true,
@@ -32,6 +34,7 @@ import { ProfilePhotoComponent } from '../../../../shared/components/ui/profile-
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsComponent implements OnInit, OnDestroy {
+  activeTab: SettingsTab = 'profile';
   user: User | null = null;
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
@@ -64,6 +67,11 @@ export class SettingsComponent implements OnInit, OnDestroy {
   ];
 
   private _unsubscribeAll = new Subject<void>();
+
+  setTab(tab: SettingsTab): void {
+    this.activeTab = tab;
+    this.cdr.markForCheck();
+  }
 
   constructor(
     private fb: FormBuilder,

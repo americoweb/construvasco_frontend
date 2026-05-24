@@ -1,47 +1,68 @@
-<div class="customer-dashboard">
-  <h1 class="text-2xl font-bold text-slate-900 mb-2">Olá, {{ userName }}</h1>
-  <p class="text-slate-600 mb-6">Acompanhe os seus pedidos, orçamentos e projectos.</p>
+<div class="customer-page customer-dashboard">
+  <header class="cp-page-header">
+    <h1 class="cp-greeting">Olá, <em>{{ firstName }}</em></h1>
+    <p class="cp-page-subtitle">Acompanhe os seus pedidos, orçamentos e projectos.</p>
+  </header>
 
   @if (loading) {
-    <div class="flex justify-center py-12">
+    <div class="cp-loading">
       <mat-spinner diameter="36" />
     </div>
   } @else if (stats) {
-    <div class="grid gap-4 sm:grid-cols-3 mb-8">
-      <mat-card>
-        <mat-card-content class="!pt-4">
-          <p class="text-sm text-slate-500">Pedidos</p>
-          <p class="text-3xl font-bold">{{ stats.project_requests_count }}</p>
-        </mat-card-content>
-      </mat-card>
-      <mat-card>
-        <mat-card-content class="!pt-4">
-          <p class="text-sm text-slate-500">Orçamentos pendentes</p>
-          <p class="text-3xl font-bold">{{ stats.pending_quotes }}</p>
-        </mat-card-content>
-      </mat-card>
-      <mat-card>
-        <mat-card-content class="!pt-4">
-          <p class="text-sm text-slate-500">Créditos IA</p>
-          <p class="text-3xl font-bold">{{ stats.credits_balance ?? 0 }}</p>
-        </mat-card-content>
-      </mat-card>
+    <div class="cp-kpi-grid cp-section">
+      <article class="cp-kpi-card">
+        <mat-icon class="cp-kpi-card__icon" svgIcon="heroicons_outline:document-text" />
+        <p class="cp-kpi-card__value">{{ stats.project_requests_count }}</p>
+        <p class="cp-kpi-card__label">Pedidos</p>
+      </article>
+      <article class="cp-kpi-card">
+        <mat-icon class="cp-kpi-card__icon" svgIcon="heroicons_outline:currency-dollar" />
+        <p class="cp-kpi-card__value">{{ stats.pending_quotes }}</p>
+        <p class="cp-kpi-card__label">Orçamentos pendentes</p>
+      </article>
+      <article class="cp-kpi-card">
+        <mat-icon class="cp-kpi-card__icon" svgIcon="heroicons_outline:sparkles" />
+        <p class="cp-kpi-card__value">{{ stats.credits_balance ?? 0 }}</p>
+        <p class="cp-kpi-card__label">Créditos IA</p>
+      </article>
     </div>
-    <mat-card class="mb-6 bg-blue-50 border border-blue-100">
-      <mat-card-content class="!py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 class="text-lg font-semibold text-slate-900 mb-1">Novo projecto</h2>
-          <p class="text-sm text-slate-600 mb-0">Briefing guiado + mockups de referência com IA.</p>
-        </div>
-        <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
-          Começar novo projecto
-        </a>
-      </mat-card-content>
-    </mat-card>
 
-    <div class="flex flex-wrap gap-3">
-      <a mat-stroked-button routerLink="/conta/pedidos">Ver pedidos</a>
-      <a mat-stroked-button routerLink="/conta/projectos">Ver projectos</a>
-    </div>
+    <section class="cp-cta-card cp-section">
+      <h2 class="cp-cta-card__title">Começar novo projecto</h2>
+      <p class="cp-cta-card__text">
+        Briefing guiado e mockups de referência com IA — do conceito inicial ao pedido de arquitectura.
+      </p>
+      <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
+        Abrir estúdio
+      </a>
+      <nav class="cp-shortcuts" aria-label="Atalhos rápidos">
+        <a routerLink="/conta/pedidos">Meus pedidos</a>
+        <a routerLink="/conta/projectos">Meus projectos</a>
+        <a routerLink="/conta/definicoes">Definições</a>
+      </nav>
+    </section>
+
+    @if (recentRequests.length) {
+      <section class="cp-section">
+        <h2 class="cp-section-title">Pedidos recentes</h2>
+        <div class="grid gap-3">
+          @for (r of recentRequests; track r.id) {
+            <a class="cp-list-card" [routerLink]="['/conta/pedidos', r.id]">
+              <div class="cp-list-card__body">
+                <p class="cp-list-card__ref">{{ r.reference_code }}</p>
+                <p class="cp-list-card__title">{{ r.title }}</p>
+                <div class="cp-list-card__meta">
+                  <span>{{ typeLabel(r) }}</span>
+                  <span class="cp-badge" [ngClass]="statusClass(r)">{{ statusLabel(r) }}</span>
+                  @if (hasNewQuote(r)) {
+                    <span class="cp-badge cp-badge--warning">Novo orçamento</span>
+                  }
+                </div>
+              </div>
+            </a>
+          }
+        </div>
+      </section>
+    }
   }
 </div>

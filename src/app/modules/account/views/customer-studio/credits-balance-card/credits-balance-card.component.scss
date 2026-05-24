@@ -1,3 +1,57 @@
 .credits-card {
-  background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-width: 12rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: var(--app-surface);
+}
+
+.credits-card--low {
+  border-color: color-mix(in srgb, var(--app-warning) 55%, var(--app-border));
+  background: var(--app-warning-light);
+}
+
+.credits-card__icon {
+  color: var(--app-primary);
+}
+
+.credits-card--low .credits-card__icon {
+  color: #7a5c00;
+}
+
+.credits-card__label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted-foreground);
+}
+
+.credits-card__value {
+  margin: 0.15rem 0 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--app-primary);
+}
+
+.credits-card--low .credits-card__value {
+  color: #7a5c00;
+}
+
+.credits-card__hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.75rem;
+  color: var(--app-foreground-secondary);
+}
+
+.credits-card__alert {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #7a5c00;
 }

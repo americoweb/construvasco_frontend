@@ -1,163 +1,104 @@
-<div class="request-detail max-w-3xl">
+<div class="customer-page request-detail">
   @if (loading) {
-    <div class="flex justify-center py-12">
+    <div class="cp-loading">
       <mat-spinner diameter="36" />
     </div>
   } @else if (request) {
     @if (showSubmitBanner) {
-      <mat-card class="submit-banner mb-6 border-l-4 border-l-green-600">
-        <mat-card-content class="!py-3 !flex items-start justify-between gap-3">
-          <div>
-            <p class="font-semibold text-green-800 mb-1">Pedido submetido com sucesso.</p>
-            <p class="text-sm text-slate-600 mb-0">A Construvasco vai analisar o seu pedido.</p>
-          </div>
-          <button mat-icon-button type="button" aria-label="Fechar" (click)="dismissBanner()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-card-content>
-      </mat-card>
+      <div class="cp-banner" role="status">
+        <div>
+          <p class="cp-banner__title">Pedido submetido com sucesso</p>
+          <p class="cp-banner__text">A Construvasco vai analisar o seu pedido e entrará em contacto em breve.</p>
+        </div>
+        <button mat-icon-button type="button" aria-label="Fechar" (click)="dismissBanner()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
     }
 
-    <header class="mb-6">
-      <h1 class="text-2xl font-bold text-slate-900 mb-2">{{ request.title }}</h1>
-      <p class="text-slate-600 text-sm mb-1">
-        <span class="font-medium">{{ request.reference_code }}</span>
-        · {{ statusLabel }}
-      </p>
-      @if (request.submitted_at) {
-        <p class="text-slate-500 text-sm mb-0">
-          Submetido em {{ request.submitted_at | date: 'medium' }}
-        </p>
-      }
+    <header class="cp-page-header">
+      <p class="cp-list-card__ref mb-1">{{ request.reference_code }}</p>
+      <h1 class="cp-page-title">{{ request.title }}</h1>
+      <div class="flex flex-wrap items-center gap-2 mt-2">
+        <span class="cp-badge" [ngClass]="headerStatusClass()">{{ statusLabel }}</span>
+        @if (request.submitted_at) {
+          <span class="text-sm text-stone-600">Submetido em {{ request.submitted_at | date: 'medium' }}</span>
+        }
+      </div>
     </header>
 
-    @if (hasApprovedMockup) {
-      <mat-card class="mb-4 mockup-featured">
-        <mat-card-content class="!pt-4">
-          <p class="text-sm font-semibold text-slate-700 mb-3">Mockup aprovado para este projecto</p>
-          <img
-            [src]="approvedMockupUrl!"
-            alt="Mockup aprovado"
-            class="w-full rounded-lg border border-slate-200 shadow-sm"
-          />
-        </mat-card-content>
-      </mat-card>
-    } @else {
-      <p class="text-sm text-slate-500 mb-4 italic">
-        Sem mockup aprovado — a Construvasco usará o briefing escrito como referência.
-      </p>
-    }
+    <div class="cp-detail-grid">
+      <div class="cp-detail-main">
+        @if (hasApprovedMockup) {
+          <app-approved-mockup-card [imageUrl]="approvedMockupUrl!" />
+        } @else {
+          <section class="cp-card">
+            <div class="cp-card__body text-sm text-stone-600 italic">
+              Sem mockup aprovado — a Construvasco usará o briefing escrito como referência.
+            </div>
+          </section>
+        }
 
-    @if (briefingRows.length) {
-      <mat-card class="mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Briefing</h2>
-          <dl class="grid gap-2 text-sm">
-            @for (row of briefingRows; track row.label) {
-              <div class="flex gap-2">
-                <dt class="text-slate-500 min-w-[10rem] shrink-0">{{ row.label }}</dt>
-                <dd class="text-slate-900">{{ row.value }}</dd>
+        <app-briefing-panel [rows]="briefingRows" />
+
+        @if (headerRows.length) {
+          <app-briefing-panel title="Projecto" [rows]="headerRows" />
+        }
+
+        @if (referenceDocuments.length) {
+          <section class="cp-card">
+            <div class="cp-card__body">
+              <h2 class="cp-card__title">Documentos de referência</h2>
+              <div class="doc-grid">
+                @for (doc of referenceDocuments; track doc.id) {
+                  @if (documentUrl(doc); as url) {
+                    <figure class="doc-thumb">
+                      <img [src]="url" [alt]="doc.original_name || 'Referência'" loading="lazy" />
+                      <figcaption class="text-xs text-stone-500 truncate px-1">
+                        {{ doc.original_name || 'Imagem' }}
+                      </figcaption>
+                    </figure>
+                  }
+                }
               </div>
-            }
-          </dl>
-        </mat-card-content>
-      </mat-card>
-    }
+            </div>
+          </section>
+        }
+      </div>
 
-    @if (headerRows.length) {
-      <mat-card class="mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Projecto</h2>
-          <dl class="grid gap-2 text-sm">
-            @for (row of headerRows; track row.label) {
-              <div class="flex gap-2">
-                <dt class="text-slate-500 min-w-[10rem] shrink-0">{{ row.label }}</dt>
-                <dd class="text-slate-900">{{ row.value }}</dd>
+      <aside class="cp-detail-aside">
+        @if (architectureQuotes.length) {
+          <section class="cp-card">
+            <div class="cp-card__body">
+              <h2 class="cp-card__title">Orçamentos recebidos</h2>
+              <div class="flex flex-col gap-4">
+                @for (q of architectureQuotes; track q.id) {
+                  <app-quote-offer-card
+                    [quote]="q"
+                    [typeLabel]="quoteTypeLabel()"
+                    [statusLabel]="quoteStatusLabel(q.status)"
+                    [statusClass]="quoteStatusClass(q.status)"
+                    [amountFormatted]="formatMt(q.total_amount_mt)"
+                    [canRespond]="canRespond(q)"
+                    [actionDisabled]="quoteActionId === q.id"
+                    (accept)="acceptQuote($event)"
+                    (reject)="rejectQuote($event)"
+                  />
+                }
               </div>
-            }
-          </dl>
-        </mat-card-content>
-      </mat-card>
-    }
+            </div>
+          </section>
+        }
 
-    @if (referenceDocuments.length) {
-      <mat-card class="mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Documentos de referência</h2>
-          <div class="doc-grid">
-            @for (doc of referenceDocuments; track doc.id) {
-              @if (documentUrl(doc); as url) {
-                <figure class="doc-thumb">
-                  <img [src]="url" [alt]="doc.original_name || 'Referência'" loading="lazy" />
-                  <figcaption class="text-xs text-slate-500 truncate px-1">
-                    {{ doc.original_name || 'Imagem' }}
-                  </figcaption>
-                </figure>
-              }
-            }
+        <section class="cp-card">
+          <div class="cp-card__body">
+            <h2 class="cp-card__title">Próximos passos</h2>
+            <p class="text-sm text-stone-700 m-0">{{ nextStepsMessage }}</p>
           </div>
-        </mat-card-content>
-      </mat-card>
-    }
+        </section>
+      </aside>
+    </div>
 
-    @if (architectureQuotes.length) {
-      <mat-card class="mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Orçamentos recebidos</h2>
-          <ul class="space-y-4">
-            @for (q of architectureQuotes; track q.id) {
-              <li class="border rounded-lg p-4 text-sm">
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                  <span class="font-medium">Orçamento de {{ quoteTypeLabel() }}</span>
-                  <span class="quote-status" [ngClass]="quoteStatusClass(q.status)">
-                    {{ quoteStatusLabel(q.status) }}
-                  </span>
-                </div>
-                <p class="mb-1"><strong>Valor:</strong> {{ formatMt(q.total_amount_mt) }}</p>
-                @if (q.delivery_days) {
-                  <p class="mb-1"><strong>Prazo:</strong> {{ q.delivery_days }} dias</p>
-                }
-                @if (q.expires_at) {
-                  <p class="mb-1"><strong>Validade:</strong> {{ q.expires_at | date: 'mediumDate' }}</p>
-                }
-                @if (q.conditions) {
-                  <p class="mb-1 text-slate-600">{{ q.conditions }}</p>
-                }
-                @if (canRespond(q)) {
-                  <div class="flex flex-wrap gap-2 mt-3">
-                    <button
-                      mat-flat-button
-                      color="primary"
-                      type="button"
-                      (click)="acceptQuote(q)"
-                      [disabled]="quoteActionId === q.id"
-                    >
-                      Aceitar orçamento
-                    </button>
-                    <button
-                      mat-stroked-button
-                      type="button"
-                      (click)="rejectQuote(q)"
-                      [disabled]="quoteActionId === q.id"
-                    >
-                      Recusar
-                    </button>
-                  </div>
-                }
-              </li>
-            }
-          </ul>
-        </mat-card-content>
-      </mat-card>
-    }
-
-    <mat-card class="mb-6 bg-blue-50 border border-blue-100">
-      <mat-card-content class="!py-4 text-sm text-slate-700">
-        <p class="font-semibold text-slate-900 mb-2">Próximos passos</p>
-        <p class="mb-0">{{ nextStepsMessage }}</p>
-      </mat-card-content>
-    </mat-card>
-
-    <a mat-stroked-button routerLink="/conta/pedidos">Voltar aos pedidos</a>
+    <a mat-stroked-button class="cp-btn-secondary mt-6" routerLink="/conta/pedidos">Voltar aos pedidos</a>
   }
 </div>

@@ -1,0 +1,15 @@
+@if (rows.length) {
+  <section class="cp-card">
+    <div class="cp-card__body">
+      <h2 class="cp-card__title">{{ title }}</h2>
+      <dl class="cp-dl">
+        @for (row of rows; track row.label) {
+          <div class="cp-dl__row">
+            <dt class="cp-dl__label">{{ row.label }}</dt>
+            <dd class="cp-dl__value">{{ row.value }}</dd>
+          </div>
+        }
+      </dl>
+    </div>
+  </section>
+}
