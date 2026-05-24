@@ -1,34 +1,40 @@
-:host {
-  display: block;
-  min-height: 100vh;
-}
-
-.auth-sign-in-shell {
-  min-height: 100vh;
-}
-
-.auth-sign-in-panel-accent {
-  color: #ca8a04;
-}
-
-.auth-sign-in-btn-primary {
-  background-color: #0f172a !important;
-  color: #f2c94c !important;
-}
-
-.auth-sign-in-btn-primary:hover:not([disabled]) {
-  background-color: #1e293b !important;
-}
-
-.auth-sign-in-hero-gradient {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #422006 100%);
-}
-
-.auth-sign-in-hero-overlay {
-  background: linear-gradient(
-    to top,
-    rgba(15, 23, 42, 0.85) 0%,
-    rgba(15, 23, 42, 0.15) 55%,
-    transparent 100%
-  );
-}
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.auth-sign-in-shell {
+  min-height: 100vh;
+}
+
+.auth-sign-in-panel-accent {
+  color: var(--app-primary);
+}
+
+.auth-sign-in-btn-primary {
+  background-color: var(--app-primary) !important;
+  color: var(--app-primary-foreground) !important;
+}
+
+.auth-sign-in-btn-primary:hover:not([disabled]) {
+  background-color: var(--app-primary-hover) !important;
+}
+
+.auth-sign-in-hero-gradient {
+  background: linear-gradient(
+    135deg,
+    #2a2e26 0%,
+    #3d4236 45%,
+    #4a6630 100%
+  );
+}
+
+.auth-sign-in-hero-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(28, 27, 24, 0.85) 0%,
+    rgba(28, 27, 24, 0.15) 55%,
+    transparent 100%
+  );
+}
+

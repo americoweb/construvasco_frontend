@@ -12,8 +12,10 @@ const generatePalette = require(
  * Tailwind-like color palettes automatically
  */
 const customPalettes = {
-    brand: generatePalette('#0F172A'),
-    secondary: generatePalette('#B68D40'),
+    brand: generatePalette('#5B7E3C'),
+    secondary: generatePalette('#6B6149'),
+    attention: generatePalette('#FF9D23'),
+    warning: generatePalette('#FFD65A'),
 };
 
 /**
@@ -23,45 +25,39 @@ const themes = {
     // Default theme is required for theming system to work correctly!
     default: {
         primary: {
-            50: '#F8FAFC',
-            100: '#E2E8F0',
-            200: '#CBD5E1',
-            300: '#94A3B8',
-            400: '#64748B',
-            500: '#475569',
-            600: '#334155',
-            700: '#1E293B',
-            800: '#0F172A',
-            900: '#0B1220',
-            DEFAULT: '#1E293B',
+            ...customPalettes.brand,
+            DEFAULT: '#5B7E3C',
         },
         accent: {
-            ...colors.teal,
-            DEFAULT: '#0EA5A4',
+            ...customPalettes.attention,
+            DEFAULT: '#FF9D23',
         },
         secondary: {
             ...customPalettes.secondary,
-            DEFAULT: '#B68D40',
+            DEFAULT: '#6B6149',
         },
         warn: {
-            ...colors.red,
-            DEFAULT: colors.red[600],
+            ...generatePalette('#EA5252'),
+            DEFAULT: '#EA5252',
         },
         'on-warn': {
-            500: colors.red['50'],
+            500: '#ffffff',
         },
     },
     // Rest of the themes will use the 'default' as the base
     // theme and will extend it with their given configuration.
     brand: {
-        primary: customPalettes.brand,
+        primary: {
+            ...customPalettes.brand,
+            DEFAULT: '#5B7E3C',
+        },
         accent: {
-            ...colors.teal,
-            DEFAULT: '#0EA5A4',
+            ...customPalettes.attention,
+            DEFAULT: '#FF9D23',
         },
         secondary: {
             ...customPalettes.secondary,
-            DEFAULT: '#B68D40',
+            DEFAULT: '#6B6149',
         },
     },
     teal: {
@@ -128,7 +124,7 @@ const config = {
                 'spin-slow': 'spin 3s linear infinite',
             },
             colors: {
-                gray: colors.slate,
+                gray: colors.stone,
             },
             flex: {
                 0: '0 0 auto',

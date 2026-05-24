@@ -1,0 +1,39 @@
+/**
+ * Construvasco text wordmark (no graphic logo).
+ */
+.brand-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  font-family: var(--app-font-sans);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--app-primary);
+  text-decoration: none;
+}
+
+.brand-wordmark__mark {
+  font-size: 1.45em;
+  font-weight: 800;
+  color: var(--app-primary);
+  margin-right: 0.02em;
+}
+
+.brand-wordmark--on-dark {
+  color: #f5f4f0;
+
+  .brand-wordmark__mark {
+    color: var(--app-primary);
+  }
+}
+
+.brand-wordmark--compact {
+  font-size: 1rem;
+}
+
+.brand-wordmark--footer {
+  font-size: 0.875rem;
+  opacity: 0.85;
+}

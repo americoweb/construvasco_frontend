@@ -1,5 +1,5 @@
 /**
- * Admin UI tokens (aligned with Amazing) — used by app-button, page-header, data-*.
+ * Construvasco design tokens — shared by admin components and Tailwind-aligned UI.
  */
 :root {
   --app-font-sans: 'Inter var', ui-sans-serif, system-ui, sans-serif;
@@ -7,64 +7,76 @@
   --app-radius-sm: 0.5rem;
   --app-radius-lg: 1rem;
 
-  --app-background: #f1f5f9;
+  /* Surfaces — warm off-white (stone-tinted, not blue-slate) */
+  --app-background: #f7f6f3;
   --app-surface: #ffffff;
   --app-surface-elevated: #ffffff;
-  --app-muted: #f8fafc;
-  --app-muted-foreground: #64748b;
-  --app-border: #e2e8f0;
-  --app-border-strong: #cbd5e1;
-  --app-foreground: #0f172a;
-  --app-foreground-secondary: #475569;
+  --app-muted: #f0ede6;
+  --app-muted-foreground: #78716c;
+  --app-border: #e4e0d6;
+  --app-border-strong: #c9c4b8;
 
-  --app-primary: #6d28d9;
-  --app-primary-hover: #5b21b6;
+  /* Text — soft black, warm secondary */
+  --app-foreground: #1c1b18;
+  --app-foreground-secondary: #5c5748;
+
+  /* Brand — olive primary */
+  --app-primary: #5b7e3c;
+  --app-primary-hover: #4a6630;
+  --app-primary-light: #e8f0e0;
   --app-primary-foreground: #ffffff;
-  --app-primary-muted: rgba(109, 40, 217, 0.1);
+  --app-primary-muted: rgba(91, 126, 60, 0.12);
 
-  --app-secondary: #475569;
-  --app-secondary-hover: #334155;
+  /* Secondary — warm neutral for outlines / secondary actions */
+  --app-secondary: #6b6149;
+  --app-secondary-hover: #554e3b;
   --app-secondary-foreground: #ffffff;
 
-  --app-accent: #0d9488;
-  --app-success: #059669;
-  --app-success-muted: rgba(5, 150, 105, 0.12);
-  --app-warning: #d97706;
-  --app-warning-muted: rgba(217, 119, 6, 0.12);
-  --app-danger: #dc2626;
-  --app-danger-hover: #b91c1c;
+  /* Semantic */
+  --app-accent: #ff9d23;
+  --app-accent-light: rgba(255, 157, 35, 0.14);
+  --app-success: #4a8f38;
+  --app-success-muted: rgba(74, 143, 56, 0.12);
+  --app-warning: #ffd65a;
+  --app-warning-light: rgba(255, 214, 90, 0.35);
+  --app-error: #ea5252;
+  --app-error-light: rgba(234, 82, 82, 0.12);
+  --app-danger: #ea5252;
+  --app-danger-hover: #d43f3f;
   --app-danger-foreground: #ffffff;
-  --app-danger-muted: rgba(220, 38, 38, 0.1);
+  --app-danger-muted: rgba(234, 82, 82, 0.12);
 
-  --app-ring: rgba(109, 40, 217, 0.45);
-  --app-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
-  --app-shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --app-ring: rgba(91, 126, 60, 0.45);
+  --app-shadow-sm: 0 1px 2px rgba(28, 27, 24, 0.06);
+  --app-shadow-md: 0 4px 12px rgba(28, 27, 24, 0.08);
 }
 
 .dark,
 body.dark {
-  --app-background: #0f172a;
-  --app-surface: #1e293b;
-  --app-surface-elevated: #334155;
-  --app-muted: #1e293b;
-  --app-muted-foreground: #94a3b8;
-  --app-border: #334155;
-  --app-border-strong: #475569;
-  --app-foreground: #f8fafc;
-  --app-foreground-secondary: #cbd5e1;
+  --app-background: #1a1c17;
+  --app-surface: #252820;
+  --app-surface-elevated: #2f3329;
+  --app-muted: #2a2e26;
+  --app-muted-foreground: #a8a29e;
+  --app-border: #3d4236;
+  --app-border-strong: #57534e;
+  --app-foreground: #f5f4f0;
+  --app-foreground-secondary: #d6d3d1;
 
-  --app-primary: #8b5cf6;
-  --app-primary-hover: #a78bfa;
-  --app-primary-foreground: #ffffff;
-  --app-primary-muted: rgba(139, 92, 246, 0.15);
+  --app-primary: #7fa85c;
+  --app-primary-hover: #96bc72;
+  --app-primary-light: rgba(127, 168, 92, 0.18);
+  --app-primary-foreground: #1a1c17;
+  --app-primary-muted: rgba(127, 168, 92, 0.2);
 
-  --app-secondary: #94a3b8;
-  --app-secondary-hover: #cbd5e1;
-  --app-secondary-foreground: #0f172a;
+  --app-secondary: #a8a29e;
+  --app-secondary-hover: #d6d3d1;
+  --app-secondary-foreground: #1a1c17;
 
-  --app-success-muted: rgba(16, 185, 129, 0.15);
-  --app-warning-muted: rgba(251, 191, 36, 0.12);
-  --app-danger-muted: rgba(248, 113, 113, 0.12);
+  --app-success-muted: rgba(127, 168, 92, 0.18);
+  --app-warning-light: rgba(255, 214, 90, 0.2);
+  --app-error-light: rgba(234, 82, 82, 0.18);
+  --app-danger-muted: rgba(234, 82, 82, 0.18);
 
   --app-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
   --app-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);

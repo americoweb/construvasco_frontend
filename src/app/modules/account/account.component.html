@@ -15,8 +15,13 @@
   </div>
 
   <!-- Mobile Layout: Content Only (Bottom Tabs) -->
-  <div class="md:hidden flex-1">
-    <main class="pb-20 w-full min-w-0 p-4">
+  <div class="md:hidden flex-1 flex flex-col">
+    <header class="flex items-center justify-center border-b border-gray-200 bg-white px-4 py-3 shrink-0">
+      <a routerLink="/conta/dashboard" class="brand-wordmark brand-wordmark--compact" aria-label="Construvasco">
+        <span class="brand-wordmark__mark">C</span><span>onstruvasco</span>
+      </a>
+    </header>
+    <main class="pb-20 w-full min-w-0 p-4 flex-1">
       <router-outlet (activate)="onRouteActivate($event)" (deactivate)="onRouteDeactivate($event)"></router-outlet>
     </main>
 
