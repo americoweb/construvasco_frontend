@@ -141,3 +141,6 @@
 
 /* This injects Tailwind's component classes and any component classes registered by plugins. */
 @tailwind components;
+
+/* Utilities must live in the same Tailwind pass as files using @apply (Fuse overrides). */
+@tailwind utilities;

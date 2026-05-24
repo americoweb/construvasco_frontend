@@ -1,0 +1,16 @@
+/**
+ * Single global stylesheet bundle so Tailwind generates utilities (text-primary, etc.)
+ * before Fuse SCSS files use @apply — Angular compiles each `styles[]` entry separately.
+ */
+@import '../@fuse/styles/tailwind.scss';
+@import '../@fuse/styles/themes.scss';
+@import './vendors.scss';
+
+@import '../@fuse/styles/components/example-viewer';
+@import '../@fuse/styles/components/input';
+@import '../@fuse/styles/overrides/angular-material';
+@import '../@fuse/styles/overrides/highlightjs';
+@import '../@fuse/styles/overrides/perfect-scrollbar';
+@import '../@fuse/styles/overrides/quill';
+
+@import './styles.scss';
