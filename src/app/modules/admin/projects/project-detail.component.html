@@ -53,6 +53,59 @@
       </mat-card>
     }
 
+    @if (isManagerView && showConstructionPhase) {
+      <mat-card class="!mb-6">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Fase de Obra</h2>
+          @if (project.contract_phase === 'execution_quote') {
+            <p class="text-sm">Cliente solicitou orçamento de obra em {{ formatDate(project.construction_quote_requested_at) }}</p>
+            @if (project.suggested_visit_date) {
+              <p class="text-sm font-medium mt-2">Data sugerida para visita: {{ formatDate(project.suggested_visit_date) }}</p>
+            }
+            @if (project.construction_request_notes) {
+              <p class="text-sm mt-2">Notas: {{ project.construction_request_notes }}</p>
+            }
+            @if (canSendConstructionQuote) {
+              <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="sendConstructionQuote()">
+                Enviar orçamento de obra
+              </button>
+            }
+            @if (project.construction_quote; as cq) {
+              <p class="text-sm mt-3">Orçamento obra: {{ formatMoney(cq.total_amount_mt) }} · {{ cq.status }}</p>
+            }
+          }
+          @if (project.contract_phase === 'completed') {
+            <p class="text-sm text-emerald-800">Obra concluída em {{ formatDate(project.construction_completed_at) }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (isManagerView && constructionPayment) {
+      <mat-card class="!mb-6">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-700 mb-3">Pagamento — Fase de Obra</h2>
+          @if (constructionPayment.status === 'proof_submitted') {
+            <div class="border border-orange-200 bg-orange-50 rounded-lg p-4">
+              <p class="text-sm font-medium">Comprovativo submetido em {{ formatDate(constructionPayment.proof_uploaded_at) }}</p>
+              <div class="flex flex-wrap gap-2 mt-4">
+                <button mat-stroked-button type="button" (click)="downloadConstructionProof()">Descarregar comprovativo</button>
+                <button mat-flat-button color="primary" type="button" [disabled]="actionConstructionPayment" (click)="confirmConstructionPayment()">Confirmar pagamento</button>
+                <button mat-stroked-button type="button" [disabled]="actionConstructionPayment" (click)="rejectConstructionPayment()">Rejeitar</button>
+              </div>
+            </div>
+          } @else if (constructionPayment.status === 'confirmed' && canMarkConstructionCompleted) {
+            <p class="text-sm text-emerald-800 mb-3">Pagamento de obra confirmado.</p>
+            <button mat-flat-button color="primary" type="button" [disabled]="markingConstruction" (click)="markConstructionCompleted()">
+              Marcar obra concluída
+            </button>
+          } @else {
+            <p class="text-sm">{{ paymentStatus(constructionPayment.status) }} · {{ formatMoney(constructionPayment.amount) }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
     @if (isManagerView && payment) {
       <mat-card class="!mb-6">
         <mat-card-content class="!pt-4">

@@ -131,7 +131,12 @@ export interface ConstructionProject {
   project_type?: string;
   location?: string;
   contract_phase?: string;
+  contract_phase_label?: string;
   architecture_completed_at?: string;
+  construction_completed_at?: string;
+  construction_quote_requested_at?: string;
+  construction_request_notes?: string;
+  suggested_visit_date?: string;
   current_phase?: string;
   budget?: number | string;
   target_budget?: number | string;
@@ -148,6 +153,9 @@ export interface ConstructionProject {
   milestones?: { id: number; title?: string; status?: string }[];
   deliverables?: ProjectDeliverable[];
   payment?: ProjectPayment;
+  architecture_payment?: ProjectPayment;
+  construction_payment?: ProjectPayment;
+  construction_quote?: Quote;
   quote?: Quote;
 }
 
@@ -166,7 +174,7 @@ export interface StoreQuotePayload {
   delivery_days: number;
   conditions?: string;
   valid_until?: string;
-  quote_type?: 'architecture';
+  quote_type?: 'architecture' | 'construction';
   breakdown?: Record<string, unknown>;
 }
 

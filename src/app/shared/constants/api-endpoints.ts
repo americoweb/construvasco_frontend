@@ -39,6 +39,7 @@ export const API_ENDPOINTS = {
     PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
       `v1/manager/projects/${projectId}/deliverables/${deliverableId}/download`,
     MARK_ARCHITECTURE_DELIVERED: (id: string | number) => `v1/manager/projects/${id}/mark-architecture-delivered`,
+    MARK_CONSTRUCTION_COMPLETED: (id: string | number) => `v1/manager/projects/${id}/mark-construction-completed`,
     PAYMENTS_PENDING: 'v1/manager/payments/pending',
     PROJECT_PAYMENT_CONFIRM: (projectId: string | number, paymentId: string | number) =>
       `v1/manager/projects/${projectId}/payments/${paymentId}/confirm`,
@@ -62,6 +63,7 @@ export const API_ENDPOINTS = {
     QUOTE_REJECT: (id: string | number) => `v1/customer/quotes/${id}/reject`,
     PROJECTS: 'v1/customer/projects',
     PROJECT: (id: string | number) => `v1/customer/projects/${id}`,
+    REQUEST_CONSTRUCTION_QUOTE: (id: string | number) => `v1/customer/projects/${id}/request-construction-quote`,
     PROJECT_DELIVERABLES: (id: string | number) => `v1/customer/projects/${id}/deliverables`,
     PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
       `v1/customer/projects/${projectId}/deliverables/${deliverableId}/download`,

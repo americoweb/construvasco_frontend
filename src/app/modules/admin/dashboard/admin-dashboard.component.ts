@@ -36,6 +36,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   isManager = false;
   pendingPayments: PendingPaymentRow[] = [];
   pendingPaymentsCount = 0;
+  pendingConstructionQuotesCount = 0;
+  pendingConstructionQuotes: { id: number; name?: string; client?: { name?: string } }[] = [];
 
   today = new Date().toLocaleDateString('pt-MZ', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
@@ -75,7 +77,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 
     forkJoin({
       stats: this.adminDashboardService.getStats(this.userRole).pipe(
-        catchError(() => of({ data: null, pending_payments: [] }))
+        catchError(() =>
+          of({
+            data: null,
+            pending_payments: [],
+            pending_construction_quote_requests_count: 0,
+            pending_construction_quote_requests: [],
+          })
+        )
       ),
       projects: this.adminDashboardService.getRecentProjects(this.userRole).pipe(
         catchError(() => of({ data: [] }))
@@ -88,6 +97,8 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           this.pendingPaymentsCount =
             stats.data?.pending_payments_count ?? stats.data?.payments_pending ?? 0;
           this.pendingPayments = (stats.pending_payments ?? []).slice(0, 5);
+          this.pendingConstructionQuotesCount = stats.pending_construction_quote_requests_count ?? 0;
+          this.pendingConstructionQuotes = (stats.pending_construction_quote_requests ?? []).slice(0, 5);
           const list = projects.data ?? [];
           this.recentProjects = list.slice(0, 8);
           this.loading = false;

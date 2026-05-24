@@ -18,9 +18,20 @@ export interface AdminDashboardStats {
   pending_payments_count?: number;
 }
 
+export interface PendingConstructionQuoteRequest {
+  id: number;
+  name?: string;
+  client?: { name?: string };
+  suggested_visit_date?: string;
+  construction_quote_requested_at?: string;
+  construction_request_notes?: string;
+}
+
 export interface AdminDashboardLoadResult {
   data: AdminDashboardStats | null;
   pending_payments: PendingPaymentRow[];
+  pending_construction_quote_requests_count?: number;
+  pending_construction_quote_requests?: PendingConstructionQuoteRequest[];
 }
 
 export interface AdminProjectSummary {
@@ -60,6 +71,8 @@ export class AdminDashboardService {
               payments_pending: 0,
             },
             pending_payments: [],
+            pending_construction_quote_requests_count: 0,
+            pending_construction_quote_requests: [],
           }))
         );
     }
@@ -70,6 +83,8 @@ export class AdminDashboardService {
             active_projects?: number;
             pending_payments_count?: number;
             pending_payments?: PendingPaymentRow[];
+            pending_construction_quote_requests_count?: number;
+            pending_construction_quote_requests?: PendingConstructionQuoteRequest[];
           };
         }>(this.configService.getApiUrl(API_ENDPOINTS.MANAGER.DASHBOARD))
         .pipe(
@@ -84,6 +99,10 @@ export class AdminDashboardService {
               pending_payments_count: res.data?.pending_payments_count ?? 0,
             },
             pending_payments: res.data?.pending_payments ?? [],
+            pending_construction_quote_requests_count:
+              res.data?.pending_construction_quote_requests_count ?? 0,
+            pending_construction_quote_requests:
+              res.data?.pending_construction_quote_requests ?? [],
           }))
         );
     }
@@ -93,6 +112,8 @@ export class AdminDashboardService {
       map((res) => ({
         data: res.data ?? null,
         pending_payments: [],
+        pending_construction_quote_requests_count: 0,
+        pending_construction_quote_requests: [],
       }))
     );
   }

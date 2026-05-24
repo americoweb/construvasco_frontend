@@ -21,6 +21,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/feedback/conf
 import { SubmitDeliverableDialogComponent } from './submit-deliverable-dialog.component';
 import { RejectDeliverableDialogComponent } from './reject-deliverable-dialog.component';
 import { RejectPaymentProofDialogComponent } from './reject-payment-proof-dialog.component';
+import { SendConstructionQuoteDialogComponent } from './send-construction-quote-dialog.component';
+import { contractPhaseLabel } from '../../../shared/construction/contract-phase.util';
 import { formatMoneyMt, paymentStatusLabel } from '../../../shared/construction/payment.util';
 import {
   approvedMockupUrl,
@@ -63,6 +65,8 @@ export class ProjectDetailComponent implements OnInit {
   actionDeliverableId: number | null = null;
   markingArchitecture = false;
   actionPayment = false;
+  actionConstructionPayment = false;
+  markingConstruction = false;
 
   project: ConstructionProject | null = null;
   deliverables: ProjectDeliverable[] = [];
@@ -153,9 +157,15 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   get phaseLabel(): string {
-    const phase = this.project?.contract_phase ?? this.project?.current_phase;
-    if (phase === 'architecture') return 'Arquitectura';
-    return phase ?? '—';
+    return contractPhaseLabel(
+      this.project?.contract_phase_label ?? this.project?.contract_phase,
+      this.project?.current_phase
+    );
+  }
+
+  get showConstructionPhase(): boolean {
+    const p = this.project?.contract_phase;
+    return ['execution_quote', 'construction', 'completed', 'closed'].includes(p ?? '');
   }
 
   get clientDisplayName(): string {
@@ -328,7 +338,86 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   get payment() {
-    return this.project?.payment;
+    return this.project?.architecture_payment ?? this.project?.payment;
+  }
+
+  get constructionPayment() {
+    return this.project?.construction_payment;
+  }
+
+  get canSendConstructionQuote(): boolean {
+    return (
+      this.isManagerView &&
+      this.project?.contract_phase === 'execution_quote' &&
+      !!this.project?.construction_quote_requested_at &&
+      !this.project?.construction_quote
+    );
+  }
+
+  get canMarkConstructionCompleted(): boolean {
+    return (
+      this.isManagerView &&
+      this.project?.contract_phase === 'construction' &&
+      this.constructionPayment?.status === 'confirmed'
+    );
+  }
+
+  sendConstructionQuote(): void {
+    const reqId = this.project?.project_request?.id;
+    if (!reqId) return;
+    const ref = this.dialog.open(SendConstructionQuoteDialogComponent, {
+      width: '520px',
+      data: {
+        requestId: reqId,
+        suggestedVisitDate: this.project?.suggested_visit_date,
+        constructionRequestNotes: this.project?.construction_request_notes,
+      },
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (ok) this.reloadAll();
+    });
+  }
+
+  markConstructionCompleted(): void {
+    if (!this.project) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: 'Marcar obra concluída?',
+        message: 'Confirmar que a obra está concluída? O cliente será notificado.',
+        confirmText: 'Confirmar',
+        cancelText: 'Cancelar',
+        type: 'info',
+      },
+    });
+    ref.afterClosed().subscribe((r) => {
+      if (!r?.confirmed) return;
+      this.markingConstruction = true;
+      this.projects.markConstructionCompleted(this.project!.id).subscribe({
+        next: () => {
+          this.markingConstruction = false;
+          this.notify.success('Obra marcada como concluída.');
+          this.reloadAll();
+        },
+        error: () => {
+          this.markingConstruction = false;
+          this.notify.error('Não foi possível concluir.');
+          this.cdr.markForCheck();
+        },
+      });
+    });
+  }
+
+  confirmConstructionPayment(): void {
+    this.confirmPaymentFor(this.constructionPayment, 'obra');
+  }
+
+  rejectConstructionPayment(): void {
+    this.rejectPaymentFor(this.constructionPayment);
+  }
+
+  downloadConstructionProof(): void {
+    this.downloadProofFor(this.constructionPayment);
   }
 
   formatMoney(v?: number | string): string {
@@ -340,12 +429,30 @@ export class ProjectDetailComponent implements OnInit {
   }
 
   confirmPayment(): void {
-    if (!this.project?.payment?.id) return;
+    this.confirmPaymentFor(this.payment, 'arquitectura');
+  }
+
+  rejectPayment(): void {
+    this.rejectPaymentFor(this.payment);
+  }
+
+  downloadProof(): void {
+    this.downloadProofFor(this.payment);
+  }
+
+  private confirmPaymentFor(
+    pay: { id?: number } | null | undefined,
+    label: string
+  ): void {
+    if (!this.project || !pay?.id) return;
     const ref = this.dialog.open(ConfirmDialogComponent, {
       width: '440px',
       data: {
         title: 'Confirmar pagamento?',
-        message: 'O cliente receberá notificação e poderá descarregar os entregáveis.',
+        message:
+          label === 'obra'
+            ? 'O cliente será notificado da confirmação do pagamento de obra.'
+            : 'O cliente receberá notificação e poderá descarregar os entregáveis.',
         confirmText: 'Confirmar',
         cancelText: 'Cancelar',
         type: 'info',
@@ -353,15 +460,19 @@ export class ProjectDetailComponent implements OnInit {
     });
     ref.afterClosed().subscribe((r) => {
       if (!r?.confirmed) return;
-      this.actionPayment = true;
-      this.projects.confirmPayment(this.project!.id, this.project!.payment!.id).subscribe({
+      const isConst = pay === this.constructionPayment;
+      if (isConst) this.actionConstructionPayment = true;
+      else this.actionPayment = true;
+      this.projects.confirmPayment(this.project!.id, pay.id!).subscribe({
         next: () => {
           this.actionPayment = false;
+          this.actionConstructionPayment = false;
           this.notify.success('Pagamento confirmado.');
           this.reloadAll();
         },
         error: () => {
           this.actionPayment = false;
+          this.actionConstructionPayment = false;
           this.notify.error('Não foi possível confirmar.');
           this.cdr.markForCheck();
         },
@@ -369,20 +480,24 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  rejectPayment(): void {
-    if (!this.project?.payment?.id) return;
+  private rejectPaymentFor(pay: { id?: number } | null | undefined): void {
+    if (!this.project || !pay?.id) return;
     const ref = this.dialog.open(RejectPaymentProofDialogComponent, { width: '480px' });
     ref.afterClosed().subscribe((reason) => {
       if (!reason) return;
-      this.actionPayment = true;
-      this.projects.rejectPayment(this.project!.id, this.project!.payment!.id, reason).subscribe({
+      const isConst = pay === this.constructionPayment;
+      if (isConst) this.actionConstructionPayment = true;
+      else this.actionPayment = true;
+      this.projects.rejectPayment(this.project!.id, pay.id!, reason).subscribe({
         next: () => {
           this.actionPayment = false;
+          this.actionConstructionPayment = false;
           this.notify.success('Comprovativo rejeitado. Cliente notificado para resubmeter.');
           this.reloadAll();
         },
         error: () => {
           this.actionPayment = false;
+          this.actionConstructionPayment = false;
           this.notify.error('Não foi possível rejeitar.');
           this.cdr.markForCheck();
         },
@@ -390,13 +505,13 @@ export class ProjectDetailComponent implements OnInit {
     });
   }
 
-  downloadProof(): void {
-    if (!this.project?.payment?.id) return;
-    this.projects.downloadPaymentProof(this.project.id, this.project.payment.id).subscribe({
+  private downloadProofFor(pay: { id?: number; proof_file_name?: string } | null | undefined): void {
+    if (!this.project || !pay?.id) return;
+    this.projects.downloadPaymentProof(this.project.id, pay.id).subscribe({
       next: (res) => {
         const name = parseFilenameFromDisposition(
           res.headers.get('Content-Disposition'),
-          this.project!.payment!.proof_file_name ?? 'comprovativo'
+          pay.proof_file_name ?? 'comprovativo'
         );
         triggerBlobDownload(res.body!, name);
       },

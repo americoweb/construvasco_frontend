@@ -17,8 +17,12 @@
     <mat-card class="!mb-4">
       <mat-card-content class="!pt-4 text-sm text-slate-700">
         <p class="mb-0">{{ statusMessage }}</p>
-        @if (project.architecture_completed_at) {
+        @if (canRequestConstructionQuoteBtn) {
           <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="requestConstructionQuote()">
+            Pedir orçamento de obra
+          </button>
+        } @else if (requestConstructionTooltip) {
+          <button mat-stroked-button type="button" class="!mt-4" disabled [matTooltip]="requestConstructionTooltip">
             Pedir orçamento de obra
           </button>
         }
@@ -46,6 +50,70 @@
               </div>
             }
           </dl>
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (showConstructionSection) {
+      <mat-card class="!mb-4">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-800 mb-2">Fase de Obra</h2>
+          @if (project.contract_phase === 'execution_quote' && !constructionQuote) {
+            <p class="text-sm">Pedido de orçamento enviado em {{ formatDate(project.construction_quote_requested_at) }}.</p>
+            @if (project.suggested_visit_date) {
+              <p class="text-sm mt-1">Data sugerida para visita: {{ formatDate(project.suggested_visit_date) }}</p>
+            }
+            @if (project.construction_request_notes) {
+              <p class="text-sm mt-1">Notas: {{ project.construction_request_notes }}</p>
+            }
+            <p class="text-sm text-slate-600 mt-2">A Construvasco vai contactá-lo brevemente para agendar a visita.</p>
+          }
+          @if (constructionQuote?.status === 'sent') {
+            <div class="border border-amber-200 bg-amber-50 rounded-lg p-4 mt-2">
+              <p class="font-medium text-sm">Orçamento de obra recebido</p>
+              <p class="text-sm mt-2">Valor: {{ formatMoney(constructionQuote?.total_amount_mt) }}</p>
+              <p class="text-sm">Prazo: {{ constructionQuote?.delivery_days }} dias</p>
+              @if (constructionQuote?.conditions) {
+                <p class="text-sm mt-2">{{ constructionQuote?.conditions }}</p>
+              }
+              <div class="flex gap-2 mt-4">
+                <button mat-flat-button color="primary" type="button" (click)="acceptConstructionQuote()">Aceitar</button>
+                <button mat-stroked-button type="button" (click)="rejectConstructionQuote()">Recusar</button>
+              </div>
+            </div>
+          }
+          @if (project.contract_phase === 'construction') {
+            <p class="text-sm text-emerald-800 mt-2">Orçamento aceite. Obra a iniciar.</p>
+            @if (constructionPayment?.status === 'confirmed') {
+              <p class="text-sm mt-2">Pagamento de obra confirmado em {{ formatDate(constructionPayment?.confirmed_at) }}.</p>
+              <p class="text-sm text-slate-600 mt-1">Acompanhamento detalhado da obra é feito directamente com a equipa da Construvasco.</p>
+            }
+          }
+          @if (project.contract_phase === 'completed') {
+            <p class="text-sm font-medium text-emerald-900 mt-2">Obra concluída em {{ formatDate(project.construction_completed_at) }}.</p>
+            <p class="text-sm mt-1">Obrigado por ter confiado na Construvasco.</p>
+          }
+          @if (project.contract_phase === 'closed' && constructionQuote?.status === 'rejected') {
+            <p class="text-sm text-slate-600 mt-2">Orçamento de obra recusado. Motivo: {{ constructionQuote?.rejection_reason }}</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+
+    @if (constructionPayment && project.contract_phase === 'construction') {
+      <mat-card class="!mb-4" [ngClass]="paymentClass(constructionPayment.status)">
+        <mat-card-content class="!pt-4">
+          <h2 class="text-sm font-semibold text-slate-800 mb-2">Pagamento — Fase de Obra</h2>
+          @if (constructionPayment.status === 'pending') {
+            <p class="text-sm mb-2">Valor a pagar: <strong>{{ formatMoney(constructionPayment.amount) }}</strong></p>
+            <pre class="text-xs bg-slate-50 border rounded p-3 mb-4 whitespace-pre-wrap">{{ bankDetails }}</pre>
+            <button mat-flat-button color="primary" type="button" (click)="openConstructionProofDialog()">Submeter comprovativo</button>
+          } @else if (constructionPayment.status === 'proof_submitted') {
+            <p class="text-sm">Comprovativo submetido — aguarda confirmação do gestor.</p>
+          } @else if (constructionPayment.status === 'rejected') {
+            <p class="text-sm text-red-800">Comprovativo rejeitado. Motivo: {{ constructionPayment.rejected_reason }}</p>
+            <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="openConstructionProofDialog()">Submeter novo comprovativo</button>
+          }
         </mat-card-content>
       </mat-card>
     }

@@ -14,6 +14,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ConfigService } from '../../../core/services/config.service';
 import { API_ENDPOINTS } from '../../../shared/constants/api-endpoints';
 import { UserService } from '../../../core/auth/services/user.service';
+import {
+  contractPhaseBadgeClass,
+  contractPhaseLabel,
+} from '../../../shared/construction/contract-phase.util';
 
 interface ProjectRow {
   id: number;
@@ -23,6 +27,7 @@ interface ProjectRow {
   location?: string;
   current_phase?: string;
   contract_phase?: string;
+  contract_phase_label?: string;
   pending_review_count?: number;
   budget?: number | string;
   target_budget?: number | string;
@@ -58,6 +63,7 @@ export class ProjectsListComponent implements OnInit {
   filteredRows: ProjectRow[] = [];
   searchText = '';
   statusFilter = '';
+  contractPhaseFilter = '';
 
   readonly displayedColumns = [
     'name',
@@ -68,6 +74,14 @@ export class ProjectsListComponent implements OnInit {
     'budget',
     'team',
     'updated',
+  ];
+
+  readonly contractPhaseOptions = [
+    { value: 'architecture', label: 'Arquitectura' },
+    { value: 'execution_quote', label: 'Aguarda orçamento de obra' },
+    { value: 'construction', label: 'Obra em andamento' },
+    { value: 'completed', label: 'Concluído' },
+    { value: 'closed', label: 'Encerrado' },
   ];
 
   readonly statusOptions = [
@@ -115,6 +129,7 @@ export class ProjectsListComponent implements OnInit {
     const q = this.searchText.trim().toLowerCase();
     this.filteredRows = this.rows.filter((p) => {
       if (this.statusFilter && p.status !== this.statusFilter) return false;
+      if (this.contractPhaseFilter && p.contract_phase !== this.contractPhaseFilter) return false;
       if (!q) return true;
       const hay = [
         p.name,
@@ -122,6 +137,9 @@ export class ProjectsListComponent implements OnInit {
         p.location,
         p.status,
         p.current_phase,
+        p.contract_phase,
+        p.contract_phase_label,
+        this.phaseLabel(p),
         String(p.id),
       ]
         .filter(Boolean)
@@ -134,6 +152,14 @@ export class ProjectsListComponent implements OnInit {
 
   labelStatus(status?: string): string {
     return this.statusOptions.find((s) => s.value === status)?.label ?? status ?? '—';
+  }
+
+  phaseLabel(p: ProjectRow): string {
+    return p.contract_phase_label ?? contractPhaseLabel(p.contract_phase, p.current_phase);
+  }
+
+  phaseBadgeClass(p: ProjectRow): string {
+    return contractPhaseBadgeClass(p.contract_phase);
   }
 
   teamLabel(p: ProjectRow): string {

@@ -58,6 +58,23 @@
         </div>
       </div>
 
+      @if (isManager && pendingConstructionQuotesCount > 0) {
+        <div class="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden">
+          <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
+            <h2 class="text-base font-semibold">Pedidos de orçamento de obra</h2>
+            <p class="text-2xl font-bold text-amber-800">{{ pendingConstructionQuotesCount }}</p>
+          </div>
+          <ul class="divide-y divide-gray-100">
+            @for (p of pendingConstructionQuotes; track p.id) {
+              <li class="px-6 py-3 flex justify-between gap-4">
+                <span class="text-sm font-medium">{{ p.client?.name || p.name }}</span>
+                <a [routerLink]="['/admin/projectos', p.id]" class="text-sm text-indigo-600">Ver projecto</a>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+
       @if (isManager && pendingPaymentsCount > 0) {
         <div class="bg-white rounded-2xl border border-orange-200 shadow-sm overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-orange-100 bg-orange-50">

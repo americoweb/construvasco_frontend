@@ -35,12 +35,25 @@ export function paymentCardClass(status?: string): string {
   return map[status ?? ''] ?? 'payment-card--pending';
 }
 
-export function canCustomerDownload(payment?: ProjectPayment | null): boolean {
-  return payment?.status === 'confirmed';
+export function architecturePaymentForProject(project?: {
+  architecture_payment?: ProjectPayment | null;
+  payment?: ProjectPayment | null;
+} | null): ProjectPayment | null | undefined {
+  return project?.architecture_payment ?? project?.payment;
 }
 
-export function downloadBlockedTooltip(payment?: ProjectPayment | null): string {
-  const s = payment?.status;
+export function canCustomerDownload(project?: {
+  architecture_payment?: ProjectPayment | null;
+  payment?: ProjectPayment | null;
+} | null): boolean {
+  return architecturePaymentForProject(project)?.status === 'confirmed';
+}
+
+export function downloadBlockedTooltip(project?: {
+  architecture_payment?: ProjectPayment | null;
+  payment?: ProjectPayment | null;
+} | null): string {
+  const s = architecturePaymentForProject(project)?.status;
   if (s === 'proof_submitted') return 'Aguarda confirmação do pagamento pelo gestor';
   if (s === 'rejected') return 'Submeta novo comprovativo para descarregar';
   return 'Submeta o comprovativo de pagamento para descarregar';

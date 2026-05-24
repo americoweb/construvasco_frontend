@@ -17,8 +17,9 @@
         <mat-card-content class="!py-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <p class="font-semibold">{{ p.name || 'Projecto #' + p.id }}</p>
-            <p class="text-sm text-slate-500">
-              {{ phaseLabel(p) }} · {{ p.location || '—' }}
+            <p class="text-sm text-slate-500 flex flex-wrap items-center gap-2">
+              <span class="phase-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
+              <span>{{ p.location || '—' }}</span>
             </p>
           </div>
           <a mat-stroked-button [routerLink]="['/conta/projectos', p.id]">Ver detalhes</a>

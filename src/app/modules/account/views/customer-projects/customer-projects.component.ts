@@ -6,6 +6,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CustomerPortalService } from '../../../../shared/construction/customer-portal.service';
 import { ConstructionProject } from '../../../../shared/construction/construction.types';
+import {
+  contractPhaseBadgeClass,
+  projectPhaseLabel,
+} from '../../../../shared/construction/contract-phase.util';
 
 @Component({
   selector: 'app-customer-projects',
@@ -39,9 +43,10 @@ export class CustomerProjectsComponent implements OnInit {
   }
 
   phaseLabel(p: ConstructionProject): string {
-    if (p.architecture_completed_at) return 'Arquitectura entregue';
-    const phase = p.contract_phase ?? p.current_phase;
-    if (phase === 'architecture') return 'Em arquitectura';
-    return phase ?? '—';
+    return projectPhaseLabel(p);
+  }
+
+  phaseBadgeClass(p: ConstructionProject): string {
+    return contractPhaseBadgeClass(p.contract_phase);
   }
 }

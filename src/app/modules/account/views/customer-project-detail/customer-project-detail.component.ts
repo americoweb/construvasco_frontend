@@ -12,6 +12,7 @@ import { ConstructionProjectService } from '../../../../shared/construction/cons
 import {
   ConstructionProject,
   ProjectDeliverable,
+  Quote,
 } from '../../../../shared/construction/construction.types';
 import { NotificationService } from '../../../../shared/components/feedback/notification.service';
 import {
@@ -27,13 +28,22 @@ import {
 } from '../../../../shared/construction/deliverable.util';
 import {
   BANK_DETAILS_PLACEHOLDER,
+  architecturePaymentForProject,
   canCustomerDownload,
   downloadBlockedTooltip,
   formatMoneyMt,
   paymentCardClass,
   paymentStatusLabel,
 } from '../../../../shared/construction/payment.util';
+import {
+  canRequestConstructionQuote,
+  contractPhaseLabel,
+  requestConstructionQuoteTooltip,
+} from '../../../../shared/construction/contract-phase.util';
 import { SubmitPaymentProofDialogComponent } from './submit-payment-proof-dialog.component';
+import { RequestConstructionQuoteDialogComponent } from './request-construction-quote-dialog.component';
+import { RejectQuoteDialogComponent } from '../customer-request-detail/reject-quote-dialog.component';
+import { ConfirmDialogComponent } from '../../../../shared/components/feedback/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-customer-project-detail',
@@ -116,13 +126,8 @@ export class CustomerProjectDetailComponent implements OnInit {
   }
 
   get phaseStatusLabel(): string {
-    if (this.project?.architecture_completed_at) {
-      const date = new Date(this.project.architecture_completed_at).toLocaleDateString('pt-MZ');
-      return `Arquitectura concluída em ${date}`;
-    }
-    const phase = this.project?.contract_phase ?? this.project?.current_phase;
-    if (phase === 'architecture') return 'Em arquitectura';
-    return phase ?? '—';
+    if (this.project?.contract_phase_label) return this.project.contract_phase_label;
+    return contractPhaseLabel(this.project?.contract_phase, this.project?.current_phase);
   }
 
   get statusMessage(): string {
@@ -139,11 +144,32 @@ export class CustomerProjectDetailComponent implements OnInit {
   }
 
   get payment() {
-    return this.project?.payment;
+    return architecturePaymentForProject(this.project);
+  }
+
+  get constructionPayment() {
+    return this.project?.construction_payment;
+  }
+
+  get constructionQuote(): Quote | undefined {
+    return this.project?.construction_quote;
+  }
+
+  get showConstructionSection(): boolean {
+    const p = this.project?.contract_phase;
+    return ['execution_quote', 'construction', 'completed', 'closed'].includes(p ?? '');
+  }
+
+  get canRequestConstructionQuoteBtn(): boolean {
+    return this.project ? canRequestConstructionQuote(this.project) : false;
+  }
+
+  get requestConstructionTooltip(): string {
+    return this.project ? requestConstructionQuoteTooltip(this.project) : '';
   }
 
   get canDownload(): boolean {
-    return canCustomerDownload(this.payment);
+    return canCustomerDownload(this.project);
   }
 
   paymentLabel(status?: string): string {
@@ -159,22 +185,26 @@ export class CustomerProjectDetailComponent implements OnInit {
   }
 
   downloadTooltip(): string {
-    return downloadBlockedTooltip(this.payment);
+    return downloadBlockedTooltip(this.project);
   }
 
-  openProofDialog(): void {
-    if (!this.project?.payment?.id) return;
+  openProofDialog(payment = this.payment): void {
+    if (!this.project || !payment?.id) return;
     const ref = this.dialog.open(SubmitPaymentProofDialogComponent, {
       width: '520px',
       data: {
         projectId: this.project.id,
-        paymentId: this.project.payment.id,
-        amount: this.project.payment.amount,
+        paymentId: payment.id,
+        amount: payment.amount,
       },
     });
     ref.afterClosed().subscribe((ok) => {
       if (ok) this.reloadAll();
     });
+  }
+
+  openConstructionProofDialog(): void {
+    this.openProofDialog(this.constructionPayment);
   }
 
   get briefingRows() {
@@ -199,7 +229,55 @@ export class CustomerProjectDetailComponent implements OnInit {
   }
 
   requestConstructionQuote(): void {
-    this.notify.info('Funcionalidade em breve.');
+    if (!this.project) return;
+    const ref = this.dialog.open(RequestConstructionQuoteDialogComponent, {
+      width: '520px',
+      data: { projectId: this.project.id },
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (ok) this.reloadAll();
+    });
+  }
+
+  acceptConstructionQuote(): void {
+    const q = this.constructionQuote;
+    if (!q?.id) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: 'Aceitar orçamento de obra?',
+        message: `Confirma a aceitação do orçamento de ${this.formatMoney(q.total_amount_mt)}?`,
+        confirmText: 'Aceitar',
+        cancelText: 'Cancelar',
+        type: 'info',
+      },
+    });
+    ref.afterClosed().subscribe((r) => {
+      if (!r?.confirmed) return;
+      this.portal.acceptQuote(q.id).subscribe({
+        next: () => {
+          this.notify.success('Orçamento de obra aceite.');
+          this.reloadAll();
+        },
+        error: () => this.notify.error('Não foi possível aceitar.'),
+      });
+    });
+  }
+
+  rejectConstructionQuote(): void {
+    const q = this.constructionQuote;
+    if (!q?.id) return;
+    const ref = this.dialog.open(RejectQuoteDialogComponent, { width: '440px' });
+    ref.afterClosed().subscribe((reason) => {
+      if (!reason) return;
+      this.portal.rejectQuote(q.id, reason).subscribe({
+        next: () => {
+          this.notify.success('Orçamento recusado.');
+          this.reloadAll();
+        },
+        error: () => this.notify.error('Não foi possível recusar.'),
+      });
+    });
   }
 
   download(d: ProjectDeliverable): void {

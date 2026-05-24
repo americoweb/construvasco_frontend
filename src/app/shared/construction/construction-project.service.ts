@@ -201,6 +201,23 @@ export class ConstructionProjectService {
     );
   }
 
+  requestConstructionQuote(
+    projectId: number | string,
+    payload: { suggested_visit_date?: string; notes?: string }
+  ): Observable<ApiDataResponse<ConstructionProject>> {
+    return this.http.post<ApiDataResponse<ConstructionProject>>(
+      this.config.getApiUrl(API_ENDPOINTS.CUSTOMER.REQUEST_CONSTRUCTION_QUOTE(projectId)),
+      payload
+    );
+  }
+
+  markConstructionCompleted(projectId: number | string): Observable<ApiDataResponse<ConstructionProject>> {
+    return this.http.post<ApiDataResponse<ConstructionProject>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.MARK_CONSTRUCTION_COMPLETED(projectId)),
+      {}
+    );
+  }
+
   getManagerDashboard(): Observable<
     ApiDataResponse<{
       pending_payments_count?: number;
