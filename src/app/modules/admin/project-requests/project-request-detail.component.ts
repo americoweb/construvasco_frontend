@@ -133,6 +133,7 @@ export class ProjectRequestDetailComponent implements OnInit {
       submitted: 'Submetido',
       under_review: 'Em análise',
       quoted: 'Orçamentado',
+      quote_rejected: 'Orçamento recusado',
       approved: 'Aprovado',
       rejected: 'Rejeitado',
       cancelled: 'Cancelado',

@@ -46,6 +46,7 @@ export class ProjectRequestsListComponent implements OnInit {
     { value: 'submitted', label: 'Submetido' },
     { value: 'under_review', label: 'Em análise' },
     { value: 'quoted', label: 'Orçamentado' },
+    { value: 'quote_rejected', label: 'Orçamento recusado' },
     { value: 'approved', label: 'Aprovado' },
     { value: 'rejected', label: 'Recusado' },
     { value: 'converted_to_project', label: 'Convertido' },

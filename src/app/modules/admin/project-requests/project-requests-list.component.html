@@ -56,7 +56,15 @@
       </ng-container>
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef>Estado</th>
-        <td mat-cell *matCellDef="let r">{{ statusLabel(r.status) }}</td>
+        <td mat-cell *matCellDef="let r">
+          @if (r.status === 'quote_rejected') {
+            <span class="status-badge status-badge--attention" title="Precisa de atenção — enviar novo orçamento">
+              Orçamento recusado
+            </span>
+          } @else {
+            {{ statusLabel(r.status) }}
+          }
+        </td>
       </ng-container>
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef>Submetido</th>
