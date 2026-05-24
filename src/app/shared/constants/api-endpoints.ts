@@ -14,6 +14,9 @@ export const API_ENDPOINTS = {
     DASHBOARD: 'v1/technician/dashboard',
     PROJECTS: 'v1/technician/projects',
     PROJECT: (id: string | number) => `v1/technician/projects/${id}`,
+    PROJECT_DELIVERABLES: (id: string | number) => `v1/technician/projects/${id}/deliverables`,
+    PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
+      `v1/technician/projects/${projectId}/deliverables/${deliverableId}/download`,
   },
   MANAGER: {
     DASHBOARD: 'v1/manager/dashboard',
@@ -28,6 +31,14 @@ export const API_ENDPOINTS = {
     PROJECTS: 'v1/manager/projects',
     PROJECT: (id: string | number) => `v1/manager/projects/${id}`,
     ASSIGN_PROJECT: (id: string | number) => `v1/manager/projects/${id}/assign`,
+    PROJECT_DELIVERABLES: (id: string | number) => `v1/manager/projects/${id}/deliverables`,
+    PROJECT_DELIVERABLE_APPROVE: (projectId: string | number, deliverableId: string | number) =>
+      `v1/manager/projects/${projectId}/deliverables/${deliverableId}/approve`,
+    PROJECT_DELIVERABLE_REJECT: (projectId: string | number, deliverableId: string | number) =>
+      `v1/manager/projects/${projectId}/deliverables/${deliverableId}/reject`,
+    PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
+      `v1/manager/projects/${projectId}/deliverables/${deliverableId}/download`,
+    MARK_ARCHITECTURE_DELIVERED: (id: string | number) => `v1/manager/projects/${id}/mark-architecture-delivered`,
   },
   CUSTOMER: {
     DASHBOARD: 'v1/customer/dashboard',
@@ -44,6 +55,9 @@ export const API_ENDPOINTS = {
     QUOTE_REJECT: (id: string | number) => `v1/customer/quotes/${id}/reject`,
     PROJECTS: 'v1/customer/projects',
     PROJECT: (id: string | number) => `v1/customer/projects/${id}`,
+    PROJECT_DELIVERABLES: (id: string | number) => `v1/customer/projects/${id}/deliverables`,
+    PROJECT_DELIVERABLE_DOWNLOAD: (projectId: string | number, deliverableId: string | number) =>
+      `v1/customer/projects/${projectId}/deliverables/${deliverableId}/download`,
     CREDITS: {
       BALANCE: 'v1/customer/credits/balance',
       HISTORY: 'v1/customer/credits/history',

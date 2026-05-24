@@ -1,233 +1,340 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-
 import { CommonModule } from '@angular/common';
-
 import { ActivatedRoute, RouterLink } from '@angular/router';
-
 import { FormsModule } from '@angular/forms';
-
 import { MatCardModule } from '@angular/material/card';
-
 import { MatButtonModule } from '@angular/material/button';
-
 import { MatIconModule } from '@angular/material/icon';
-
 import { MatFormFieldModule } from '@angular/material/form-field';
-
 import { MatSelectModule } from '@angular/material/select';
-
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-
-import { ConstructionProjectService } from '../../../shared/construction/construction-project.service';
-
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { ConstructionProjectService, ProjectApiRole } from '../../../shared/construction/construction-project.service';
 import { UserService } from '../../../core/auth/services/user.service';
-
 import {
-
   AssignableUser,
-
   ConstructionProject,
-
+  ProjectDeliverable,
 } from '../../../shared/construction/construction.types';
-
 import { NotificationService } from '../../../shared/components/feedback/notification.service';
-
-
+import { ConfirmDialogComponent } from '../../../shared/components/feedback/confirm-dialog/confirm-dialog.component';
+import { SubmitDeliverableDialogComponent } from './submit-deliverable-dialog.component';
+import { RejectDeliverableDialogComponent } from './reject-deliverable-dialog.component';
+import {
+  approvedMockupUrl,
+  briefingRowsFromRequest,
+  hasApprovedMockup,
+} from '../../../shared/construction/project-briefing.util';
+import {
+  deliverableStatusClass,
+  deliverableStatusLabel,
+  formatFileSize,
+  isDeliverablePendingReview,
+  normalizeDeliverableStatus,
+  parseFilenameFromDisposition,
+  triggerBlobDownload,
+} from '../../../shared/construction/deliverable.util';
 
 @Component({
-
   selector: 'app-project-detail',
-
   standalone: true,
-
   imports: [
-
     CommonModule,
-
     RouterLink,
-
     FormsModule,
-
     MatCardModule,
-
     MatButtonModule,
-
     MatIconModule,
-
     MatFormFieldModule,
-
     MatSelectModule,
-
     MatProgressSpinnerModule,
-
+    MatDialogModule,
   ],
-
   templateUrl: './project-detail.component.html',
-
   styleUrls: ['./project-detail.component.scss'],
-
   changeDetection: ChangeDetectionStrategy.OnPush,
-
 })
-
 export class ProjectDetailComponent implements OnInit {
-
   loading = true;
-
+  deliverablesLoading = false;
   assigning = false;
+  actionDeliverableId: number | null = null;
+  markingArchitecture = false;
 
   project: ConstructionProject | null = null;
-
+  deliverables: ProjectDeliverable[] = [];
   technicians: AssignableUser[] = [];
-
   selectedTechnicianId: number | null = null;
 
   isAdmin = false;
-
   isTechnicianView = false;
-
+  isManagerView = false;
   userRole = '';
-
-
+  apiRole: ProjectApiRole = 'manager';
+  private projectId = '';
 
   constructor(
-
     private route: ActivatedRoute,
-
     private projects: ConstructionProjectService,
-
     private userService: UserService,
-
     private notify: NotificationService,
-
+    private dialog: MatDialog,
     private cdr: ChangeDetectorRef
-
   ) {}
 
-
-
   ngOnInit(): void {
-
     this.userRole = String(this.userService.user?.current_tenant_context?.role ?? '').toLowerCase();
-
+    this.apiRole = this.projects.resolveApiRole(this.userRole);
     this.isAdmin = this.userRole === 'admin';
-
-    this.isTechnicianView = ['technician', 'designer', 'tecnico', 'desenhista'].includes(this.userRole);
-
-
+    this.isTechnicianView = this.apiRole === 'technician';
+    this.isManagerView = !this.isTechnicianView;
 
     const id = this.route.snapshot.paramMap.get('id');
-
     if (!id) return;
+    this.projectId = id;
 
-
-
-    if (!this.isTechnicianView) {
-
+    if (this.isManagerView) {
       this.projects.assignableUsers().subscribe({
-
         next: (res) => {
-
           this.technicians = res.data ?? [];
-
           this.cdr.markForCheck();
-
         },
-
       });
-
     }
 
-
-
-    this.reloadProject(id);
-
+    this.reloadAll();
   }
 
+  private reloadAll(): void {
+    this.reloadProject();
+    this.reloadDeliverables();
+  }
 
-
-  private reloadProject(id: string): void {
-
+  private reloadProject(): void {
     this.loading = true;
-
-    this.projects.getForRole(id, this.userRole).subscribe({
-
+    this.projects.getForRole(this.projectId, this.userRole).subscribe({
       next: (res) => {
-
         this.project = res.data;
-
         const main = res.data.assignments?.find((a) => a.assignment_role === 'main');
-
         this.selectedTechnicianId = main?.assigned_user?.id ?? main?.assigned_to ?? null;
-
         this.loading = false;
-
         this.cdr.markForCheck();
-
       },
-
       error: () => {
-
         this.loading = false;
-
         this.notify.error('Projecto não encontrado.');
-
         this.cdr.markForCheck();
-
       },
-
     });
-
   }
 
+  private reloadDeliverables(): void {
+    this.deliverablesLoading = true;
+    this.projects.listDeliverables(this.apiRole, this.projectId).subscribe({
+      next: (res) => {
+        this.deliverables = res.data ?? [];
+        this.deliverablesLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.deliverables = [];
+        this.deliverablesLoading = false;
+        this.cdr.markForCheck();
+      },
+    });
+  }
 
+  get referenceLabel(): string {
+    const req = this.project?.project_request;
+    return req?.reference_code ?? this.project?.name ?? `Projecto #${this.project?.id}`;
+  }
+
+  get phaseLabel(): string {
+    const phase = this.project?.contract_phase ?? this.project?.current_phase;
+    if (phase === 'architecture') return 'Arquitectura';
+    return phase ?? '—';
+  }
+
+  get clientDisplayName(): string {
+    return this.project?.client?.name ?? this.project?.project_request?.client?.name ?? '—';
+  }
+
+  get briefingRows() {
+    return briefingRowsFromRequest(this.project?.project_request);
+  }
+
+  get mockupUrl(): string | null {
+    return approvedMockupUrl(this.project?.project_request);
+  }
+
+  get showMockup(): boolean {
+    return hasApprovedMockup(this.project?.project_request);
+  }
+
+  get hasApprovedDeliverable(): boolean {
+    return this.deliverables.some((d) => normalizeDeliverableStatus(d.status) === 'approved');
+  }
+
+  get canMarkArchitectureDelivered(): boolean {
+    if (!this.isManagerView || !this.project) return false;
+    const phase = this.project.contract_phase ?? this.project.current_phase;
+    if (phase !== 'architecture') return false;
+    if (this.project.architecture_completed_at) return false;
+    return this.hasApprovedDeliverable;
+  }
+
+  get architectureDeliveredLabel(): string | null {
+    if (!this.project?.architecture_completed_at) return null;
+    const date = new Date(this.project.architecture_completed_at).toLocaleDateString('pt-MZ');
+    return `Arquitectura entregue em ${date}`;
+  }
+
+  statusLabel(d: ProjectDeliverable): string {
+    return deliverableStatusLabel(d.status);
+  }
+
+  statusClass(d: ProjectDeliverable): string {
+    return deliverableStatusClass(d.status);
+  }
+
+  fileSize(d: ProjectDeliverable): string {
+    return formatFileSize(d.size_bytes);
+  }
+
+  formatDate(v?: string): string {
+    if (!v) return '—';
+    return new Date(v).toLocaleDateString('pt-MZ');
+  }
+
+  canApprove(d: ProjectDeliverable): boolean {
+    return this.isManagerView && isDeliverablePendingReview(d);
+  }
+
+  canReject(d: ProjectDeliverable): boolean {
+    return this.canApprove(d);
+  }
+
+  isRejected(d: ProjectDeliverable): boolean {
+    return normalizeDeliverableStatus(d.status) === 'rejected';
+  }
 
   assign(): void {
-
     if (!this.project || !this.selectedTechnicianId) {
-
       this.notify.error('Seleccione um técnico.');
-
       return;
-
     }
-
     this.assigning = true;
-
     const assign$ = this.isAdmin
-
       ? this.projects.assignAdmin(this.project.id, this.selectedTechnicianId)
-
       : this.projects.assignManager(this.project.id, this.selectedTechnicianId);
 
-
-
     assign$.subscribe({
-
       next: () => {
-
         this.notify.success('Técnico atribuído.');
-
         this.assigning = false;
-
-        this.reloadProject(String(this.project!.id));
-
+        this.reloadProject();
       },
-
       error: () => {
-
         this.assigning = false;
-
         this.notify.error('Erro ao atribuir técnico.');
-
         this.cdr.markForCheck();
-
       },
-
     });
-
   }
 
+  openSubmitDialog(): void {
+    if (!this.project) return;
+    const ref = this.dialog.open(SubmitDeliverableDialogComponent, {
+      width: '520px',
+      disableClose: true,
+      data: { projectId: this.project.id },
+    });
+    ref.afterClosed().subscribe((ok) => {
+      if (ok) this.reloadDeliverables();
+    });
+  }
+
+  approve(d: ProjectDeliverable): void {
+    if (!this.project) return;
+    this.actionDeliverableId = d.id;
+    this.projects.approveDeliverable(this.project.id, d.id).subscribe({
+      next: () => {
+        this.notify.success('Entregável aprovado. Cliente será notificado.');
+        this.actionDeliverableId = null;
+        this.reloadAll();
+      },
+      error: () => {
+        this.actionDeliverableId = null;
+        this.notify.error('Não foi possível aprovar.');
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  reject(d: ProjectDeliverable): void {
+    if (!this.project) return;
+    const ref = this.dialog.open(RejectDeliverableDialogComponent, { width: '480px' });
+    ref.afterClosed().subscribe((reason) => {
+      if (!reason) return;
+      this.actionDeliverableId = d.id;
+      this.projects.rejectDeliverable(this.project!.id, d.id, reason).subscribe({
+        next: () => {
+          this.notify.success('Entregável rejeitado. Técnico vai ser notificado para refazer.');
+          this.actionDeliverableId = null;
+          this.reloadDeliverables();
+        },
+        error: () => {
+          this.actionDeliverableId = null;
+          this.notify.error('Não foi possível rejeitar.');
+          this.cdr.markForCheck();
+        },
+      });
+    });
+  }
+
+  markArchitectureDelivered(): void {
+    if (!this.project) return;
+    const ref = this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: 'Marcar arquitectura entregue',
+        message:
+          'Confirmar que a arquitectura está concluída? O cliente vai ser notificado e poderá pedir orçamento de obra.',
+        confirmText: 'Confirmar',
+        cancelText: 'Cancelar',
+        type: 'info',
+      },
+    });
+    ref.afterClosed().subscribe((result) => {
+      if (!result?.confirmed) return;
+      this.markingArchitecture = true;
+      this.projects.markArchitectureDelivered(this.project!.id).subscribe({
+        next: (res) => {
+          this.project = { ...this.project!, ...res.data };
+          this.markingArchitecture = false;
+          this.notify.success('Arquitectura marcada como entregue.');
+          this.reloadProject();
+        },
+        error: () => {
+          this.markingArchitecture = false;
+          this.notify.error('Não foi possível marcar como entregue.');
+          this.cdr.markForCheck();
+        },
+      });
+    });
+  }
+
+  download(d: ProjectDeliverable): void {
+    if (!this.project) return;
+    this.projects.downloadDeliverable(this.apiRole, this.project.id, d.id).subscribe({
+      next: (res) => {
+        const name = parseFilenameFromDisposition(
+          res.headers.get('Content-Disposition'),
+          d.file_name ?? `entregavel-${d.id}`
+        );
+        triggerBlobDownload(res.body!, name);
+      },
+      error: () => this.notify.error('Não foi possível descarregar o ficheiro.'),
+    });
+  }
 }
-
-

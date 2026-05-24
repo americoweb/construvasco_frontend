@@ -1,0 +1,48 @@
+<h2 mat-dialog-title>Submeter entregável</h2>
+<mat-dialog-content class="!pt-2 space-y-4">
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Título</mat-label>
+    <input matInput [formControl]="form.controls.title" placeholder="Ex: Planta piso 0" />
+    @if (form.controls.title.hasError('required') && form.controls.title.touched) {
+      <mat-error>O título é obrigatório.</mat-error>
+    }
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-full">
+    <mat-label>Descrição (opcional)</mat-label>
+    <textarea matInput rows="3" [formControl]="form.controls.description"></textarea>
+  </mat-form-field>
+
+  <div
+    class="upload-drop"
+    [class.upload-drop--active]="dragOver"
+    (drop)="onDrop($event)"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+  >
+    <mat-icon class="!text-slate-400">cloud_upload</mat-icon>
+    <p class="text-sm text-slate-600 mb-2">Arraste o ficheiro ou clique para seleccionar</p>
+    <p class="text-xs text-slate-500 mb-3">PDF, DWG, PNG ou JPG · máx. 50 MB</p>
+    <input type="file" #fileInput hidden accept=".pdf,.dwg,.png,.jpg,.jpeg" (change)="onFileSelected($event)" />
+    <button mat-stroked-button type="button" [disabled]="uploading" (click)="fileInput.click()">
+      Escolher ficheiro
+    </button>
+    @if (fileLabel()) {
+      <p class="text-sm font-medium text-slate-800 mt-3">{{ fileLabel() }}</p>
+    }
+    @if (fileError) {
+      <p class="text-sm text-red-600 mt-2">{{ fileError }}</p>
+    }
+  </div>
+
+  @if (uploading) {
+    <mat-progress-bar mode="determinate" [value]="uploadProgress" />
+    <p class="text-xs text-slate-500">A enviar… {{ uploadProgress }}%</p>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button type="button" [disabled]="uploading" (click)="dialogRef.close(false)">Cancelar</button>
+  <button mat-flat-button color="primary" type="button" [disabled]="uploading" (click)="submit()">
+    Submeter para revisão
+  </button>
+</mat-dialog-actions>

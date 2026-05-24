@@ -1,3 +1,46 @@
 :host {
   display: block;
 }
+
+.deliverable-status {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.deliverable-status--review {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.deliverable-status--approved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.deliverable-status--rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.rejection-reason {
+  background: #fef2f2;
+  border-left: 3px solid #ef4444;
+  padding: 0.5rem 0.75rem;
+  color: #991b1b;
+}
+
+.upload-drop {
+  border: 2px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
+
+  &--active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+}

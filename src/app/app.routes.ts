@@ -149,6 +149,13 @@ export const routes: Route[] = [
                                 (m) => m.CustomerProjectsComponent
                             ),
                     },
+                    {
+                        path: 'projectos/:id',
+                        loadComponent: () =>
+                            import('./modules/account/views/customer-project-detail/customer-project-detail.component').then(
+                                (m) => m.CustomerProjectDetailComponent
+                            ),
+                    },
                     { path: 'pagamentos', pathMatch: 'full', redirectTo: 'dashboard' },
                     {path: 'definicoes', loadComponent: () => import('./modules/account/views/settings/settings.component').then(m => m.SettingsComponent)},
                 ]

@@ -22,6 +22,8 @@ interface ProjectRow {
   project_type?: string;
   location?: string;
   current_phase?: string;
+  contract_phase?: string;
+  pending_review_count?: number;
   budget?: number | string;
   target_budget?: number | string;
   updated_at?: string;

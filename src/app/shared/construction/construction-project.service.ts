@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpEvent, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ConfigService } from '../../core/services/config.service';
 import { API_ENDPOINTS } from '../constants/api-endpoints';
@@ -8,7 +8,10 @@ import {
   AssignableUser,
   ConstructionProject,
   PaginatedResponse,
+  ProjectDeliverable,
 } from './construction.types';
+
+export type ProjectApiRole = 'manager' | 'technician' | 'customer' | 'admin';
 
 @Injectable({ providedIn: 'root' })
 export class ConstructionProjectService {
@@ -72,5 +75,92 @@ export class ConstructionProjectService {
     return this.http.get<ApiDataResponse<AssignableUser[]>>(
       this.config.getApiUrl(API_ENDPOINTS.MANAGER.ASSIGNABLE_USERS)
     );
+  }
+
+  listDeliverables(
+    role: ProjectApiRole,
+    projectId: number | string
+  ): Observable<ApiDataResponse<ProjectDeliverable[]>> {
+    return this.http.get<ApiDataResponse<ProjectDeliverable[]>>(
+      this.config.getApiUrl(this.deliverablesListPath(role, projectId))
+    );
+  }
+
+  uploadTechnicianDeliverable(
+    projectId: number | string,
+    form: FormData
+  ): Observable<HttpEvent<ApiDataResponse<ProjectDeliverable>>> {
+    return this.http.post<ApiDataResponse<ProjectDeliverable>>(
+      this.config.getApiUrl(API_ENDPOINTS.TECHNICIAN.PROJECT_DELIVERABLES(projectId)),
+      form,
+      { reportProgress: true, observe: 'events' }
+    );
+  }
+
+  approveDeliverable(
+    projectId: number | string,
+    deliverableId: number | string
+  ): Observable<ApiDataResponse<ProjectDeliverable>> {
+    return this.http.post<ApiDataResponse<ProjectDeliverable>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.PROJECT_DELIVERABLE_APPROVE(projectId, deliverableId)),
+      {}
+    );
+  }
+
+  rejectDeliverable(
+    projectId: number | string,
+    deliverableId: number | string,
+    rejectionReason: string
+  ): Observable<ApiDataResponse<ProjectDeliverable>> {
+    return this.http.post<ApiDataResponse<ProjectDeliverable>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.PROJECT_DELIVERABLE_REJECT(projectId, deliverableId)),
+      { rejection_reason: rejectionReason }
+    );
+  }
+
+  markArchitectureDelivered(projectId: number | string): Observable<ApiDataResponse<ConstructionProject>> {
+    return this.http.post<ApiDataResponse<ConstructionProject>>(
+      this.config.getApiUrl(API_ENDPOINTS.MANAGER.MARK_ARCHITECTURE_DELIVERED(projectId)),
+      {}
+    );
+  }
+
+  downloadDeliverable(
+    role: ProjectApiRole,
+    projectId: number | string,
+    deliverableId: number | string
+  ): Observable<HttpResponse<Blob>> {
+    return this.http.get(this.config.getApiUrl(this.deliverableDownloadPath(role, projectId, deliverableId)), {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
+
+  private deliverablesListPath(role: ProjectApiRole, projectId: number | string): string {
+    if (role === 'technician') return API_ENDPOINTS.TECHNICIAN.PROJECT_DELIVERABLES(projectId);
+    if (role === 'customer') return API_ENDPOINTS.CUSTOMER.PROJECT_DELIVERABLES(projectId);
+    return API_ENDPOINTS.MANAGER.PROJECT_DELIVERABLES(projectId);
+  }
+
+  private deliverableDownloadPath(
+    role: ProjectApiRole,
+    projectId: number | string,
+    deliverableId: number | string
+  ): string {
+    if (role === 'technician') {
+      return API_ENDPOINTS.TECHNICIAN.PROJECT_DELIVERABLE_DOWNLOAD(projectId, deliverableId);
+    }
+    if (role === 'customer') {
+      return API_ENDPOINTS.CUSTOMER.PROJECT_DELIVERABLE_DOWNLOAD(projectId, deliverableId);
+    }
+    return API_ENDPOINTS.MANAGER.PROJECT_DELIVERABLE_DOWNLOAD(projectId, deliverableId);
+  }
+
+  resolveApiRole(userRole: string): ProjectApiRole {
+    const r = userRole.toLowerCase();
+    if (['technician', 'designer', 'tecnico', 'desenhista'].includes(r)) return 'technician';
+    if (r === 'customer' || r === 'cliente') return 'customer';
+    if (r === 'admin') return 'admin';
+    return 'manager';
   }
 }

@@ -92,17 +92,37 @@ export interface ProjectRequest {
   projects?: ProjectRequestProjectSummary[];
 }
 
+export interface ProjectDeliverable {
+  id: number;
+  project_id?: number;
+  title?: string;
+  description?: string;
+  file_name?: string;
+  mime_type?: string;
+  size_bytes?: number;
+  status?: string;
+  rejection_reason?: string;
+  uploaded_by?: { id?: number; name?: string };
+  uploaded_at?: string;
+  approved_by?: { id?: number; name?: string } | null;
+  approved_at?: string;
+}
+
 export interface ConstructionProject {
   id: number;
   name?: string;
   status?: string;
   project_type?: string;
   location?: string;
+  contract_phase?: string;
+  architecture_completed_at?: string;
   current_phase?: string;
   budget?: number | string;
   target_budget?: number | string;
   updated_at?: string;
+  pending_review_count?: number;
   client?: { id?: number; name?: string; identifier?: string };
+  project_request?: ProjectRequest;
   assignments?: {
     id?: number;
     assigned_to?: number;
@@ -110,6 +130,7 @@ export interface ConstructionProject {
     assigned_user?: { id: number; name?: string };
   }[];
   milestones?: { id: number; title?: string; status?: string }[];
+  deliverables?: ProjectDeliverable[];
   quote?: Quote;
 }
 

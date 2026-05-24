@@ -49,6 +49,9 @@
               <a [routerLink]="['/admin/projectos', p.id]" class="font-medium text-blue-700 hover:underline">
                 {{ p.name || ('#' + p.id) }}
               </a>
+              @if (!isTechnicianView && p.pending_review_count) {
+                <span class="review-badge">Revisão pendente</span>
+              }
               @if (p.project_type) {
                 <span class="block text-xs text-slate-500">{{ p.project_type }}</span>
               }
