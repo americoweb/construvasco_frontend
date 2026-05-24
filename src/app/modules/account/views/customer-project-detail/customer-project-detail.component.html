@@ -47,7 +47,7 @@
             <span class="cp-badge cp-badge--neutral">{{ paymentLabel(payment.status) }}</span>
           </div>
           @if (payment.status === 'pending') {
-            <p class="text-sm mb-2">Valor a pagar: <strong class="text-primary" style="color: var(--app-primary)">{{ formatMoney(payment.amount) }}</strong></p>
+            <p class="text-sm mb-2">Valor a pagar: <strong style="color: var(--app-primary)">{{ formatMoney(payment.amount) }}</strong></p>
             <p class="text-sm text-stone-600 mb-3">
               Pode efectuar o pagamento por M-Pesa, e-Mola ou transferência bancária. Depois, submeta o comprovativo.
             </p>
