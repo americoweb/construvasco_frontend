@@ -19,10 +19,19 @@ import { PermissionsComponent } from './permissions/permissions.component';
 import { PermissionService } from './shared/services/permission.service';
 import { SettingsTemplateComponent } from './template/template.component';
 import { UserService } from '../../core/auth/services/user.service';
+import { User } from '../../core/auth/models/user.interface';
+
+interface SettingsPanel {
+    id: string;
+    icon: string;
+    title: string;
+    description: string;
+}
 
 @Component({
     selector: 'settings',
     templateUrl: './settings.component.html',
+    styleUrls: ['./settings.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     standalone: true,
@@ -42,12 +51,16 @@ import { UserService } from '../../core/auth/services/user.service';
 export class SettingsComponent implements OnInit, OnDestroy {
     @ViewChild('drawer') drawer: MatDrawer;
     drawerMode: 'over' | 'side' = 'side';
-    drawerOpened: boolean = true;
-    panels: any[] = [];
-    selectedPanel: string = 'account';
-    private _unsubscribeAll: Subject<any> = new Subject<any>();
+    drawerOpened = true;
+    panels: SettingsPanel[] = [];
+    selectedPanel = 'account';
+    pageReady = false;
+    user: User | null = null;
 
     permissionStatus: { [key: string]: boolean } = {};
+
+    private _unsubscribeAll = new Subject<void>();
+    private _resizeHandler = (): void => this.setupResponsiveBehavior();
 
     constructor(
         private _changeDetectorRef: ChangeDetectorRef,
@@ -55,23 +68,33 @@ export class SettingsComponent implements OnInit, OnDestroy {
         private _userService: UserService
     ) {}
 
+    get userInitial(): string {
+        const name = this.user?.name?.trim() || 'U';
+        return name.charAt(0).toUpperCase();
+    }
+
     ngOnInit(): void {
-        // Set up basic panels first (without filtering)
         this.setupBasicPanels();
         this.setupResponsiveBehavior();
-        
-        // Check if user is already loaded
+        window.addEventListener('resize', this._resizeHandler);
+
+        this.user = this._userService.user;
+        if (this.user) {
+            this.pageReady = true;
+        }
+
         if (this._userService.user) {
             this._checkPermissions();
         }
-        
-        // Wait for user data to be loaded before checking permissions
+
         this._userService.user$
             .pipe(
                 takeUntil(this._unsubscribeAll),
-                filter(user => user !== null)
+                filter((user) => user !== null)
             )
-            .subscribe(() => {
+            .subscribe((user) => {
+                this.user = user;
+                this.pageReady = true;
                 this._checkPermissions();
             });
     }
@@ -82,109 +105,100 @@ export class SettingsComponent implements OnInit, OnDestroy {
                 id: 'account',
                 icon: 'heroicons_outline:user-circle',
                 title: 'Conta',
-                description: 'Gere seu perfil público e informações privadas',
+                description: 'Perfil público e informações privadas',
             },
             {
                 id: 'security',
                 icon: 'heroicons_outline:lock-closed',
                 title: 'Segurança',
-                description: 'Gere sua senha e preferências de verificação em duas etapas',
+                description: 'Palavra-passe e verificação em dois passos',
             },
-           /*  {
-                id: 'plan-billing',
-                icon: 'heroicons_outline:credit-card',
-                title: 'Plano e Faturamento',
-                description: 'Gere seu plano de assinatura, método de pagamento e informações de faturamento',
-            }, */
             {
                 id: 'team',
                 icon: 'heroicons_outline:user-group',
-                title: 'Equipe',
-                description: 'Gere sua equipe existente e altere funções/permissões',
+                title: 'Equipa',
+                description: 'Membros, convites e funções',
             },
-            /* {
-                id: 'permissions',
-                icon: 'heroicons_outline:key',
-                title: 'Permissões',
-                description: 'Gerencie a matriz de permissões e papéis do sistema',
-            }, */
-           /*  {
-                id: 'template',
-                icon: 'heroicons_outline:document-text',
-                title: 'Modelo de Documentos',
-                description: 'Gere seu modelo de documentos e assinaturas',
-            }, */
             {
                 id: 'tickets',
-                icon: 'heroicons_outline:ticket',
-                title: 'Ajuda e Suporte',
-                description: 'Fale conosco por whatsapp para obter ajuda e suporte 24 horas por dia, 7 dias por semana',
-            }
+                icon: 'heroicons_outline:chat-bubble-left-right',
+                title: 'Ajuda e suporte',
+                description: 'WhatsApp e apoio 24/7',
+            },
         ];
         this._changeDetectorRef.markForCheck();
     }
 
     private _checkPermissions(): void {
-        this._permissionService.checkMultiplePermissions({
-            manageCompanySettings: 'tenants.manage_settings',
-            manageFinancialWorkflows: 'finance.*',
-            manageUsers: 'users.view',
-            manageRoles: 'users.manage_roles',
-        }).subscribe((response) => {
-            console.log('🔍 Permission check results:', response);
-            this.permissionStatus = response;
-            this.setupPanels(); // Re-setup panels after permissions are loaded
-            console.log('🔍 Panels after setup:', this.panels);
-        });
+        this._permissionService
+            .checkMultiplePermissions({
+                manageCompanySettings: 'tenants.manage_settings',
+                manageFinancialWorkflows: 'finance.*',
+                manageUsers: 'users.view',
+                manageRoles: 'users.manage_roles',
+            })
+            .subscribe((response) => {
+                this.permissionStatus = response;
+                this.setupPanels();
+            });
     }
 
     private setupPanels(): void {
-        // Filter panels based on permissions
-        this.panels = this.panels.filter((panel) => {
-            console.log('🔍 Checking panel:', panel.id, 'permissionStatus:', this.permissionStatus);
-            
-            if (panel.id === 'plan-billing' && !this.permissionStatus.manageCompanySettings) {
-                console.log('🔍 Filtering out plan-billing - no manageCompanySettings permission');
-                return false;
-            }
+        const base = [
+            {
+                id: 'account',
+                icon: 'heroicons_outline:user-circle',
+                title: 'Conta',
+                description: 'Perfil público e informações privadas',
+            },
+            {
+                id: 'security',
+                icon: 'heroicons_outline:lock-closed',
+                title: 'Segurança',
+                description: 'Palavra-passe e verificação em dois passos',
+            },
+            {
+                id: 'team',
+                icon: 'heroicons_outline:user-group',
+                title: 'Equipa',
+                description: 'Membros, convites e funções',
+            },
+            {
+                id: 'tickets',
+                icon: 'heroicons_outline:chat-bubble-left-right',
+                title: 'Ajuda e suporte',
+                description: 'WhatsApp e apoio 24/7',
+            },
+        ];
+
+        this.panels = base.filter((panel) => {
             if (panel.id === 'team' && !this.permissionStatus.manageUsers) {
-                console.log('🔍 Filtering out team - no manageUsers permission');
                 return false;
             }
-            if (panel.id === 'permissions' && !this.permissionStatus.manageRoles) {
-                console.log('🔍 Filtering out permissions - no manageRoles permission');
-                return false;
-            }
-            if (panel.id === 'template' && !this.permissionStatus.manageCompanySettings) {
-                console.log('🔍 Filtering out template - no manageCompanySettings permission');
-                return false;
-            }
-            console.log('🔍 Keeping panel:', panel.id);
             return true;
         });
+
+        if (!this.panels.some((p) => p.id === this.selectedPanel)) {
+            this.selectedPanel = this.panels[0]?.id ?? 'account';
+        }
 
         this._changeDetectorRef.markForCheck();
     }
 
     private setupResponsiveBehavior(): void {
-        // Simple responsive behavior - you can replace with FuseMediaWatcherService if available
-        const checkScreenSize = () => {
-            if (window.innerWidth >= 1024) { // lg breakpoint
-                this.drawerMode = 'side';
-                this.drawerOpened = true;
-            } else {
-                this.drawerMode = 'over';
-                this.drawerOpened = false;
-            }
-            this._changeDetectorRef.markForCheck();
-        };
-
-        checkScreenSize();
-        window.addEventListener('resize', checkScreenSize);
+        if (window.innerWidth >= 1024) {
+            this.drawerMode = 'side';
+            this.drawerOpened = true;
+        } else {
+            this.drawerMode = 'over';
+            this.drawerOpened = false;
+        }
+        this._changeDetectorRef.markForCheck();
     }
 
     ngOnDestroy(): void {
-        this._unsubscribeAll.next(null);
+        window.removeEventListener('resize', this._resizeHandler);
+        this._unsubscribeAll.next();
         this._unsubscribeAll.complete();
     }
 
@@ -194,18 +208,18 @@ export class SettingsComponent implements OnInit, OnDestroy {
         if (this.drawerMode === 'over') {
             this.drawer.close();
         }
+        this._changeDetectorRef.markForCheck();
     }
 
-    getPanelInfo(id: string): any {
+    getPanelInfo(id: string): SettingsPanel | undefined {
         return this.panels.find((panel) => panel.id === id);
     }
 
-    trackByFn(index: number, item: any): any {
-        return item.id || index;
+    trackByFn(index: number, item: SettingsPanel): string {
+        return item.id || String(index);
     }
 
     openSupportDialog(): void {
-        // Implement support dialog or redirect to WhatsApp
         window.open('https://wa.me/258868875269', '_blank');
     }
 }

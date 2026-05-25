@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 
-const BASE = 'http://127.0.0.1:4300';
+const BASE = 'http://127.0.0.1:4200';
 const OUT = path.join(__dirname, '..', 'tools', 'smoke-test4-technician.png');
 
 (async () => {

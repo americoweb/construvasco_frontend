@@ -1,44 +1,183 @@
-<div class="customer-page">
-  <header class="cp-page-header">
-    <h1 class="cp-page-title">Meus projectos</h1>
-    <p class="cp-page-subtitle">Projectos activos após aceitar um orçamento de arquitectura.</p>
-  </header>
-
+<div class="prj" [class.prj--ready]="!loading">
   @if (loading) {
-    <div class="cp-loading">
-      <mat-spinner diameter="36" />
-    </div>
-  } @else if (!rows.length) {
-    <div class="cp-empty">
-      <mat-icon class="cp-empty__icon">apartment</mat-icon>
-      <p class="cp-empty__title">Ainda não tem projectos activos</p>
-      <p class="cp-empty__text">
-        Após aceitar um orçamento, o projecto aparecerá aqui. Pode também consultar os seus pedidos ou iniciar um novo no Estúdio.
-      </p>
-      <div class="flex flex-wrap justify-center gap-3">
-        <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">Estúdio</a>
-        <a mat-stroked-button class="cp-btn-secondary" routerLink="/conta/pedidos">Meus pedidos</a>
+    <div class="prj__skeleton" aria-busy="true" aria-label="A carregar projectos">
+      <div class="prj__skel-hero"></div>
+      <div class="prj__skel-toolbar"></div>
+      <div class="prj__skel-list">
+        <div></div><div></div>
       </div>
     </div>
   } @else {
-    <div class="grid gap-4 sm:grid-cols-2">
-      @for (p of rows; track p.id) {
-        <a class="cp-list-card" [routerLink]="['/conta/projectos', p.id]">
-          <div class="cp-list-card__body">
-            <p class="cp-list-card__ref">{{ reference(p) }}</p>
-            <p class="cp-list-card__title">{{ p.name || 'Projecto #' + p.id }}</p>
-            <div class="cp-list-card__meta">
-              <span class="cp-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
-              @if (p.updated_at) {
-                <span>Actualizado {{ p.updated_at | date: 'mediumDate' }}</span>
-              }
-              @if (p.location) {
-                <span>{{ p.location }}</span>
-              }
-            </div>
-          </div>
+    <header class="prj-hero prj-animate" style="--i: 0">
+      <div class="prj-hero__main">
+        <div class="prj-hero__copy">
+          <span class="prj-hero__eyebrow">Execução</span>
+          <h1 class="prj-hero__title">Meus projectos</h1>
+          <p class="prj-hero__sub">
+            Acompanhe obra, entregáveis e pagamentos após aceitar o orçamento de arquitectura.
+          </p>
+        </div>
+        <a mat-stroked-button class="cp-btn-secondary prj-hero__link" routerLink="/conta/pedidos">
+          <mat-icon svgIcon="heroicons_outline:document-text" />
+          Ver pedidos
         </a>
-      }
+      </div>
+
+      <div class="prj-kpis">
+        <article class="prj-kpi">
+          <div class="prj-kpi__icon">
+            <mat-icon svgIcon="heroicons_outline:building-office-2" />
+          </div>
+          <div class="prj-kpi__data">
+            <span class="prj-kpi__value">{{ rows.length }}</span>
+            <span class="prj-kpi__label">Projectos activos</span>
+          </div>
+        </article>
+        <article class="prj-kpi" [class.prj-kpi--attention]="constructionCount > 0">
+          <div class="prj-kpi__icon prj-kpi__icon--build">
+            <mat-icon svgIcon="heroicons_outline:wrench-screwdriver" />
+          </div>
+          <div class="prj-kpi__data">
+            <span class="prj-kpi__value">{{ constructionCount }}</span>
+            <span class="prj-kpi__label">Em obra</span>
+          </div>
+        </article>
+        <article class="prj-kpi">
+          <div class="prj-kpi__icon prj-kpi__icon--success">
+            <mat-icon svgIcon="heroicons_outline:check-badge" />
+          </div>
+          <div class="prj-kpi__data">
+            <span class="prj-kpi__value">{{ completedCount }}</span>
+            <span class="prj-kpi__label">Concluídos</span>
+          </div>
+        </article>
+      </div>
+    </header>
+
+    <div class="prj-toolbar prj-animate" style="--i: 1">
+      <div class="prj-search" role="search">
+        <mat-icon class="prj-search__icon" svgIcon="heroicons_outline:magnifying-glass" />
+        <input
+          type="search"
+          class="prj-search__input"
+          placeholder="Pesquisar por nome, referência ou local…"
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+          aria-label="Pesquisar projectos"
+        />
+        @if (searchQuery) {
+          <button type="button" class="prj-search__clear" aria-label="Limpar pesquisa" (click)="clearSearch()">
+            <mat-icon svgIcon="heroicons_outline:x-mark" />
+          </button>
+        }
+      </div>
+
+      <div class="prj-filters" role="tablist" aria-label="Filtrar projectos">
+        @for (f of filters; track f.id) {
+          <button
+            type="button"
+            class="prj-filter"
+            role="tab"
+            [attr.aria-selected]="filter === f.id"
+            [class.prj-filter--active]="filter === f.id"
+            (click)="setFilter(f.id)"
+          >
+            <mat-icon [svgIcon]="f.icon" />
+            <span class="prj-filter__label">{{ f.label }}</span>
+            <span class="prj-filter__count">{{ filterCount(f.id) }}</span>
+          </button>
+        }
+      </div>
     </div>
+
+    @if (!rows.length) {
+      <div class="prj-empty prj-animate" style="--i: 2">
+        <div class="prj-empty__visual" aria-hidden="true">
+          <div class="prj-empty__ring"></div>
+          <mat-icon svgIcon="heroicons_outline:building-office-2" />
+        </div>
+        <h2 class="prj-empty__title">Ainda não tem projectos activos</h2>
+        <p class="prj-empty__text">
+          Após aceitar um orçamento de arquitectura, o projecto aparece aqui com pagamentos, entregáveis e fase de obra.
+        </p>
+        <div class="prj-empty__actions">
+          <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
+            Abrir Estúdio
+          </a>
+          <a mat-stroked-button class="cp-btn-secondary" routerLink="/conta/pedidos">Meus pedidos</a>
+        </div>
+      </div>
+    } @else if (!filteredRows.length) {
+      <div class="prj-empty prj-animate" style="--i: 2">
+        <div class="prj-empty__visual" aria-hidden="true">
+          <mat-icon svgIcon="heroicons_outline:magnifying-glass" />
+        </div>
+        <h2 class="prj-empty__title">Nenhum resultado</h2>
+        <p class="prj-empty__text">Tente outro termo ou altere o filtro.</p>
+        <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="clearSearch(); setFilter('all')">
+          Repor lista
+        </button>
+      </div>
+    } @else {
+      <p class="prj-results prj-animate" style="--i: 2">
+        <span class="prj-results__count">{{ filteredRows.length }}</span>
+        {{ filteredRows.length === 1 ? 'projecto' : 'projectos' }}
+        @if (searchQuery) {
+          <span class="prj-results__hint">· «{{ searchQuery }}»</span>
+        }
+      </p>
+
+      <div class="prj-list prj-animate" style="--i: 2">
+        @for (p of filteredRows; track p.id; let idx = $index) {
+          <a
+            class="prj-card"
+            [ngClass]="phaseAccentClass(p)"
+            [class.prj-card--live]="needsAttention(p)"
+            [routerLink]="['/conta/projectos', p.id]"
+            [style.--pi]="idx"
+          >
+            <span class="prj-card__accent" aria-hidden="true"></span>
+
+            <div class="prj-card__inner">
+              <div class="prj-card__icon-wrap">
+                <mat-icon [svgIcon]="phaseIcon(p)" />
+              </div>
+
+              <div class="prj-card__content">
+                <div class="prj-card__top">
+                  <code class="prj-card__ref">{{ reference(p) }}</code>
+                  <span class="cp-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
+                </div>
+                <h2 class="prj-card__title">{{ p.name || 'Projecto #' + p.id }}</h2>
+                <div class="prj-card__meta">
+                  @if (p.project_type) {
+                    <span class="prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:tag" />
+                      {{ typeLabel(p) }}
+                    </span>
+                  }
+                  @if (p.updated_at) {
+                    <span class="prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:clock" />
+                      Actualizado {{ p.updated_at | date: 'd MMM y' }}
+                    </span>
+                  }
+                  @if (p.location) {
+                    <span class="prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:map-pin" />
+                      {{ p.location }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <span class="prj-card__go" aria-hidden="true">
+                <mat-icon svgIcon="heroicons_outline:chevron-right" />
+              </span>
+            </div>
+          </a>
+        }
+      </div>
+    }
   }
 </div>

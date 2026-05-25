@@ -1,25 +1,37 @@
 @if (!generations.length) {
-  <div class="cp-empty py-8">
-    <mat-icon class="cp-empty__icon">image</mat-icon>
-    <p class="cp-empty__title">Ainda sem mockups</p>
-    <p class="cp-empty__text mb-0">Use «Gerar mockup» para criar a primeira versão do seu projecto.</p>
+  <div class="gallery-empty">
+    <div class="gallery-empty__icon" aria-hidden="true">
+      <mat-icon svgIcon="heroicons_outline:photo" />
+    </div>
+    <p class="gallery-empty__title">Ainda sem mockups</p>
+    <p class="gallery-empty__text">Use «Gerar mockup» para criar a primeira versão do seu projecto.</p>
   </div>
 } @else {
   <div class="gallery-grid">
-    @for (g of generations; track g.id) {
-      <article class="gallery-card" [class.superseded]="isSuperseded(g)" [class.approved]="isApproved(g)">
-        @if (g.image_url) {
-          <img [src]="g.image_url" [alt]="'Mockup ' + g.id" loading="lazy" />
-        } @else {
-          <div class="placeholder">Sem imagem</div>
-        }
-        <div class="card-actions">
-          @if (isSuperseded(g)) {
-            <span class="cp-badge cp-badge--neutral">Versão anterior</span>
+    @for (g of generations; track g.id; let idx = $index) {
+      <article
+        class="gallery-card"
+        [class.gallery-card--superseded]="isSuperseded(g)"
+        [class.gallery-card--approved]="isApproved(g)"
+        [style.--gi]="idx"
+      >
+        <div class="gallery-card__media">
+          @if (g.image_url) {
+            <img [src]="g.image_url" [alt]="'Mockup ' + g.id" loading="lazy" />
+          } @else {
+            <div class="gallery-card__placeholder">Sem imagem</div>
           }
           @if (isApproved(g)) {
-            <span class="cp-badge cp-badge--success">Aprovado</span>
-          } @else if (!isSuperseded(g)) {
+            <span class="gallery-card__ribbon">
+              <mat-icon svgIcon="heroicons_outline:check-badge" />
+              Aprovado
+            </span>
+          }
+        </div>
+        <div class="gallery-card__actions">
+          @if (isSuperseded(g)) {
+            <span class="cp-badge cp-badge--neutral">Versão anterior</span>
+          } @else if (!isApproved(g)) {
             <button mat-flat-button color="primary" type="button" [disabled]="disabled" (click)="approve.emit(g)">
               Aprovar
             </button>

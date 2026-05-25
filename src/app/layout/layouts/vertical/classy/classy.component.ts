@@ -14,7 +14,13 @@ import { UserService } from 'app/core/auth/services/user.service';
 import { User } from 'app/core/auth/models/user.interface';
 import { ConfigService } from 'app/core/services/config.service';
 import { AvatarComponent } from 'app/shared/components/ui/avatar/avatar.component';
+import { LanguagesComponent } from 'app/layout/common/languages/languages.component';
+import { MessagesComponent } from 'app/layout/common/messages/messages.component';
+import { NotificationsComponent } from 'app/layout/common/notifications/notifications.component';
+import { SearchComponent } from 'app/layout/common/search/search.component';
+import { ShortcutsComponent } from 'app/layout/common/shortcuts/shortcuts.component';
 import { UserComponent } from 'app/layout/common/user/user.component';
+import { FuseFullscreenComponent } from '@fuse/components/fullscreen';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 
@@ -28,6 +34,12 @@ import { CommonModule } from '@angular/common';
         CommonModule,
         FuseLoadingBarComponent,
         FuseVerticalNavigationComponent,
+        LanguagesComponent,
+        FuseFullscreenComponent,
+        SearchComponent,
+        ShortcutsComponent,
+        MessagesComponent,
+        NotificationsComponent,
         UserComponent,
         MatIconModule,
         MatButtonModule,

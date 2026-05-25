@@ -25,6 +25,7 @@ import {
 export class CustomerDashboardComponent implements OnInit {
   loading = true;
   firstName = 'Cliente';
+  greetingLine = 'Bem-vindo de volta';
   stats: CustomerDashboard | null = null;
   recentRequests: ProjectRequest[] = [];
 
@@ -37,6 +38,7 @@ export class CustomerDashboardComponent implements OnInit {
   ngOnInit(): void {
     const fullName = this.userService.user?.name ?? 'Cliente';
     this.firstName = fullName.trim().split(/\s+/)[0] || 'Cliente';
+    this.greetingLine = this.buildGreeting();
 
     forkJoin({
       dashboard: this.portal.dashboard(),
@@ -76,5 +78,16 @@ export class CustomerDashboardComponent implements OnInit {
 
   hasNewQuote(r: ProjectRequest): boolean {
     return !!(r.quotes ?? []).some((q) => q.status === 'sent');
+  }
+
+  private buildGreeting(): string {
+    const h = new Date().getHours();
+    if (h < 12) {
+      return 'Bom dia';
+    }
+    if (h < 18) {
+      return 'Boa tarde';
+    }
+    return 'Boa noite';
   }
 }

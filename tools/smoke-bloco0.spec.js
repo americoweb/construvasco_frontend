@@ -1,6 +1,6 @@
 const { chromium } = require('playwright');
 
-const BASE = 'http://127.0.0.1:4300';
+const BASE = 'http://127.0.0.1:4200';
 const USERS = [
   ['admin', 'admin@construvasco.co.mz', 'Admin@2026', '#/admin/dashboard'],
   ['gestor', 'gestor@construvasco.co.mz', 'Gestor@2026', '#/admin/dashboard'],

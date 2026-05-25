@@ -35,7 +35,14 @@ export type SettingsTab = 'profile' | 'addresses' | 'security';
 })
 export class SettingsComponent implements OnInit, OnDestroy {
   activeTab: SettingsTab = 'profile';
+  pageReady = false;
   user: User | null = null;
+
+  readonly tabs: { id: SettingsTab; label: string; icon: string }[] = [
+    { id: 'profile', label: 'Perfil', icon: 'heroicons_outline:user-circle' },
+    { id: 'addresses', label: 'Endereços', icon: 'heroicons_outline:map-pin' },
+    { id: 'security', label: 'Segurança', icon: 'heroicons_outline:shield-check' },
+  ];
   profileForm!: FormGroup;
   passwordForm!: FormGroup;
   preferencesForm!: FormGroup;
@@ -87,6 +94,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
     if (currentUser) {
       this.user = currentUser;
       this.patchFormsWithUserData(currentUser);
+      this.pageReady = true;
       this.cdr.markForCheck();
     } else {
       this.userService.getCurrentUser()
@@ -95,10 +103,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
           next: (user) => {
             this.user = user;
             this.patchFormsWithUserData(user);
+            this.pageReady = true;
             this.cdr.markForCheck();
           },
           error: (error) => {
             console.error('Failed to load user data:', error);
+            this.pageReady = true;
             this.cdr.markForCheck();
           }
         });
@@ -110,6 +120,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
         this.user = user;
         if (user) {
           this.patchFormsWithUserData(user);
+        }
+        if (!this.pageReady && user) {
+          this.pageReady = true;
         }
         this.cdr.markForCheck();
       });

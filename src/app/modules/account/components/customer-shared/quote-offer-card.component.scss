@@ -1,3 +1,57 @@
-:host {
-  display: block;
+.quote-offer {
+  padding: 1.15rem 1.25rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+
+  &--pending {
+    border-color: color-mix(in srgb, var(--app-warning) 45%, var(--app-border));
+    background: linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--app-warning-light) 60%, var(--app-surface)) 0%,
+      var(--app-surface) 100%
+    );
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--app-warning) 12%, transparent);
+  }
+}
+
+.quote-offer__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.quote-offer__type {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--app-foreground);
+}
+
+.quote-offer__amount {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--app-primary);
+}
+
+.quote-offer__line {
+  font-size: 0.8125rem;
+  color: var(--app-foreground-secondary);
+}
+
+.quote-offer__conditions {
+  margin: 0.65rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--app-foreground-secondary);
+}
+
+.quote-offer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1rem;
 }

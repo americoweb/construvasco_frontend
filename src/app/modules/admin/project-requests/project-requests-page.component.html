@@ -1,8 +1,8 @@
-<div class="project-requests-page w-full pb-10">
-  <p class="text-sm text-slate-600 mb-4">
+<div class="stf-req-form">
+  <p class="stf-req-form__intro">
     Briefing adaptado ao tipo de projecto — campos de construção residencial, comercial, industrial, etc.
   </p>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-6">
+    <form [formGroup]="form" (ngSubmit)="submit()" class="stf-req-form__body">
 
       <mat-accordion multi>
         <!-- Cliente -->
@@ -17,8 +17,8 @@
 
           <div class="space-y-3 pb-2">
             @if (selectedClient) {
-              <div class="flex items-center gap-3 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3">
-                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-200 text-sm font-bold text-indigo-800">
+              <div class="stf-req-form__client-selected">
+                <div class="stf-req-form__client-avatar">
                   {{ selectedClient.name.charAt(0).toUpperCase() }}
                 </div>
                 <div class="min-w-0 flex-1">
@@ -271,7 +271,7 @@
         </mat-expansion-panel>
       </mat-accordion>
 
-      <div class="flex flex-wrap gap-3">
+      <div class="stf-req-form__actions">
         <button mat-flat-button color="primary" type="submit" [disabled]="submitting">
           @if (submitting) {
             <mat-spinner diameter="20" class="!inline-block mr-2" />
@@ -284,9 +284,9 @@
 </div>
 
 @if (showCreateClientModal) {
-  <div class="modal-backdrop" (click)="closeCreateClientModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
-      <h3 class="text-lg font-semibold">Novo cliente</h3>
+  <div class="stf-req-form__modal-backdrop" (click)="closeCreateClientModal()">
+    <div class="stf-req-form__modal" (click)="$event.stopPropagation()">
+      <h3 class="stf-req-form__modal-title">Novo cliente</h3>
       <form [formGroup]="createClientForm" (ngSubmit)="createClient()" class="mt-4 grid gap-3">
         <mat-form-field appearance="outline" subscriptSizing="dynamic">
           <mat-label>Nome completo</mat-label>

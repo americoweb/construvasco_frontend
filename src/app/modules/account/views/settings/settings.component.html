@@ -1,188 +1,283 @@
-<div class="customer-page customer-page--narrow settings-container">
-  <header class="cp-page-header">
-    <h1 class="cp-page-title">Definições</h1>
-    <p class="cp-page-subtitle">Perfil, endereços e segurança da sua conta.</p>
-  </header>
+<div class="set" [class.set--ready]="pageReady">
+  @if (!pageReady) {
+    <div class="set__skeleton" aria-busy="true">
+      <div class="set__skel-hero"></div>
+      <div class="set__skel-tabs"></div>
+      <div class="set__skel-panel"></div>
+    </div>
+  } @else {
+    <header class="set-hero set-animate" style="--i: 0">
+      <div class="set-hero__main">
+        <div class="set-hero__copy">
+          <span class="set-hero__eyebrow">Conta</span>
+          <h1 class="set-hero__title">Definições</h1>
+          <p class="set-hero__sub">Perfil, moradas e segurança da sua conta Construvasco.</p>
+        </div>
+        @if (user) {
+          <div class="set-hero__user">
+            <app-profile-photo [size]="52" [user]="user" />
+            <div class="set-hero__user-text">
+              <span class="set-hero__user-name">{{ user.name || 'Cliente' }}</span>
+              <span class="set-hero__user-email">{{ user.email || user.identifier }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </header>
 
-  <nav class="cp-settings-tabs" aria-label="Secções de definições">
-    <button type="button" class="cp-settings-tab" [class.active]="activeTab === 'profile'" (click)="setTab('profile')">Perfil</button>
-    <button type="button" class="cp-settings-tab" [class.active]="activeTab === 'addresses'" (click)="setTab('addresses')">Endereços</button>
-    <button type="button" class="cp-settings-tab" [class.active]="activeTab === 'security'" (click)="setTab('security')">Segurança</button>
-  </nav>
+    <nav class="set-tabs set-animate" aria-label="Secções de definições" style="--i: 1">
+      @for (t of tabs; track t.id) {
+        <button
+          type="button"
+          class="set-tab"
+          role="tab"
+          [attr.aria-selected]="activeTab === t.id"
+          [class.set-tab--active]="activeTab === t.id"
+          (click)="setTab(t.id)"
+        >
+          <mat-icon [svgIcon]="t.icon" />
+          {{ t.label }}
+        </button>
+      }
+    </nav>
 
-  @if (activeTab === 'profile') {
-    <section class="cp-card cp-section">
-      <div class="cp-card__body settings-form">
-        <h2 class="cp-section-title">Informações pessoais</h2>
+    <div class="set-panels set-animate" style="--i: 2">
+      @if (activeTab === 'profile') {
+        <section class="set-panel">
+          <h2 class="set-panel__title">
+            <mat-icon svgIcon="heroicons_outline:identification" />
+            Informações pessoais
+          </h2>
 
-        <div class="mb-6">
-          <span class="text-sm font-medium text-stone-600 block mb-2">Foto de perfil</span>
-          <div class="flex flex-wrap items-center gap-4">
-            <app-profile-photo [size]="120" [user]="user"></app-profile-photo>
-            <div>
-              <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onFileSelected($event)" class="hidden" id="photo-upload" />
+          <div class="set-photo">
+            <app-profile-photo [size]="96" [user]="user" />
+            <div class="set-photo__actions">
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                (change)="onFileSelected($event)"
+                class="set-photo__input"
+                id="photo-upload"
+              />
               <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="openPhotoPicker()">
-                <mat-icon class="settings-btn-icon">photo_camera</mat-icon>
+                <mat-icon svgIcon="heroicons_outline:camera" />
                 Alterar foto
               </button>
-              <p class="text-xs text-stone-500 mt-2 mb-0">JPG, PNG ou WebP (máx. 2MB)</p>
+              <p class="set-photo__hint">JPG, PNG ou WebP (máx. 2MB)</p>
+              @if (selectedFile) {
+                <button
+                  mat-flat-button
+                  color="primary"
+                  type="button"
+                  class="set-photo__save"
+                  (click)="uploadPhoto()"
+                  [disabled]="isUploadingPhoto"
+                >
+                  {{ isUploadingPhoto ? 'A enviar…' : 'Guardar foto' }}
+                </button>
+              }
             </div>
-            @if (selectedFile) {
-              <button mat-flat-button color="primary" type="button" (click)="uploadPhoto()" [disabled]="isUploadingPhoto">
-                {{ isUploadingPhoto ? 'A enviar…' : 'Guardar foto' }}
+          </div>
+
+          <form class="set-form studio-form" [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>Nome completo</mat-label>
+              <input matInput formControlName="name" type="text" />
+              @if (profileForm.get('name')?.invalid && profileForm.get('name')?.touched) {
+                <mat-error>O nome é obrigatório</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>E-mail</mat-label>
+              <input matInput [value]="user?.email || user?.identifier || ''" type="email" disabled />
+              <mat-hint>Contacte o suporte para alterar</mat-hint>
+            </mat-form-field>
+
+            <div class="set-form__row">
+              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                <mat-label>Telefone</mat-label>
+                <input matInput formControlName="phone" type="tel" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                <mat-label>WhatsApp</mat-label>
+                <input matInput formControlName="whatsapp" type="tel" />
+              </mat-form-field>
+            </div>
+
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              class="set-form__submit"
+              [disabled]="isSavingProfile || profileForm.invalid"
+            >
+              {{ isSavingProfile ? 'A guardar…' : 'Guardar perfil' }}
+            </button>
+          </form>
+        </section>
+      }
+
+      @if (activeTab === 'addresses') {
+        <section class="set-panel">
+          <div class="set-panel__head">
+            <h2 class="set-panel__title mb-0">
+              <mat-icon svgIcon="heroicons_outline:home" />
+              Endereços
+            </h2>
+            @if (!showAddressForm) {
+              <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="addNewAddress()">
+                <mat-icon svgIcon="heroicons_outline:plus" />
+                Adicionar
               </button>
             }
           </div>
-        </div>
 
-        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Nome completo</mat-label>
-            <input matInput formControlName="name" type="text" />
-            @if (profileForm.get('name')?.invalid && profileForm.get('name')?.touched) {
-              <mat-error>O nome é obrigatório</mat-error>
-            }
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>E-mail</mat-label>
-            <input matInput [value]="user?.email || user?.identifier || ''" type="email" disabled />
-            <mat-hint>Contacte o suporte para alterar</mat-hint>
-          </mat-form-field>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-              <mat-label>Telefone</mat-label>
-              <input matInput formControlName="phone" type="tel" />
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-              <mat-label>WhatsApp</mat-label>
-              <input matInput formControlName="whatsapp" type="tel" />
-            </mat-form-field>
-          </div>
-
-          <button mat-flat-button color="primary" type="submit" [disabled]="isSavingProfile || profileForm.invalid">
-            {{ isSavingProfile ? 'A guardar…' : 'Guardar perfil' }}
-          </button>
-        </form>
-      </div>
-    </section>
-  }
-
-  @if (activeTab === 'addresses') {
-    <section class="cp-card cp-section">
-      <div class="cp-card__body">
-        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-          <h2 class="cp-section-title mb-0">Endereços</h2>
-          @if (!showAddressForm) {
-            <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="addNewAddress()">
-              <mat-icon>add</mat-icon>
-              Adicionar endereço
-            </button>
-          }
-        </div>
-
-        @if (showAddressForm) {
-          <div class="mb-6 pb-6 border-b border-stone-200 settings-form">
-            <h3 class="text-base font-semibold text-stone-900 mb-4">
-              {{ editingAddress ? 'Editar endereço' : 'Novo endereço' }}
-            </h3>
-            <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
-              <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-                <mat-label>Morada</mat-label>
-                <input matInput formControlName="address" type="text" placeholder="Rua, número, bairro" />
-              </mat-form-field>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @if (showAddressForm) {
+            <div class="set-form-block">
+              <h3 class="set-form-block__title">
+                {{ editingAddress ? 'Editar endereço' : 'Novo endereço' }}
+              </h3>
+              <form class="set-form studio-form" [formGroup]="addressForm" (ngSubmit)="saveAddress()">
                 <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-                  <mat-label>Cidade</mat-label>
-                  <input matInput formControlName="city" type="text" />
+                  <mat-label>Morada</mat-label>
+                  <input matInput formControlName="address" type="text" placeholder="Rua, número, bairro" />
                 </mat-form-field>
-                <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-                  <mat-label>Província</mat-label>
-                  <mat-select formControlName="province">
-                    <mat-option value="">Selecione</mat-option>
-                    <mat-option *ngFor="let prov of provinces" [value]="prov">{{ prov }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <mat-checkbox formControlName="is_primary" color="primary">Endereço principal</mat-checkbox>
-              <div class="flex flex-wrap gap-3 pt-4">
-                <button mat-flat-button color="primary" type="submit" [disabled]="addressForm.invalid">Guardar</button>
-                <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="cancelAddressForm()">Cancelar</button>
-              </div>
-            </form>
-          </div>
-        }
-
-        @if (addresses.length === 0 && !showAddressForm) {
-          <div class="cp-empty py-6">
-            <mat-icon class="cp-empty__icon">location_off</mat-icon>
-            <p class="cp-empty__text mb-0">Nenhum endereço registado.</p>
-          </div>
-        }
-
-        @if (addresses.length > 0) {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @for (address of addresses; track address.id) {
-              <div class="settings-address-card">
-                @if (address.is_primary) {
-                  <span class="cp-badge cp-badge--primary absolute top-3 right-3">Principal</span>
-                }
-                <p class="font-medium text-stone-900 m-0">{{ address.address }}</p>
-                <p class="text-sm text-stone-600 mt-1 mb-0">{{ address.city }}, {{ address.province }}</p>
-                <div class="mt-4 flex flex-wrap gap-2">
-                  <button mat-button type="button" (click)="editAddress(address)">Editar</button>
-                  @if (!address.is_primary) {
-                    <button mat-button type="button" (click)="setAsPrimary(address)">Definir principal</button>
-                  }
-                  <button mat-button type="button" style="color: var(--app-error)" (click)="deleteAddress(address)">Excluir</button>
+                <div class="set-form__row">
+                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>Cidade</mat-label>
+                    <input matInput formControlName="city" type="text" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+                    <mat-label>Província</mat-label>
+                    <mat-select formControlName="province">
+                      <mat-option value="">Selecione</mat-option>
+                      @for (prov of provinces; track prov) {
+                        <mat-option [value]="prov">{{ prov }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
                 </div>
+                <mat-checkbox formControlName="is_primary" color="primary">Endereço principal</mat-checkbox>
+                <div class="set-form__actions">
+                  <button mat-flat-button color="primary" type="submit" [disabled]="addressForm.invalid">
+                    Guardar
+                  </button>
+                  <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="cancelAddressForm()">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          }
+
+          @if (addresses.length === 0 && !showAddressForm) {
+            <div class="set-empty">
+              <div class="set-empty__icon">
+                <mat-icon svgIcon="heroicons_outline:map-pin" />
               </div>
-            }
-          </div>
-        }
-      </div>
-    </section>
-  }
+              <p class="set-empty__title">Nenhum endereço</p>
+              <p class="set-empty__text">Adicione uma morada para entregas e visitas técnicas.</p>
+            </div>
+          }
 
-  @if (activeTab === 'security') {
-    <section class="cp-card cp-section">
-      <div class="cp-card__body settings-form">
-        <h2 class="cp-section-title">Alterar senha</h2>
-        <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Senha actual</mat-label>
-            <input matInput formControlName="current_password" type="password" autocomplete="current-password" />
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Nova senha</mat-label>
-            <input matInput formControlName="password" type="password" autocomplete="new-password" />
-            <mat-hint>Mínimo 8 caracteres</mat-hint>
-          </mat-form-field>
-          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Confirmar nova senha</mat-label>
-            <input matInput formControlName="password_confirmation" type="password" autocomplete="new-password" />
-          </mat-form-field>
-          <button mat-flat-button color="primary" type="submit" [disabled]="isChangingPassword || passwordForm.invalid">
-            {{ isChangingPassword ? 'A actualizar…' : 'Actualizar senha' }}
-          </button>
-        </form>
-      </div>
-    </section>
+          @if (addresses.length > 0) {
+            <div class="set-address-grid">
+              @for (address of addresses; track address.id) {
+                <article class="set-address" [class.set-address--primary]="address.is_primary">
+                  @if (address.is_primary) {
+                    <span class="cp-badge cp-badge--primary set-address__badge">Principal</span>
+                  }
+                  <p class="set-address__line">{{ address.address }}</p>
+                  <p class="set-address__sub">{{ address.city }}, {{ address.province }}</p>
+                  <div class="set-address__actions">
+                    <button mat-button type="button" (click)="editAddress(address)">Editar</button>
+                    @if (!address.is_primary) {
+                      <button mat-button type="button" (click)="setAsPrimary(address)">Principal</button>
+                    }
+                    <button mat-button type="button" class="set-address__danger" (click)="deleteAddress(address)">
+                      Excluir
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+      }
 
-    <section class="cp-card cp-section">
-      <div class="cp-card__body settings-form">
-        <h2 class="cp-section-title">Preferências de comunicação</h2>
-        <form [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
-          <div class="settings-checkboxes">
-            <mat-checkbox formControlName="email_promotions" color="primary">E-mails de promoções</mat-checkbox>
-            <mat-checkbox formControlName="sms_updates" color="primary">SMS de actualizações</mat-checkbox>
-            <mat-checkbox formControlName="whatsapp_notifications" color="primary">Notificações WhatsApp</mat-checkbox>
-            <mat-checkbox formControlName="weekly_newsletter" color="primary">Newsletter semanal</mat-checkbox>
-          </div>
-          <button mat-flat-button color="primary" type="submit">Guardar preferências</button>
-        </form>
-      </div>
-    </section>
+      @if (activeTab === 'security') {
+        <section class="set-panel set-panel--spaced">
+          <h2 class="set-panel__title">
+            <mat-icon svgIcon="heroicons_outline:key" />
+            Alterar senha
+          </h2>
+          <form class="set-form studio-form" [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>Senha actual</mat-label>
+              <input matInput formControlName="current_password" type="password" autocomplete="current-password" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>Nova senha</mat-label>
+              <input matInput formControlName="password" type="password" autocomplete="new-password" />
+              <mat-hint>Mínimo 8 caracteres</mat-hint>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+              <mat-label>Confirmar nova senha</mat-label>
+              <input matInput formControlName="password_confirmation" type="password" autocomplete="new-password" />
+            </mat-form-field>
+            <button
+              mat-flat-button
+              color="primary"
+              type="submit"
+              class="set-form__submit"
+              [disabled]="isChangingPassword || passwordForm.invalid"
+            >
+              {{ isChangingPassword ? 'A actualizar…' : 'Actualizar senha' }}
+            </button>
+          </form>
+        </section>
+
+        <section class="set-panel">
+          <h2 class="set-panel__title">
+            <mat-icon svgIcon="heroicons_outline:bell" />
+            Preferências de comunicação
+          </h2>
+          <form class="set-form" [formGroup]="preferencesForm" (ngSubmit)="savePreferences()">
+            <div class="set-prefs">
+              <label class="set-pref">
+                <mat-checkbox formControlName="email_promotions" color="primary" />
+                <span class="set-pref__text">
+                  <strong>E-mails de promoções</strong>
+                  <small>Ofertas e novidades da Construvasco</small>
+                </span>
+              </label>
+              <label class="set-pref">
+                <mat-checkbox formControlName="sms_updates" color="primary" />
+                <span class="set-pref__text">
+                  <strong>SMS de actualizações</strong>
+                  <small>Estado de pedidos e projectos</small>
+                </span>
+              </label>
+              <label class="set-pref">
+                <mat-checkbox formControlName="whatsapp_notifications" color="primary" />
+                <span class="set-pref__text">
+                  <strong>WhatsApp</strong>
+                  <small>Mensagens rápidas da equipa</small>
+                </span>
+              </label>
+              <label class="set-pref">
+                <mat-checkbox formControlName="weekly_newsletter" color="primary" />
+                <span class="set-pref__text">
+                  <strong>Newsletter semanal</strong>
+                  <small>Resumo e inspiração para projectos</small>
+                </span>
+              </label>
+            </div>
+            <button mat-flat-button color="primary" type="submit" class="set-form__submit">Guardar preferências</button>
+          </form>
+        </section>
+      }
+    </div>
   }
 </div>

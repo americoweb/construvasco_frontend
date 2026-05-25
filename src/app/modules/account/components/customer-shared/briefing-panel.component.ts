@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface BriefingRow {
   label: string;
@@ -9,7 +10,7 @@ export interface BriefingRow {
 @Component({
   selector: 'app-briefing-panel',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './briefing-panel.component.html',
   styleUrls: ['./briefing-panel.component.scss'],
 })

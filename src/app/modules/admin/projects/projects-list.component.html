@@ -1,109 +1,211 @@
-<div class="projects-page w-full">
-    <mat-card class="!mb-6">
-      <mat-card-content class="!flex flex-wrap items-center gap-4 !pt-4">
-        <mat-form-field appearance="outline" class="w-full sm:w-64" subscriptSizing="dynamic">
-          <mat-label>Pesquisar</mat-label>
-          <input matInput [(ngModel)]="searchText" (ngModelChange)="applyFilter()" placeholder="Nome, cliente, local..." />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="w-full sm:w-48" subscriptSizing="dynamic">
-          <mat-label>Estado</mat-label>
-          <mat-select [(value)]="statusFilter" (selectionChange)="applyFilter()">
-            <mat-option value="">Todos</mat-option>
-            @for (s of statusOptions; track s.value) {
-              <mat-option [value]="s.value">{{ s.label }}</mat-option>
+<div class="stf-prj" [class.stf-prj--ready]="pageReady">
+  @if (loading) {
+    <div class="stf-prj__skeleton" aria-busy="true" aria-label="A carregar projectos">
+      <div class="stf-prj__skel-hero"></div>
+      <div class="stf-prj__skel-toolbar"></div>
+      <div class="stf-prj__skel-list">
+        <div></div><div></div><div></div>
+      </div>
+    </div>
+  } @else {
+    <header class="stf-prj-hero stf-prj-animate" style="--i: 0">
+      <div class="stf-prj-hero__main">
+        <div class="stf-prj-hero__copy">
+          <span class="stf-prj-hero__eyebrow">{{ isTechnicianView ? 'Área técnica' : 'Operação' }}</span>
+          <h1 class="stf-prj-hero__title">{{ isTechnicianView ? 'Meus projectos' : 'Projectos' }}</h1>
+          <p class="stf-prj-hero__sub">
+            @if (isTechnicianView) {
+              Obras atribuídas — marcos, entregáveis e execução em campo.
+            } @else {
+              Obras activas após aceitação do orçamento — fases, equipa e pagamentos.
             }
-          </mat-select>
-        </mat-form-field>
+          </p>
+        </div>
         @if (!isTechnicianView) {
-          <mat-form-field appearance="outline" class="w-full sm:w-56" subscriptSizing="dynamic">
-            <mat-label>Fase do contrato</mat-label>
-            <mat-select [(value)]="contractPhaseFilter" (selectionChange)="applyFilter()">
-              <mat-option value="">Todas</mat-option>
-              @for (f of contractPhaseOptions; track f.value) {
-                <mat-option [value]="f.value">{{ f.label }}</mat-option>
-              }
-            </mat-select>
-          </mat-form-field>
-        }
-        <span class="text-sm text-slate-500">{{ filteredRows.length }} projecto(s)</span>
-        @if (!isTechnicianView) {
-          <a mat-stroked-button routerLink="/admin/pedidos/novo" class="!ml-auto">
-            <mat-icon>add</mat-icon>
+          <a mat-stroked-button class="stf-prj-hero__cta" routerLink="/admin/pedidos/novo">
+            <mat-icon svgIcon="heroicons_outline:plus-circle" />
             Novo pedido
           </a>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
 
-    @if (loading) {
-      <div class="flex justify-center py-16">
-        <mat-spinner diameter="40" />
+      <div class="stf-prj-kpis">
+        <article class="stf-prj-kpi">
+          <div class="stf-prj-kpi__icon">
+            <mat-icon svgIcon="heroicons_outline:building-office-2" />
+          </div>
+          <div class="stf-prj-kpi__data">
+            <span class="stf-prj-kpi__value">{{ rows.length }}</span>
+            <span class="stf-prj-kpi__label">Total</span>
+          </div>
+        </article>
+        <article class="stf-prj-kpi" [class.stf-prj-kpi--attention]="constructionCount > 0">
+          <div class="stf-prj-kpi__icon stf-prj-kpi__icon--build">
+            <mat-icon svgIcon="heroicons_outline:wrench-screwdriver" />
+          </div>
+          <div class="stf-prj-kpi__data">
+            <span class="stf-prj-kpi__value">{{ constructionCount }}</span>
+            <span class="stf-prj-kpi__label">Em obra</span>
+          </div>
+        </article>
+        @if (!isTechnicianView) {
+          <article class="stf-prj-kpi" [class.stf-prj-kpi--attention]="reviewCount > 0">
+            <div class="stf-prj-kpi__icon stf-prj-kpi__icon--warn">
+              <mat-icon svgIcon="heroicons_outline:exclamation-circle" />
+            </div>
+            <div class="stf-prj-kpi__data">
+              <span class="stf-prj-kpi__value">{{ reviewCount }}</span>
+              <span class="stf-prj-kpi__label">Revisão pendente</span>
+            </div>
+          </article>
+        }
+        <article class="stf-prj-kpi">
+          <div class="stf-prj-kpi__icon stf-prj-kpi__icon--success">
+            <mat-icon svgIcon="heroicons_outline:check-badge" />
+          </div>
+          <div class="stf-prj-kpi__data">
+            <span class="stf-prj-kpi__value">{{ completedCount }}</span>
+            <span class="stf-prj-kpi__label">Concluídos</span>
+          </div>
+        </article>
+      </div>
+    </header>
+
+    <div class="stf-prj-toolbar stf-prj-animate" style="--i: 1">
+      <div class="stf-prj-search" role="search">
+        <mat-icon class="stf-prj-search__icon" svgIcon="heroicons_outline:magnifying-glass" />
+        <input
+          type="search"
+          class="stf-prj-search__input"
+          placeholder="Nome, cliente, local…"
+          [value]="searchText"
+          (input)="onSearchInput($event)"
+          aria-label="Pesquisar projectos"
+        />
+        @if (searchText) {
+          <button type="button" class="stf-prj-search__clear" aria-label="Limpar pesquisa" (click)="clearSearch()">
+            <mat-icon svgIcon="heroicons_outline:x-mark" />
+          </button>
+        }
+      </div>
+
+      <div class="stf-prj-filters" role="tablist" aria-label="Filtrar projectos">
+        @for (f of filters; track f.id) {
+          <button
+            type="button"
+            class="stf-prj-filter"
+            role="tab"
+            [attr.aria-selected]="filter === f.id"
+            [class.stf-prj-filter--active]="filter === f.id"
+            (click)="setFilter(f.id)"
+          >
+            <mat-icon [svgIcon]="f.icon" />
+            <span class="stf-prj-filter__label">{{ f.label }}</span>
+            <span class="stf-prj-filter__count">{{ filterCount(f.id) }}</span>
+          </button>
+        }
+      </div>
+    </div>
+
+    @if (!rows.length) {
+      <div class="stf-prj-empty stf-prj-animate" style="--i: 2">
+        <div class="stf-prj-empty__visual" aria-hidden="true">
+          <div class="stf-prj-empty__ring"></div>
+          <mat-icon svgIcon="heroicons_outline:building-office-2" />
+        </div>
+        <h2 class="stf-prj-empty__title">Nenhum projecto encontrado</h2>
+        <p class="stf-prj-empty__text">
+          Fluxo: pedido de projecto → orçamento → cliente aceita → projecto activo.
+        </p>
+        @if (!isTechnicianView) {
+          <a mat-flat-button color="primary" routerLink="/admin/pedidos/novo">Ir para pedidos</a>
+        }
       </div>
     } @else if (!filteredRows.length) {
-      <mat-card>
-        <mat-card-content class="!py-12 text-center">
-          <mat-icon class="!mb-2 !h-12 !w-12 !text-slate-300">architecture</mat-icon>
-          <p class="font-medium text-slate-700">Nenhum projecto encontrado</p>
-          <p class="mt-1 text-sm text-slate-500">
-            Fluxo: pedido de projecto → orçamento → cliente aceita → projecto activo.
-          </p>
-          <a mat-flat-button color="primary" routerLink="/admin/pedidos/novo" class="!mt-4">Ir para pedidos</a>
-        </mat-card-content>
-      </mat-card>
+      <div class="stf-prj-empty stf-prj-animate" style="--i: 2">
+        <div class="stf-prj-empty__visual" aria-hidden="true">
+          <mat-icon svgIcon="heroicons_outline:magnifying-glass" />
+        </div>
+        <h2 class="stf-prj-empty__title">Nenhum resultado</h2>
+        <p class="stf-prj-empty__text">Tente outro termo ou altere o filtro.</p>
+        <button mat-stroked-button type="button" (click)="clearSearch(); setFilter('all')">Repor lista</button>
+      </div>
     } @else {
-      <mat-card>
-        <table mat-table [dataSource]="filteredRows" class="w-full">
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Projecto</th>
-            <td mat-cell *matCellDef="let p">
-              <a [routerLink]="['/admin/projectos', p.id]" class="font-medium text-blue-700 hover:underline">
-                {{ p.name || ('#' + p.id) }}
-              </a>
-              @if (!isTechnicianView && p.pending_review_count) {
-                <span class="review-badge">Revisão pendente</span>
-              }
-              @if (p.project_type) {
-                <span class="block text-xs text-slate-500">{{ p.project_type }}</span>
-              }
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="client">
-            <th mat-header-cell *matHeaderCellDef>Cliente</th>
-            <td mat-cell *matCellDef="let p">{{ p.client?.name || '—' }}</td>
-          </ng-container>
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let p">
-              <span class="status-chip" [attr.data-status]="p.status">{{ labelStatus(p.status) }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="phase">
-            <th mat-header-cell *matHeaderCellDef>Fase</th>
-            <td mat-cell *matCellDef="let p">
-              <span class="phase-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
-            </td>
-          </ng-container>
-          <ng-container matColumnDef="location">
-            <th mat-header-cell *matHeaderCellDef>Local</th>
-            <td mat-cell *matCellDef="let p">{{ p.location || '—' }}</td>
-          </ng-container>
-          <ng-container matColumnDef="budget">
-            <th mat-header-cell *matHeaderCellDef>Orçamento</th>
-            <td mat-cell *matCellDef="let p">{{ formatMoney(p.budget ?? p.target_budget) }}</td>
-          </ng-container>
-          <ng-container matColumnDef="team">
-            <th mat-header-cell *matHeaderCellDef>Equipa</th>
-            <td mat-cell *matCellDef="let p">{{ teamLabel(p) }}</td>
-          </ng-container>
-          <ng-container matColumnDef="updated">
-            <th mat-header-cell *matHeaderCellDef>Actualizado</th>
-            <td mat-cell *matCellDef="let p">{{ formatDate(p.updated_at) }}</td>
-          </ng-container>
+      <p class="stf-prj-results stf-prj-animate" style="--i: 2">
+        <span class="stf-prj-results__count">{{ filteredRows.length }}</span>
+        {{ filteredRows.length === 1 ? 'projecto' : 'projectos' }}
+        @if (searchText) {
+          <span class="stf-prj-results__hint">· «{{ searchText }}»</span>
+        }
+      </p>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="hover-row"></tr>
-        </table>
-      </mat-card>
+      <div class="stf-prj-list stf-prj-animate" style="--i: 2">
+        @for (p of filteredRows; track p.id; let idx = $index) {
+          <a
+            class="stf-prj-card"
+            [ngClass]="phaseAccentClass(p)"
+            [class.stf-prj-card--live]="needsAttention(p)"
+            [routerLink]="['/admin/projectos', p.id]"
+            [style.--pi]="idx"
+          >
+            <span class="stf-prj-card__accent" aria-hidden="true"></span>
+            <div class="stf-prj-card__inner">
+              <div class="stf-prj-card__icon-wrap">
+                <mat-icon [svgIcon]="phaseIcon(p)" />
+              </div>
+              <div class="stf-prj-card__content">
+                <div class="stf-prj-card__top">
+                  <code class="stf-prj-card__ref">CV-PRJ-{{ p.id }}</code>
+                  <span class="stf-prj-badge" [ngClass]="phaseBadgeClass(p)">{{ phaseLabel(p) }}</span>
+                </div>
+                <h2 class="stf-prj-card__title">{{ p.name || ('Projecto #' + p.id) }}</h2>
+                <div class="stf-prj-card__meta">
+                  @if (p.client?.name) {
+                    <span class="stf-prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:user" />
+                      {{ p.client.name }}
+                    </span>
+                  }
+                  <span class="stf-prj-card__meta-item">
+                    <mat-icon svgIcon="heroicons_outline:signal" />
+                    {{ labelStatus(p.status) }}
+                  </span>
+                  @if (p.location) {
+                    <span class="stf-prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:map-pin" />
+                      {{ p.location }}
+                    </span>
+                  }
+                  @if (!isTechnicianView && teamLabel(p) !== '—') {
+                    <span class="stf-prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:user-group" />
+                      {{ teamLabel(p) }}
+                    </span>
+                  }
+                  @if (formatMoney(p.budget ?? p.target_budget) !== '—') {
+                    <span class="stf-prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:banknotes" />
+                      {{ formatMoney(p.budget ?? p.target_budget) }}
+                    </span>
+                  }
+                  @if (p.updated_at) {
+                    <span class="stf-prj-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:clock" />
+                      {{ formatDate(p.updated_at) }}
+                    </span>
+                  }
+                </div>
+                @if (!isTechnicianView && p.pending_review_count) {
+                  <span class="stf-prj-card__review">Revisão pendente ({{ p.pending_review_count }})</span>
+                }
+              </div>
+              <span class="stf-prj-card__go" aria-hidden="true">
+                <mat-icon svgIcon="heroicons_outline:chevron-right" />
+              </span>
+            </div>
+          </a>
+        }
+      </div>
     }
+  }
 </div>

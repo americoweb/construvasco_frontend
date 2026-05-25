@@ -1,169 +1,107 @@
-<div
-    class="flex w-full min-w-0 flex-col sm:absolute sm:inset-0 sm:overflow-hidden"
->
-    <mat-drawer-container class="flex-auto sm:h-full">
-        <!-- Drawer -->
-        <mat-drawer
-            class="dark:bg-gray-900 sm:w-96"
-            [autoFocus]="false"
-            [mode]="drawerMode"
-            [opened]="drawerOpened"
-            #drawer
-        >
-            <!-- Header -->
-            <div class="m-8 mr-6 flex items-center justify-between sm:my-10">
-                <!-- Title -->
-                <div
-                    class="text-4xl font-extrabold leading-none tracking-tight"
-                >
-                    Configurações
-                </div>
-                <!-- Close button -->
-                <div class="lg:hidden">
-                    <button mat-icon-button (click)="drawer.close()">
-                        <mat-icon
-                            [svgIcon]="'heroicons_outline:x-mark'"
-                        ></mat-icon>
-                    </button>
-                </div>
-            </div>
-            <!-- Panel links -->
-            <div class="flex flex-col divide-y border-b border-t">
-                @for (panel of panels; track trackByFn($index, panel)) {
-                    <div
-                        class="flex cursor-pointer px-8 py-5"
-                        [ngClass]="{
-                            'dark:hover:bg-hover hover:bg-gray-100':
-                                !selectedPanel || selectedPanel !== panel.id,
-                            'bg-primary-50 dark:bg-hover':
-                                selectedPanel && selectedPanel === panel.id,
-                        }"
-                        (click)="goToPanel(panel.id)"
-                    >
-                        <mat-icon
-                            [ngClass]="{
-                                'text-hint':
-                                    !selectedPanel ||
-                                    selectedPanel !== panel.id,
-                                'text-primary dark:text-primary-500':
-                                    selectedPanel && selectedPanel === panel.id,
-                            }"
-                            [svgIcon]="panel.icon"
-                        ></mat-icon>
-                        <div class="ml-3">
-                            <div
-                                class="font-medium leading-6"
-                                [ngClass]="{
-                                    'text-primary dark:text-primary-500':
-                                        selectedPanel &&
-                                        selectedPanel === panel.id,
-                                }"
-                            >
-                                {{ panel.title }}
-                            </div>
-                            <div class="text-secondary mt-0.5">
-                                {{ panel.description }}
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </mat-drawer>
+<div class="stf-set" [class.stf-set--ready]="pageReady">
+  <header class="stf-set-hero stf-set-animate" style="--i: 0">
+    <div class="stf-set-hero__main">
+      <div class="stf-set-hero__copy">
+        <span class="stf-set-hero__eyebrow">Sistema</span>
+        <h1 class="stf-set-hero__title">Configurações</h1>
+        <p class="stf-set-hero__sub">Conta, segurança, equipa e suporte da sua área staff Construvasco.</p>
+      </div>
+      @if (user) {
+        <div class="stf-set-hero__user">
+          <span class="stf-set-hero__avatar" aria-hidden="true">{{ userInitial }}</span>
+          <div class="stf-set-hero__user-text">
+            <span class="stf-set-hero__user-name">{{ user.name || 'Utilizador' }}</span>
+            <span class="stf-set-hero__user-email">{{ user.identifier }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  </header>
 
-        <!-- Drawer content -->
-        <mat-drawer-content class="flex flex-col">
-            <!-- Main -->
-            <div class="flex-auto px-6 pb-12 pt-9 md:p-8 md:pb-12 lg:p-12">
-                <!-- Panel header -->
-                <div class="flex items-center">
-                    <!-- Drawer toggle -->
-                    <button
-                        class="-ml-2 lg:hidden"
-                        mat-icon-button
-                        (click)="drawer.toggle()"
-                    >
-                        <mat-icon
-                            [svgIcon]="'heroicons_outline:bars-3'"
-                        ></mat-icon>
-                    </button>
+  <mat-drawer-container class="stf-set-layout stf-set-animate" style="--i: 1">
+    <mat-drawer
+      class="stf-set-nav"
+      [autoFocus]="false"
+      [mode]="drawerMode"
+      [opened]="drawerOpened"
+      #drawer
+    >
+      <div class="stf-set-nav__head">
+        <span class="stf-set-nav__label">Secções</span>
+        <button type="button" class="stf-set-nav__close" mat-icon-button (click)="drawer.close()" aria-label="Fechar menu">
+          <mat-icon svgIcon="heroicons_outline:x-mark" />
+        </button>
+      </div>
+      <nav class="stf-set-nav__list" aria-label="Configurações">
+        @for (panel of panels; track trackByFn($index, panel)) {
+          <button
+            type="button"
+            class="stf-set-nav__item"
+            [class.stf-set-nav__item--active]="selectedPanel === panel.id"
+            (click)="goToPanel(panel.id)"
+          >
+            <mat-icon [svgIcon]="panel.icon" />
+            <span class="stf-set-nav__item-text">
+              <strong>{{ panel.title }}</strong>
+              <small>{{ panel.description }}</small>
+            </span>
+          </button>
+        }
+      </nav>
+    </mat-drawer>
 
-                    <!-- Panel title -->
-                    <div
-                        class="ml-2 text-3xl font-bold leading-none tracking-tight lg:ml-0"
-                    >
-                        {{ getPanelInfo(selectedPanel).title }}
-                    </div>
-                </div>
-                 <!-- Load settings panel -->
-                <div class="mt-8">
-                    @switch (selectedPanel) {
-                        <!-- Account -->
-                        @case ('account') {
-                            <settings-account></settings-account>
-                        }
-                        <!-- Security -->
-                        @case ('security') {
-                            <settings-security></settings-security>
-                        }
-                        <!-- Plan & Billing -->
-                        @case ('plan-billing') {
-                            <div class="flex flex-col items-center justify-center p-8">
-                                <mat-icon 
-                                    class="mb-4 h-12 w-12 text-hint" 
-                                    [svgIcon]="'heroicons_outline:credit-card'"></mat-icon>
-                            
-                                <div class="text-center">
-                                    <h3 class="mb-1 text-lg font-medium">Plano e Faturamento</h3>
-                                    <p class="text-secondary">Gerencie seu plano de assinatura e informações de pagamento</p>
-                                </div>
-                                <button 
-                                    mat-flat-button 
-                                    color="primary" 
-                                    class="mt-4">
-                                    Gerenciar Plano
-                                </button>
-                            </div>
-                        }
-                        <!-- Team -->
-                        @case ('team') {
-                            <settings-team></settings-team>
-                        }
-                        @case ('permissions') {
-                            <app-permissions></app-permissions>
-                        }
-                        <!-- Template -->
-                        @case ('template') {
-                            <settings-template></settings-template>
-                        }
-                        <!-- Support -->
-                        @case ('tickets') {
-                            <div class="flex flex-col items-center justify-center p-8">
-                                <mat-icon 
-                                    class="mb-4 h-12 w-12 text-hint" 
-                                    [svgIcon]="'heroicons_outline:support'"></mat-icon>
-                            
-                                <div class="text-center">
-                                    <h3 class="mb-1 text-lg font-medium">Suporte 24/7</h3>
-                                    <p class="text-secondary">Estamos aqui para ajudar você a qualquer momento</p>
-                                </div>
-                                <button 
-                                    mat-flat-button 
-                                    color="primary" 
-                                    class="mt-4"
-                                    (click)="openSupportDialog()">
-                                    Contatar Suporte
-                                </button>
-                                <a 
-                                    href="https://wa.me/258868875269" 
-                                    target="_blank" 
-                                    class="mt-4 text-primary">
-                                    Suporte via WhatsApp
-                                </a>
-                            </div>
-                        }
-                    }
-                </div>
+    <mat-drawer-content class="stf-set-content">
+      <div class="stf-set-content__toolbar">
+        <button type="button" class="stf-set-content__menu" mat-icon-button (click)="drawer.toggle()" aria-label="Abrir menu">
+          <mat-icon svgIcon="heroicons_outline:bars-3" />
+        </button>
+        <h2 class="stf-set-content__title">{{ getPanelInfo(selectedPanel)?.title }}</h2>
+      </div>
+
+      <div class="stf-set-panel-body">
+        @switch (selectedPanel) {
+          @case ('account') {
+            <settings-account />
+          }
+          @case ('security') {
+            <settings-security />
+          }
+          @case ('plan-billing') {
+            <div class="stf-set-placeholder">
+              <div class="stf-set-placeholder__icon">
+                <mat-icon svgIcon="heroicons_outline:credit-card" />
+              </div>
+              <h3>Plano e faturação</h3>
+              <p>Gerir plano de subscrição e informações de pagamento.</p>
+              <button mat-flat-button color="primary" type="button">Gerir plano</button>
             </div>
-        </mat-drawer-content>
-    </mat-drawer-container>
+          }
+          @case ('team') {
+            <settings-team />
+          }
+          @case ('permissions') {
+            <app-permissions />
+          }
+          @case ('template') {
+            <settings-template />
+          }
+          @case ('tickets') {
+            <div class="stf-set-placeholder">
+              <div class="stf-set-placeholder__icon">
+                <mat-icon svgIcon="heroicons_outline:chat-bubble-left-right" />
+              </div>
+              <h3>Ajuda e suporte</h3>
+              <p>Contacte-nos por WhatsApp — disponível 24 horas por dia, 7 dias por semana.</p>
+              <button mat-flat-button color="primary" type="button" (click)="openSupportDialog()">
+                Contatar suporte
+              </button>
+              <a href="https://wa.me/258868875269" target="_blank" rel="noopener" class="stf-set-placeholder__link">
+                Suporte via WhatsApp
+              </a>
+            </div>
+          }
+        }
+      </div>
+    </mat-drawer-content>
+  </mat-drawer-container>
 </div>

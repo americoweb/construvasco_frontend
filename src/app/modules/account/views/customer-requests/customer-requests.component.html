@@ -1,55 +1,202 @@
-<div class="customer-page">
-  <header class="cp-page-header">
-    <h1 class="cp-page-title">Meus pedidos</h1>
-    <p class="cp-page-subtitle">Consulte o estado dos seus pedidos e orçamentos de arquitectura.</p>
-  </header>
-
-  <div class="cp-filter-bar" role="tablist" aria-label="Filtrar pedidos">
-    @for (f of filters; track f.id) {
-      <button
-        type="button"
-        class="cp-filter-btn"
-        [class.active]="filter === f.id"
-        (click)="setFilter(f.id)"
-      >
-        {{ f.label }}
-      </button>
-    }
-  </div>
-
+<div class="req" [class.req--ready]="!loading">
   @if (loading) {
-    <div class="cp-loading">
-      <mat-spinner diameter="36" />
-    </div>
-  } @else if (!filteredRows.length) {
-    <div class="cp-empty">
-      <mat-icon class="cp-empty__icon">inbox</mat-icon>
-      <p class="cp-empty__title">Ainda não tem pedidos</p>
-      <p class="cp-empty__text">Comece um novo projecto no Estúdio para criar o seu primeiro pedido.</p>
-      <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
-        Ir para o Estúdio
-      </a>
+    <div class="req__skeleton" aria-busy="true" aria-label="A carregar pedidos">
+      <div class="req__skel-hero"></div>
+      <div class="req__skel-toolbar"></div>
+      <div class="req__skel-list">
+        <div></div><div></div><div></div>
+      </div>
     </div>
   } @else {
-    <div class="grid gap-4 sm:grid-cols-2">
-      @for (r of filteredRows; track r.id) {
-        <a class="cp-list-card" [routerLink]="['/conta/pedidos', r.id]">
-          <div class="cp-list-card__body">
-            <p class="cp-list-card__ref">{{ r.reference_code }}</p>
-            <p class="cp-list-card__title">{{ r.title }}</p>
-            <div class="cp-list-card__meta">
-              <span>{{ typeLabel(r) }}</span>
-              @if (r.submitted_at) {
-                <span>{{ r.submitted_at | date: 'mediumDate' }}</span>
-              }
-              <span class="cp-badge" [ngClass]="statusClass(r)">{{ statusLabel(r) }}</span>
-              @if (pendingQuoteId(r)) {
-                <span class="cp-badge cp-badge--warning">Novo orçamento</span>
-              }
-            </div>
-          </div>
+    <header class="req-hero req-animate" style="--i: 0">
+      <div class="req-hero__main">
+        <div class="req-hero__copy">
+          <span class="req-hero__eyebrow">Área cliente</span>
+          <h1 class="req-hero__title">Meus pedidos</h1>
+          <p class="req-hero__sub">
+            Consulte o estado dos seus pedidos e responda aos orçamentos de arquitectura.
+          </p>
+        </div>
+        <a
+          mat-flat-button
+          color="primary"
+          class="req-hero__cta"
+          routerLink="/conta/estudio"
+          [queryParams]="{ new: 1 }"
+        >
+          <mat-icon svgIcon="heroicons_outline:plus-circle" />
+          Novo projecto
         </a>
-      }
+      </div>
+
+      <div class="req-kpis">
+        <article class="req-kpi">
+          <div class="req-kpi__icon">
+            <mat-icon svgIcon="heroicons_outline:document-text" />
+          </div>
+          <div class="req-kpi__data">
+            <span class="req-kpi__value">{{ rows.length }}</span>
+            <span class="req-kpi__label">Total de pedidos</span>
+          </div>
+        </article>
+        <article class="req-kpi" [class.req-kpi--attention]="pendingQuotesCount > 0">
+          <div class="req-kpi__icon req-kpi__icon--warn">
+            <mat-icon svgIcon="heroicons_outline:currency-dollar" />
+          </div>
+          <div class="req-kpi__data">
+            <span class="req-kpi__value">{{ pendingQuotesCount }}</span>
+            <span class="req-kpi__label">Orçamentos por responder</span>
+          </div>
+          @if (pendingQuotesCount > 0) {
+            <span class="req-kpi__pulse" aria-hidden="true"></span>
+          }
+        </article>
+        <article class="req-kpi">
+          <div class="req-kpi__icon req-kpi__icon--soft">
+            <mat-icon svgIcon="heroicons_outline:arrow-path" />
+          </div>
+          <div class="req-kpi__data">
+            <span class="req-kpi__value">{{ activeCount }}</span>
+            <span class="req-kpi__label">Em curso</span>
+          </div>
+        </article>
+      </div>
+    </header>
+
+    <div class="req-toolbar req-animate" style="--i: 1">
+      <div class="req-search" role="search">
+        <mat-icon class="req-search__icon" svgIcon="heroicons_outline:magnifying-glass" />
+        <input
+          type="search"
+          class="req-search__input"
+          placeholder="Pesquisar por referência, título ou tipo…"
+          [value]="searchQuery"
+          (input)="onSearchInput($event)"
+          aria-label="Pesquisar pedidos"
+        />
+        @if (searchQuery) {
+          <button type="button" class="req-search__clear" aria-label="Limpar pesquisa" (click)="clearSearch()">
+            <mat-icon svgIcon="heroicons_outline:x-mark" />
+          </button>
+        }
+      </div>
+
+      <div class="req-filters" role="tablist" aria-label="Filtrar pedidos">
+        @for (f of filters; track f.id) {
+          <button
+            type="button"
+            class="req-filter"
+            role="tab"
+            [attr.aria-selected]="filter === f.id"
+            [class.req-filter--active]="filter === f.id"
+            (click)="setFilter(f.id)"
+          >
+            <mat-icon [svgIcon]="f.icon" />
+            <span class="req-filter__label">{{ f.label }}</span>
+            <span class="req-filter__count">{{ filterCount(f.id) }}</span>
+          </button>
+        }
+      </div>
     </div>
+
+    @if (!filteredRows.length) {
+      <div class="req-empty req-animate" style="--i: 2">
+        <div class="req-empty__visual" aria-hidden="true">
+          <div class="req-empty__ring"></div>
+          <mat-icon svgIcon="heroicons_outline:inbox" />
+        </div>
+        <h2 class="req-empty__title">
+          @if (searchQuery) {
+            Nenhum resultado
+          } @else if (filter === 'all') {
+            Ainda não tem pedidos
+          } @else {
+            Nenhum pedido neste filtro
+          }
+        </h2>
+        <p class="req-empty__text">
+          @if (searchQuery) {
+            Tente outro termo ou limpe a pesquisa.
+          } @else {
+            Comece no Estúdio — briefing guiado e mockups com IA antes de pedir arquitectura.
+          }
+        </p>
+        <div class="req-empty__actions">
+          @if (searchQuery) {
+            <button mat-stroked-button type="button" class="cp-btn-secondary" (click)="clearSearch()">
+              Limpar pesquisa
+            </button>
+          }
+          <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
+            Abrir Estúdio
+          </a>
+        </div>
+      </div>
+    } @else {
+      <p class="req-results req-animate" style="--i: 2">
+        <span class="req-results__count">{{ filteredRows.length }}</span>
+        {{ filteredRows.length === 1 ? 'pedido' : 'pedidos' }}
+        @if (searchQuery) {
+          <span class="req-results__hint">para «{{ searchQuery }}»</span>
+        }
+      </p>
+
+      <div class="req-list req-animate" style="--i: 2">
+        @for (r of filteredRows; track r.id; let idx = $index) {
+          <a
+            class="req-card"
+            [class.req-card--priority]="hasPendingQuote(r)"
+            [ngClass]="statusAccentClass(r)"
+            [routerLink]="['/conta/pedidos', r.id]"
+            [style.--ri]="idx"
+          >
+            <span class="req-card__accent" aria-hidden="true"></span>
+
+            @if (hasPendingQuote(r)) {
+              <span class="req-card__priority-badge">
+                <mat-icon svgIcon="heroicons_outline:bell-alert" />
+                Acção necessária
+              </span>
+            }
+
+            <div class="req-card__inner">
+              <div class="req-card__icon-wrap">
+                <mat-icon svgIcon="heroicons_outline:document-text" />
+              </div>
+
+              <div class="req-card__content">
+                <div class="req-card__top">
+                  <code class="req-card__ref">{{ r.reference_code }}</code>
+                  <span class="cp-badge" [ngClass]="statusClass(r)">{{ statusLabel(r) }}</span>
+                </div>
+                <h2 class="req-card__title">{{ r.title }}</h2>
+                <div class="req-card__meta">
+                  <span class="req-card__meta-item">
+                    <mat-icon svgIcon="heroicons_outline:building-office-2" />
+                    {{ typeLabel(r) }}
+                  </span>
+                  @if (r.submitted_at) {
+                    <span class="req-card__meta-item">
+                      <mat-icon svgIcon="heroicons_outline:calendar-days" />
+                      {{ r.submitted_at | date: 'd MMM y' }}
+                    </span>
+                  }
+                </div>
+                @if (hasPendingQuote(r)) {
+                  <span class="req-card__quote-tag">
+                    <mat-icon svgIcon="heroicons_outline:sparkles" />
+                    Novo orçamento disponível
+                  </span>
+                }
+              </div>
+
+              <span class="req-card__go" aria-hidden="true">
+                <mat-icon svgIcon="heroicons_outline:chevron-right" />
+              </span>
+            </div>
+          </a>
+        }
+      </div>
+    }
   }
 </div>

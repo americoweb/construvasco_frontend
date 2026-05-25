@@ -1,19 +1,33 @@
-<div class="studio-workspace relative">
+<div class="studio-ws">
   @if (isGenerating) {
-    <div class="cp-studio-overlay">
-      <mat-spinner diameter="48" />
-      <p class="cp-studio-overlay__title">A gerar o seu mockup</p>
-      <p class="cp-studio-overlay__text">
+    <div class="studio-ws__overlay" role="status" aria-live="polite">
+      <div class="studio-ws__overlay-ring" aria-hidden="true"></div>
+      <mat-spinner diameter="44" />
+      <p class="studio-ws__overlay-title">A gerar o seu mockup</p>
+      <p class="studio-ws__overlay-text">
         Isto pode demorar até 1 minuto. Não feche nem actualize esta página.
       </p>
     </div>
   }
 
-  <div class="flex flex-wrap gap-3 mb-6">
-    <button mat-flat-button color="primary" type="button" [disabled]="isGenerating" (click)="generate()">
+  <div class="studio-ws__toolbar">
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      class="studio-ws__generate"
+      [disabled]="isGenerating"
+      (click)="generate()"
+    >
+      <mat-icon svgIcon="heroicons_outline:sparkles" />
       Gerar mockup
     </button>
-    <mat-checkbox [checked]="showSuperseded" [disabled]="isGenerating" (change)="showSuperseded = $event.checked">
+    <mat-checkbox
+      class="studio-ws__toggle"
+      [checked]="showSuperseded"
+      [disabled]="isGenerating"
+      (change)="showSuperseded = $event.checked"
+    >
       Mostrar versões anteriores
     </mat-checkbox>
   </div>
@@ -28,14 +42,28 @@
   />
 
   @if (selectedForRefine) {
-    <section class="mt-6 p-5 border border-stone-200 rounded-xl bg-stone-50">
-      <h3 class="font-semibold text-stone-900 mb-3">Refinar versão #{{ selectedForRefine.id }}</h3>
+    <section class="studio-ws__refine">
+      <h3 class="studio-ws__refine-title">
+        <mat-icon svgIcon="heroicons_outline:pencil-square" />
+        Refinar versão #{{ selectedForRefine.id }}
+      </h3>
       <mat-form-field appearance="outline" class="w-full cp-form-step">
         <mat-label>O que quer alterar?</mat-label>
-        <textarea matInput rows="3" [formControl]="refineFeedback" placeholder="Ex.: mais janelas na fachada, telhado mais inclinado…"></textarea>
+        <textarea
+          matInput
+          rows="3"
+          [formControl]="refineFeedback"
+          placeholder="Ex.: mais janelas na fachada, telhado mais inclinado…"
+        ></textarea>
       </mat-form-field>
-      <div class="flex gap-2">
-        <button mat-stroked-button type="button" class="cp-btn-secondary" [disabled]="isGenerating" (click)="selectedForRefine = null">
+      <div class="studio-ws__refine-actions">
+        <button
+          mat-stroked-button
+          type="button"
+          class="cp-btn-secondary"
+          [disabled]="isGenerating"
+          (click)="selectedForRefine = null"
+        >
           Cancelar
         </button>
         <button mat-flat-button color="primary" type="button" [disabled]="isGenerating" (click)="confirmRefine()">
@@ -46,10 +74,10 @@
   }
 
   @if (errorMessage) {
-    <p class="text-sm mt-3" style="color: var(--app-error)">{{ errorMessage }}</p>
+    <p class="studio-ws__error">{{ errorMessage }}</p>
   }
 
-  <footer class="mt-8 p-4 rounded-lg text-sm border" style="border-color: var(--app-border); background: var(--app-warning-light); color: #5c5748">
-    {{ disclaimer }}
-  </footer>
+  @if (disclaimer) {
+    <footer class="studio-ws__disclaimer">{{ disclaimer }}</footer>
+  }
 </div>

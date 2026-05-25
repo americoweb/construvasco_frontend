@@ -1,5 +1,5 @@
 const { chromium } = require('playwright');
-const BASE = 'http://127.0.0.1:4300';
+const BASE = 'http://127.0.0.1:4200';
 
 (async () => {
   const browser = await chromium.launch({ headless: true });

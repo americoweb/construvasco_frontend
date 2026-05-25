@@ -1,15 +1,16 @@
 @if (rows.length) {
-  <section class="cp-card">
-    <div class="cp-card__body">
-      <h2 class="cp-card__title">{{ title }}</h2>
-      <dl class="cp-dl">
-        @for (row of rows; track row.label) {
-          <div class="cp-dl__row">
-            <dt class="cp-dl__label">{{ row.label }}</dt>
-            <dd class="cp-dl__value">{{ row.value }}</dd>
-          </div>
-        }
-      </dl>
-    </div>
+  <section class="portal-panel briefing-panel">
+    <h2 class="portal-panel__title">
+      <mat-icon svgIcon="heroicons_outline:clipboard-document-list" />
+      {{ title }}
+    </h2>
+    <dl class="briefing-panel__dl">
+      @for (row of rows; track row.label) {
+        <div class="briefing-panel__row">
+          <dt>{{ row.label }}</dt>
+          <dd>{{ row.value }}</dd>
+        </div>
+      }
+    </dl>
   </section>
 }

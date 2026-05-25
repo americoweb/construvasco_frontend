@@ -1,0 +1,13 @@
+/**
+ * Single global stylesheet bundle.
+ * Required so Fuse @apply (text-primary, etc.) resolves — Angular compiles
+ * each angular.json "styles" entry separately in dev mode.
+ */
+@import '../@fuse/styles/tailwind.scss';
+@import '../@fuse/styles/themes.scss';
+
+@tailwind utilities;
+
+@import './vendors.scss';
+@import '../@fuse/styles/main.scss';
+@import './styles.scss';

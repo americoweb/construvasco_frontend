@@ -1,6 +1,9 @@
-<section class="cp-card cp-mockup-featured">
-  <div class="cp-card__body">
-    <h2 class="cp-card__title">{{ caption }}</h2>
+<section class="portal-panel mockup-card">
+  <h2 class="portal-panel__title">
+    <mat-icon svgIcon="heroicons_outline:check-badge" />
+    {{ caption }}
+  </h2>
+  <div class="mockup-card__frame">
     <img [src]="imageUrl" alt="Mockup aprovado" loading="lazy" />
   </div>
 </section>

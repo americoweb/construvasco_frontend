@@ -1,26 +1,35 @@
-<div class="max-w-xl">
-  <p class="text-slate-600 mb-4">
-    Fotos do terreno ou referências de inspiração (opcional). Ajuda a IA a compreender o contexto.
-  </p>
-
-  <label class="inline-flex items-center gap-2 px-4 py-2 border border-dashed border-slate-300 rounded-lg cursor-pointer hover:bg-slate-50">
-    <mat-icon>upload</mat-icon>
-    <span>Escolher imagens</span>
-    <input type="file" accept="image/*" multiple class="hidden" (change)="onFiles($event)" [disabled]="uploading" />
+<div class="studio-refs">
+  <label class="studio-refs__drop" [class.studio-refs__drop--busy]="uploading">
+    <span class="studio-refs__drop-icon">
+      <mat-icon svgIcon="heroicons_outline:arrow-up-tray" />
+    </span>
+    <span class="studio-refs__drop-title">Arraste ou escolha imagens</span>
+    <span class="studio-refs__drop-hint">Terreno, fachadas ou inspiração — JPG ou PNG</span>
+    <input
+      type="file"
+      accept="image/*"
+      multiple
+      class="studio-refs__input"
+      (change)="onFiles($event)"
+      [disabled]="uploading"
+    />
   </label>
 
   @if (uploading) {
-    <p class="text-sm text-slate-500 mt-2">A enviar ficheiros…</p>
+    <p class="studio-refs__status">
+      <mat-icon svgIcon="heroicons_outline:arrow-path" class="studio-refs__spin" />
+      A enviar ficheiros…
+    </p>
   }
 
   @if (documents.length) {
-    <mat-list class="mt-4">
+    <ul class="studio-refs__list" aria-label="Ficheiros carregados">
       @for (doc of documents; track doc.id) {
-        <mat-list-item>
-          <mat-icon matListItemIcon>image</mat-icon>
-          <span matListItemTitle>{{ doc.original_name || 'Imagem' }}</span>
-        </mat-list-item>
+        <li class="studio-refs__item">
+          <mat-icon svgIcon="heroicons_outline:photo" />
+          <span>{{ doc.original_name || 'Imagem' }}</span>
+        </li>
       }
-    </mat-list>
+    </ul>
   }
 </div>

@@ -10,6 +10,7 @@ import { ProjectDocument } from '../../../../../shared/construction/construction
   standalone: true,
   imports: [CommonModule, MatButtonModule, MatIconModule, MatListModule],
   templateUrl: './wizard-step-references.component.html',
+  styleUrls: ['./wizard-step-references.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WizardStepReferencesComponent {

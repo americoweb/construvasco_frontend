@@ -60,6 +60,7 @@ import {
 })
 export class ProjectDetailComponent implements OnInit {
   loading = true;
+  pageReady = false;
   deliverablesLoading = false;
   assigning = false;
   actionDeliverableId: number | null = null;
@@ -125,10 +126,12 @@ export class ProjectDetailComponent implements OnInit {
         const main = res.data.assignments?.find((a) => a.assignment_role === 'main');
         this.selectedTechnicianId = main?.assigned_user?.id ?? main?.assigned_to ?? null;
         this.loading = false;
+        this.pageReady = true;
         this.cdr.markForCheck();
       },
       error: () => {
         this.loading = false;
+        this.pageReady = true;
         this.notify.error('Projecto não encontrado.');
         this.cdr.markForCheck();
       },
@@ -161,6 +164,21 @@ export class ProjectDetailComponent implements OnInit {
       this.project?.contract_phase_label ?? this.project?.contract_phase,
       this.project?.current_phase
     );
+  }
+
+  phaseBadgeClass(): string {
+    switch (this.project?.contract_phase) {
+      case 'execution_quote':
+        return 'stf-prj-d-badge--warn';
+      case 'construction':
+        return 'stf-prj-d-badge--build';
+      case 'completed':
+        return 'stf-prj-d-badge--ok';
+      case 'closed':
+        return 'stf-prj-d-badge--muted';
+      default:
+        return 'stf-prj-d-badge--default';
+    }
   }
 
   get showConstructionPhase(): boolean {

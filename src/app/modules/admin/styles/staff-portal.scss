@@ -1,0 +1,14 @@
+/**
+ * Staff portal layout — content lives inside `.staff-main` (classy layout, px-6 = 1.5rem).
+ * Page roots should be full width; no extra max-width centering on list hubs.
+ */
+
+.staff-main {
+  min-width: 0;
+  width: 100%;
+}
+
+.staff-main > :not(router-outlet) {
+  width: 100%;
+  max-width: none;
+}

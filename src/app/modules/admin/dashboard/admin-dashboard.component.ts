@@ -8,7 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { Subject, takeUntil, forkJoin, of, catchError } from 'rxjs';
-import { PageHeaderComponent } from '../../../shared/components/layout/page-header/page-header.component';
+import { MatIconModule } from '@angular/material/icon';
 import {
   AdminDashboardService,
   AdminDashboardStats,
@@ -22,13 +22,14 @@ import { UserService } from '../../../core/auth/services/user.service';
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, PageHeaderComponent],
+  imports: [CommonModule, RouterLink, MatIconModule],
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminDashboardComponent implements OnInit, OnDestroy {
   loading = true;
+  pageReady = false;
   stats: AdminDashboardStats | null = null;
   recentProjects: AdminProjectSummary[] = [];
   userRole = '';
@@ -42,6 +43,24 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   today = new Date().toLocaleDateString('pt-MZ', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
   });
+
+  get firstName(): string {
+    const name = this.userService.user?.name?.trim() || 'Equipa';
+    return name.split(/\s+/)[0] || name;
+  }
+
+  get heroEyebrow(): string {
+    if (this.isTechnician) return 'Área técnica';
+    if (this.userRole === 'admin') return 'Administração';
+    return 'Gestão de projectos';
+  }
+
+  get heroSubtitle(): string {
+    if (this.isTechnician) {
+      return 'Marcos, entregáveis e obras atribuídas a si.';
+    }
+    return 'Visão geral da operação Construvasco — pedidos, obras e finanças.';
+  }
 
   private _destroy$ = new Subject<void>();
 
@@ -73,6 +92,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
     this.isManager = ['admin', 'project_manager', 'gestor'].includes(this.userRole);
 
     this.loading = true;
+    this.pageReady = false;
     this.cdr.markForCheck();
 
     forkJoin({
@@ -102,12 +122,14 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
           const list = projects.data ?? [];
           this.recentProjects = list.slice(0, 8);
           this.loading = false;
+          this.pageReady = !!this.stats;
           this.cdr.markForCheck();
         },
         error: () => {
           this.stats = null;
           this.recentProjects = [];
           this.loading = false;
+          this.pageReady = false;
           this.cdr.markForCheck();
         }
       });

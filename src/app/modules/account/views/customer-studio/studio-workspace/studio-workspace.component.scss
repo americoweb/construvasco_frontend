@@ -1,20 +1,177 @@
-.generating-overlay {
+.studio-ws {
+  position: relative;
+  min-height: 12rem;
+}
+
+.studio-ws__overlay {
   position: absolute;
   inset: 0;
   z-index: 10;
-  background: rgba(255, 255, 255, 0.92);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
   padding: 2rem;
+  text-align: center;
+  border-radius: 1rem;
+  background: rgba(247, 246, 243, 0.94);
+  backdrop-filter: blur(6px);
 }
 
-.refine-section {
-  max-width: 36rem;
+.studio-ws__overlay-ring {
+  position: absolute;
+  width: 5.5rem;
+  height: 5.5rem;
+  border: 2px solid color-mix(in srgb, var(--app-primary) 30%, transparent);
+  border-radius: 50%;
+  animation: studio-ws-ring 2s ease-in-out infinite;
 }
 
-.disclaimer {
-  line-height: 1.5;
+@keyframes studio-ws-ring {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+.studio-ws__overlay-title {
+  position: relative;
+  z-index: 1;
+  margin: 1rem 0 0.4rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-foreground);
+}
+
+.studio-ws__overlay-text {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  max-width: 22rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--app-foreground-secondary);
+}
+
+.studio-ws__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.15rem;
+  border-radius: 0.875rem;
+  border: 1px solid var(--app-border);
+  background: color-mix(in srgb, var(--app-muted) 40%, var(--app-surface));
+}
+
+.studio-ws__generate {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.45rem;
+  height: 2.65rem !important;
+  padding: 0 1.35rem !important;
+  border-radius: 0.75rem !important;
+  transition: transform 0.2s ease !important;
+
+  mat-icon {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  &:hover:not([disabled]) {
+    transform: scale(1.02);
+  }
+
+  &:active:not([disabled]) {
+    transform: scale(0.98);
+  }
+}
+
+.studio-ws__toggle {
+  font-size: 0.875rem;
+}
+
+.studio-ws__refine {
+  margin-top: 1.5rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 28%, var(--app-border));
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--app-primary-muted) 60%, var(--app-surface)) 0%,
+    var(--app-surface) 100%
+  );
+  animation: studio-ws-refine-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes studio-ws-refine-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.studio-ws__refine-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--app-foreground);
+
+  mat-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--app-primary);
+  }
+}
+
+.studio-ws__refine-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.studio-ws__error {
+  margin: 1rem 0 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  background: var(--app-error-light);
+  color: var(--app-error);
+}
+
+.studio-ws__disclaimer {
+  margin-top: 1.5rem;
+  padding: 1rem 1.15rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  border: 1px solid color-mix(in srgb, var(--app-warning) 45%, var(--app-border));
+  background: var(--app-warning-light);
+  color: #5c5748;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-ws__overlay-ring,
+  .studio-ws__refine {
+    animation: none;
+  }
+
+  .studio-ws__generate:hover:not([disabled]),
+  .studio-ws__generate:active:not([disabled]) {
+    transform: none;
+  }
 }

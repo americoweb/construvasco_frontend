@@ -1,183 +1,238 @@
-<div class="admin-dashboard w-full">
-  <app-page-header
-    [title]="'Painel'"
-    [subtitle]="'Visão geral da operação · ' + today"
-    [showSearch]="false"
-    [loading]="loading">
-  </app-page-header>
-
-  <div class="container mx-auto px-4 py-6 space-y-8">
-
-    @if (loading) {
-      <div class="flex items-center justify-center py-20">
-        <div class="flex flex-col items-center gap-3 text-gray-400">
-          <svg class="w-8 h-8 animate-spin" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-          </svg>
-          <span class="text-sm">A carregar…</span>
+<div class="stf-dash" [class.stf-dash--ready]="pageReady">
+  @if (loading) {
+    <div class="stf-dash__skeleton" aria-busy="true" aria-label="A carregar painel">
+      <div class="stf-dash__skel-hero"></div>
+      <div class="stf-dash__skel-kpis">
+        <div></div><div></div><div></div><div></div>
+      </div>
+      <div class="stf-dash__skel-panel"></div>
+    </div>
+  } @else if (stats) {
+    <header class="stf-dash-hero stf-dash-animate" style="--i: 0">
+      <div class="stf-dash-hero__main">
+        <div class="stf-dash-hero__copy">
+          <span class="stf-dash-hero__eyebrow">{{ heroEyebrow }}</span>
+          <h1 class="stf-dash-hero__title">
+            Olá, <span class="stf-dash-hero__name">{{ firstName }}</span>
+          </h1>
+          <p class="stf-dash-hero__sub">{{ heroSubtitle }}</p>
+          <p class="stf-dash-hero__date">{{ today }}</p>
+        </div>
+        <div class="stf-dash-hero__stat">
+          <span class="stf-dash-hero__stat-label">
+            {{ isTechnician ? 'Projectos atribuídos' : 'Projectos activos' }}
+          </span>
+          <span class="stf-dash-hero__stat-value">{{ stats.projects_active }}</span>
+          <span class="stf-dash-hero__stat-total">de {{ stats.projects_total }} no total</span>
         </div>
       </div>
-    } @else if (stats) {
+    </header>
 
-      <div class="job-cards-hero rounded-2xl overflow-hidden">
-        <div class="bg-gradient-to-br from-indigo-600 to-violet-600 p-6 text-white">
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <p class="text-indigo-200 text-sm font-medium uppercase tracking-wider">
-                {{ isTechnician ? 'Projectos atribuídos' : 'Projectos de construção' }}
-              </p>
-              <p class="text-5xl font-extrabold mt-1">{{ stats.projects_total }}</p>
-              <p class="text-indigo-200 text-sm mt-1">{{ stats.projects_active }} {{ isTechnician ? 'em execução' : 'activos' }}</p>
-            </div>
-            <div class="rounded-xl bg-white/15 p-4">
-              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-              </svg>
-            </div>
+    <div class="stf-dash-kpis stf-dash-animate" style="--i: 1">
+      <article class="stf-dash-kpi">
+        <div class="stf-dash-kpi__icon">
+          <mat-icon svgIcon="heroicons_outline:flag" />
+        </div>
+        <div class="stf-dash-kpi__data">
+          <span class="stf-dash-kpi__value">{{ stats.milestones_pending }}</span>
+          <span class="stf-dash-kpi__label">Marcos pendentes</span>
+        </div>
+      </article>
+      <article class="stf-dash-kpi">
+        <div class="stf-dash-kpi__icon stf-dash-kpi__icon--info">
+          <mat-icon svgIcon="heroicons_outline:document-arrow-up" />
+        </div>
+        <div class="stf-dash-kpi__data">
+          <span class="stf-dash-kpi__value">{{ stats.deliverables_submitted }}</span>
+          <span class="stf-dash-kpi__label">Entregáveis submetidos</span>
+        </div>
+      </article>
+      <article class="stf-dash-kpi">
+        <div class="stf-dash-kpi__icon stf-dash-kpi__icon--ok">
+          <mat-icon svgIcon="heroicons_outline:user-group" />
+        </div>
+        <div class="stf-dash-kpi__data">
+          <span class="stf-dash-kpi__value">{{ stats.assignments_active }}</span>
+          <span class="stf-dash-kpi__label">Atribuições activas</span>
+        </div>
+      </article>
+      <article class="stf-dash-kpi" [class.stf-dash-kpi--attention]="stats.payments_pending > 0">
+        <div class="stf-dash-kpi__icon stf-dash-kpi__icon--warn">
+          <mat-icon svgIcon="heroicons_outline:banknotes" />
+        </div>
+        <div class="stf-dash-kpi__data">
+          <span class="stf-dash-kpi__value">{{ stats.payments_pending }}</span>
+          <span class="stf-dash-kpi__label">Pagamentos pendentes</span>
+        </div>
+        @if (stats.payments_pending > 0) {
+          <span class="stf-dash-kpi__hint">Requer confirmação</span>
+        }
+      </article>
+    </div>
+
+    @if (isManager && pendingConstructionQuotesCount > 0) {
+      <section class="stf-dash-alert stf-dash-animate" style="--i: 2">
+        <div class="stf-dash-alert__head">
+          <div class="stf-dash-alert__icon stf-dash-alert__icon--quote">
+            <mat-icon svgIcon="heroicons_outline:document-text" />
           </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="stage-pill">
-              <div class="stage-number bg-purple-500/30 text-purple-100">{{ stats.milestones_pending }}</div>
-              <p class="text-xs text-indigo-200">Marcos pendentes</p>
-            </div>
-            <div class="stage-pill">
-              <div class="stage-number bg-amber-500/30 text-amber-100">{{ stats.deliverables_submitted }}</div>
-              <p class="text-xs text-indigo-200">Entregáveis submetidos</p>
-            </div>
-            <div class="stage-pill">
-              <div class="stage-number bg-emerald-500/30 text-emerald-100">{{ stats.assignments_active }}</div>
-              <p class="text-xs text-indigo-200">Atribuições activas</p>
-            </div>
-            <div class="stage-pill">
-              <div class="stage-number bg-orange-500/30 text-orange-100">{{ stats.payments_pending }}</div>
-              <p class="text-xs text-indigo-200">Pagamentos pendentes</p>
-            </div>
+          <div>
+            <h2 class="stf-dash-alert__title">Pedidos de orçamento de obra</h2>
+            <p class="stf-dash-alert__count">{{ pendingConstructionQuotesCount }}</p>
           </div>
         </div>
-      </div>
+        <ul class="stf-dash-alert__list">
+          @for (p of pendingConstructionQuotes; track p.id) {
+            <li>
+              <span class="stf-dash-alert__item-label">{{ p.client?.name || p.name }}</span>
+              <a [routerLink]="['/admin/projectos', p.id]" class="stf-dash-alert__link">
+                Ver projecto
+                <mat-icon svgIcon="heroicons_outline:arrow-right" />
+              </a>
+            </li>
+          }
+        </ul>
+      </section>
+    }
 
-      @if (isManager && pendingConstructionQuotesCount > 0) {
-        <div class="bg-white rounded-2xl border border-amber-200 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-amber-100 bg-amber-50">
-            <h2 class="text-base font-semibold">Pedidos de orçamento de obra</h2>
-            <p class="text-2xl font-bold text-amber-800">{{ pendingConstructionQuotesCount }}</p>
+    @if (isManager && pendingPaymentsCount > 0) {
+      <section class="stf-dash-alert stf-dash-animate" style="--i: 3">
+        <div class="stf-dash-alert__head">
+          <div class="stf-dash-alert__icon stf-dash-alert__icon--pay">
+            <mat-icon svgIcon="heroicons_outline:currency-dollar" />
           </div>
-          <ul class="divide-y divide-gray-100">
-            @for (p of pendingConstructionQuotes; track p.id) {
-              <li class="px-6 py-3 flex justify-between gap-4">
-                <span class="text-sm font-medium">{{ p.client?.name || p.name }}</span>
-                <a [routerLink]="['/admin/projectos', p.id]" class="text-sm text-indigo-600">Ver projecto</a>
-              </li>
-            }
-          </ul>
-        </div>
-      }
-
-      @if (isManager && pendingPaymentsCount > 0) {
-        <div class="bg-white rounded-2xl border border-orange-200 shadow-sm overflow-hidden">
-          <div class="flex items-center justify-between px-6 py-4 border-b border-orange-100 bg-orange-50">
-            <div>
-              <h2 class="text-base font-semibold text-gray-900">Pagamentos pendentes de confirmação</h2>
-              <p class="text-3xl font-bold text-orange-700 mt-1">{{ pendingPaymentsCount }}</p>
-            </div>
-          </div>
-          <ul class="divide-y divide-gray-100">
-            @for (p of pendingPayments; track p.id) {
-              <li class="px-6 py-3 flex items-center justify-between gap-4 hover:bg-gray-50">
-                <div class="min-w-0">
-                  <p class="font-medium text-gray-900 truncate">{{ paymentClientLabel(p) }}</p>
-                  <p class="text-sm text-gray-500">
-                    {{ formatMoney(p.amount) }} · {{ formatDate(p.proof_uploaded_at) }}
-                  </p>
-                </div>
-                @if (p.project_id) {
-                  <a
-                    [routerLink]="['/admin/projectos', p.project_id]"
-                    class="text-sm font-medium text-indigo-600 hover:text-indigo-800 shrink-0">
-                    Ver projecto
-                  </a>
-                }
-              </li>
-            }
-          </ul>
-          <div class="px-6 py-3 border-t border-gray-100 text-sm">
-            <span class="text-gray-500">Abra cada projecto para confirmar ou rejeitar o comprovativo.</span>
+          <div>
+            <h2 class="stf-dash-alert__title">Pagamentos por confirmar</h2>
+            <p class="stf-dash-alert__count">{{ pendingPaymentsCount }}</p>
           </div>
         </div>
-      }
+        <ul class="stf-dash-alert__list">
+          @for (p of pendingPayments; track p.id) {
+            <li>
+              <div class="stf-dash-alert__item-meta">
+                <span class="stf-dash-alert__item-label">{{ paymentClientLabel(p) }}</span>
+                <span class="stf-dash-alert__item-sub">
+                  {{ formatMoney(p.amount) }} · {{ formatDate(p.proof_uploaded_at) }}
+                </span>
+              </div>
+              @if (p.project_id) {
+                <a [routerLink]="['/admin/projectos', p.project_id]" class="stf-dash-alert__link">
+                  Ver projecto
+                  <mat-icon svgIcon="heroicons_outline:arrow-right" />
+                </a>
+              }
+            </li>
+          }
+        </ul>
+        <p class="stf-dash-alert__foot">Abra cada projecto para confirmar ou rejeitar o comprovativo.</p>
+      </section>
+    }
 
+  <div class="stf-dash-mid stf-dash-animate" [style.--i]="isManager && (pendingConstructionQuotesCount > 0 || pendingPaymentsCount > 0) ? 4 : 2">
       @if (!isTechnician) {
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <a routerLink="/admin/financas" class="stat-card">
-          <div>
-            <p class="stat-label">Finanças</p>
-            <p class="stat-value">{{ stats.payments_pending }}</p>
-            <p class="stat-hint">Pagamentos pendentes</p>
-          </div>
-          <div class="stat-icon bg-teal-100 text-teal-800">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-        </a>
-
-        <a routerLink="/admin/staff" class="stat-card">
-          <div>
-            <p class="stat-label">Equipa</p>
-            <p class="stat-value">—</p>
-            <p class="stat-hint">Membros e perfis</p>
-          </div>
-          <div class="stat-icon bg-slate-100 text-slate-700">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-          </div>
-        </a>
-      </div>
+        <nav class="stf-dash-quick" aria-label="Atalhos">
+          <a routerLink="/admin/pedidos/lista" class="stf-dash-quick__item">
+            <span class="stf-dash-quick__icon">
+              <mat-icon svgIcon="heroicons_outline:document-text" />
+            </span>
+            <span class="stf-dash-quick__text">
+              <strong>Pedidos</strong>
+              <small>Briefings e orçamentos</small>
+            </span>
+            <mat-icon class="stf-dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+          </a>
+          <a routerLink="/admin/projectos" class="stf-dash-quick__item">
+            <span class="stf-dash-quick__icon">
+              <mat-icon svgIcon="heroicons_outline:building-office-2" />
+            </span>
+            <span class="stf-dash-quick__text">
+              <strong>Projectos</strong>
+              <small>Obras e marcos</small>
+            </span>
+            <mat-icon class="stf-dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+          </a>
+          <a routerLink="/admin/financas" class="stf-dash-quick__item">
+            <span class="stf-dash-quick__icon">
+              <mat-icon svgIcon="heroicons_outline:banknotes" />
+            </span>
+            <span class="stf-dash-quick__text">
+              <strong>Finanças</strong>
+              <small>Pagamentos e receitas</small>
+            </span>
+            <mat-icon class="stf-dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+          </a>
+          @if (userRole === 'admin') {
+            <a routerLink="/admin/staff/list" class="stf-dash-quick__item">
+              <span class="stf-dash-quick__icon">
+                <mat-icon svgIcon="heroicons_outline:users" />
+              </span>
+              <span class="stf-dash-quick__text">
+                <strong>Equipa</strong>
+                <small>Membros e perfis</small>
+              </span>
+              <mat-icon class="stf-dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+            </a>
+          }
+        </nav>
       } @else {
-        <a routerLink="/admin/projectos" class="stat-card block max-w-md">
-          <div>
-            <p class="stat-label">Meus projectos</p>
-            <p class="stat-value">{{ stats.projects_total }}</p>
-            <p class="stat-hint">Ver obras atribuídas e entregáveis</p>
+        <a routerLink="/admin/projectos" class="stf-dash-cta-tech">
+          <div class="stf-dash-cta-tech__icon">
+            <mat-icon svgIcon="heroicons_outline:wrench-screwdriver" />
           </div>
+          <div>
+            <strong>Meus projectos</strong>
+            <p>Obras atribuídas, marcos e entregáveis</p>
+          </div>
+          <mat-icon svgIcon="heroicons_outline:arrow-right" />
         </a>
       }
 
-      <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 class="text-base font-semibold text-gray-900">{{ isTechnician ? 'Meus projectos' : 'Projectos recentes' }}</h2>
-        </div>
+      <section class="stf-dash-panel">
+        <header class="stf-dash-panel__head">
+          <h2 class="stf-dash-panel__title">
+            <mat-icon svgIcon="heroicons_outline:rectangle-stack" />
+            {{ isTechnician ? 'Meus projectos' : 'Projectos recentes' }}
+          </h2>
+          <a routerLink="/admin/projectos" class="stf-dash-panel__all">Ver todos</a>
+        </header>
 
         @if (recentProjects.length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 text-gray-400">
-            <p class="text-sm">Ainda não há projectos registados.</p>
+          <div class="stf-dash-empty">
+            <div class="stf-dash-empty__icon">
+              <mat-icon svgIcon="heroicons_outline:building-office-2" />
+            </div>
+            <p class="stf-dash-empty__title">Sem projectos recentes</p>
+            <p class="stf-dash-empty__text">Os projectos aparecerão aqui quando forem criados ou atribuídos.</p>
           </div>
         } @else {
-          <ul class="divide-y divide-gray-100">
+          <ul class="stf-dash-list">
             @for (project of recentProjects; track project.id) {
-              <li class="px-6 py-4 flex items-center justify-between gap-4 hover:bg-gray-50">
-                <div class="min-w-0">
-                  <p class="font-medium text-gray-900 truncate">{{ projectLabel(project) }}</p>
-                  <p class="text-sm text-gray-500">
-                    {{ project.client?.name || 'Cliente' }}
-                    · {{ project.status || '—' }}
-                    · {{ formatDate(project.updated_at || project.created_at) }}
-                  </p>
-                </div>
+              <li>
+                <a [routerLink]="['/admin/projectos', project.id]" class="stf-dash-list__card">
+                  <span class="stf-dash-list__accent" aria-hidden="true"></span>
+                  <div class="stf-dash-list__body">
+                    <p class="stf-dash-list__title">{{ projectLabel(project) }}</p>
+                    <p class="stf-dash-list__meta">
+                      {{ project.client?.name || 'Cliente' }}
+                      · {{ project.status || '—' }}
+                      · {{ formatDate(project.updated_at || project.created_at) }}
+                    </p>
+                  </div>
+                  <mat-icon class="stf-dash-list__chev" svgIcon="heroicons_outline:chevron-right" />
+                </a>
               </li>
             }
           </ul>
         }
-      </div>
-
-    } @else {
-      <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        Não foi possível carregar o painel. Confirme que o servidor Laravel está a correr e que tem perfil de administrador.
-      </div>
-    }
-
-  </div>
+      </section>
+    </div>
+  } @else {
+    <div class="stf-dash-error stf-dash-animate" style="--i: 0">
+      <mat-icon svgIcon="heroicons_outline:exclamation-triangle" />
+      <p>
+        Não foi possível carregar o painel. Confirme que o servidor Laravel está a correr e que tem perfil
+        adequado.
+      </p>
+    </div>
+  }
 </div>

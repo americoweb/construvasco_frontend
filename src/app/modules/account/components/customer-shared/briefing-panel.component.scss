@@ -1,3 +1,33 @@
 :host {
   display: block;
 }
+
+.briefing-panel__dl {
+  margin: 0;
+}
+
+.briefing-panel__row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 38%) 1fr;
+  gap: 0.35rem 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--app-border);
+  font-size: 0.9375rem;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  dt {
+    margin: 0;
+    font-weight: 500;
+    color: var(--app-muted-foreground);
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--app-foreground);
+  }
+}

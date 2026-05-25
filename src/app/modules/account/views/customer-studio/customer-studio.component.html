@@ -1,102 +1,195 @@
-<div class="customer-page customer-studio">
-  <header class="cp-page-header flex flex-wrap items-start justify-between gap-4">
-    <div>
-      <h1 class="cp-page-title">Estúdio de projecto</h1>
-      <p class="cp-page-subtitle">Crie o briefing, carregue referências e gere mockups com IA antes de submeter o pedido.</p>
+<div class="studio customer-page" [class.studio--ready]="!loading">
+  <header class="studio-hero studio-animate" style="--i: 0">
+    <div class="studio-hero__copy">
+      <p class="studio-hero__eyebrow">Briefing guiado com IA</p>
+      <h1 class="studio-hero__title">Estúdio de projecto</h1>
+      <p class="studio-hero__sub">
+        Defina o projecto, carregue referências e gere mockups antes de pedir arquitectura.
+      </p>
     </div>
     @if (!loading) {
-      <app-credits-balance-card [balance]="creditsBalance" [costPerGeneration]="costPerGeneration" />
+      <app-credits-balance-card
+        class="studio-hero__credits"
+        [balance]="creditsBalance"
+        [costPerGeneration]="costPerGeneration"
+      />
     }
   </header>
 
-  <nav class="cp-wizard-progress" aria-label="Passos do wizard">
+  <nav class="studio-wizard studio-animate" aria-label="Passos do wizard" style="--i: 1">
     @for (label of stepLabels; track label; let i = $index) {
       <div
-        class="cp-wizard-step"
-        [class.active]="i === currentStep"
-        [class.done]="i < currentStep"
+        class="studio-wizard__step"
+        [class.studio-wizard__step--active]="i === currentStep"
+        [class.studio-wizard__step--done]="i < currentStep"
       >
-        <span class="cp-wizard-step__dot">{{ i + 1 }}</span>
-        <span class="cp-wizard-step__label">{{ label }}</span>
+        <span class="studio-wizard__dot">
+          @if (i < currentStep) {
+            <mat-icon svgIcon="heroicons_outline:check" />
+          } @else {
+            {{ i + 1 }}
+          }
+        </span>
+        <span class="studio-wizard__label">{{ label }}</span>
       </div>
     }
   </nav>
 
   @if (loading) {
-    <div class="cp-loading">
-      <mat-spinner diameter="40" />
+    <div class="studio-skeleton" aria-busy="true" aria-label="A carregar estúdio">
+      <div class="studio-skeleton__panel"></div>
+      <div class="studio-skeleton__actions"></div>
     </div>
   } @else {
-    <div class="cp-card cp-card__body mb-6">
+    <div class="studio-panel studio-animate" style="--i: 2">
       @switch (currentStep) {
         @case (0) {
-          <app-wizard-step-project [form]="projectForm" />
+          <div class="studio-step">
+            <div class="studio-step__intro">
+              <span class="studio-step__icon">
+                <mat-icon svgIcon="heroicons_outline:home-modern" />
+              </span>
+              <div>
+                <h2 class="studio-step__title">Dados do projecto</h2>
+                <p class="studio-step__text">Título, tipo de obra e tipologia.</p>
+              </div>
+            </div>
+            <app-wizard-step-project [form]="projectForm" />
+          </div>
         }
         @case (1) {
-          <app-wizard-step-briefing [form]="briefingForm" />
+          <div class="studio-step">
+            <div class="studio-step__intro">
+              <span class="studio-step__icon">
+                <mat-icon svgIcon="heroicons_outline:map-pin" />
+              </span>
+              <div>
+                <h2 class="studio-step__title">Briefing</h2>
+                <p class="studio-step__text">Local, dimensões e preferências estéticas.</p>
+              </div>
+            </div>
+            <app-wizard-step-briefing [form]="briefingForm" />
+          </div>
         }
         @case (2) {
-          <app-wizard-step-references
-            [documents]="documents"
-            [uploading]="uploading"
-            (filesSelected)="onFilesSelected($event)"
-          />
+          <div class="studio-step">
+            <div class="studio-step__intro">
+              <span class="studio-step__icon">
+                <mat-icon svgIcon="heroicons_outline:photo" />
+              </span>
+              <div>
+                <h2 class="studio-step__title">Referências visuais</h2>
+                <p class="studio-step__text">Fotos do terreno ou inspiração (opcional).</p>
+              </div>
+            </div>
+            <app-wizard-step-references
+              [documents]="documents"
+              [uploading]="uploading"
+              (filesSelected)="onFilesSelected($event)"
+            />
+          </div>
         }
         @case (3) {
-          @if (draftId) {
-            <app-studio-workspace [requestId]="draftId" [disclaimer]="disclaimer" />
-          }
+          <div class="studio-step studio-step--wide">
+            <div class="studio-step__intro">
+              <span class="studio-step__icon studio-step__icon--ai">
+                <mat-icon svgIcon="heroicons_outline:sparkles" />
+              </span>
+              <div>
+                <h2 class="studio-step__title">Geração com IA</h2>
+                <p class="studio-step__text">Crie, refine e aprove o mockup de referência.</p>
+              </div>
+            </div>
+            @if (draftId) {
+              <app-studio-workspace [requestId]="draftId" [disclaimer]="disclaimer" />
+            }
+          </div>
         }
         @case (4) {
-          <section class="customer-page--narrow">
-            <h2 class="cp-section-title">Revisão e submissão</h2>
-            <dl class="cp-dl mb-4">
-              <div class="cp-dl__row">
-                <dt class="cp-dl__label">Título</dt>
-                <dd class="cp-dl__value">{{ projectForm.value.title }}</dd>
+          <section class="studio-review">
+            <div class="studio-step__intro studio-step__intro--compact">
+              <span class="studio-step__icon">
+                <mat-icon svgIcon="heroicons_outline:clipboard-document-check" />
+              </span>
+              <div>
+                <h2 class="studio-step__title">Revisão e submissão</h2>
+                <p class="studio-step__text">Confirme os dados antes de pedir arquitectura.</p>
               </div>
-              <div class="cp-dl__row">
-                <dt class="cp-dl__label">Tipo</dt>
-                <dd class="cp-dl__value">{{ projectForm.value.project_type }} / {{ projectForm.value.tipologia }}</dd>
-              </div>
-              <div class="cp-dl__row">
-                <dt class="cp-dl__label">Local</dt>
-                <dd class="cp-dl__value">{{ briefingForm.value.localizacao }}</dd>
-              </div>
-              <div class="cp-dl__row">
-                <dt class="cp-dl__label">Área</dt>
-                <dd class="cp-dl__value">{{ briefingForm.value.area_m2 }} m², {{ briefingForm.value.num_pisos }} pisos</dd>
-              </div>
-              <div class="cp-dl__row">
-                <dt class="cp-dl__label">Mockup aprovado</dt>
-                <dd class="cp-dl__value">{{ hasApprovedMockup ? 'Sim' : 'Não' }}</dd>
-              </div>
-            </dl>
-            <p class="text-sm text-stone-600 mb-4">
+            </div>
+
+            <div class="studio-review__grid">
+              <article class="studio-review__card">
+                <h3 class="studio-review__card-title">Projecto</h3>
+                <dl class="studio-review__dl">
+                  <div>
+                    <dt>Título</dt>
+                    <dd>{{ projectForm.value.title }}</dd>
+                  </div>
+                  <div>
+                    <dt>Tipo</dt>
+                    <dd>{{ projectForm.value.project_type }} / {{ projectForm.value.tipologia }}</dd>
+                  </div>
+                </dl>
+              </article>
+              <article class="studio-review__card">
+                <h3 class="studio-review__card-title">Briefing</h3>
+                <dl class="studio-review__dl">
+                  <div>
+                    <dt>Local</dt>
+                    <dd>{{ briefingForm.value.localizacao }}</dd>
+                  </div>
+                  <div>
+                    <dt>Área</dt>
+                    <dd>{{ briefingForm.value.area_m2 }} m² · {{ briefingForm.value.num_pisos }} pisos</dd>
+                  </div>
+                </dl>
+              </article>
+              <article
+                class="studio-review__card"
+                [class.studio-review__card--ok]="hasApprovedMockup"
+                [class.studio-review__card--warn]="!hasApprovedMockup"
+              >
+                <h3 class="studio-review__card-title">Mockup IA</h3>
+                <p class="studio-review__status">
+                  @if (hasApprovedMockup) {
+                    <mat-icon svgIcon="heroicons_outline:check-circle" />
+                    Aprovado — pronto para submissão
+                  } @else {
+                    <mat-icon svgIcon="heroicons_outline:exclamation-triangle" />
+                    Sem mockup aprovado
+                  }
+                </p>
+              </article>
+            </div>
+
+            <p class="studio-review__note">
               Ao submeter, a Construvasco analisa o pedido e entra em contacto para o orçamento de arquitectura.
             </p>
             <button
               mat-flat-button
               color="primary"
               type="button"
+              class="studio-review__submit"
               [disabled]="submitting"
               (click)="submitRequest()"
             >
-              Pedir arquitectura
+              <mat-icon svgIcon="heroicons_outline:paper-airplane" />
+              @if (submitting) { A submeter… } @else { Pedir arquitectura }
             </button>
           </section>
         }
       }
     </div>
 
-    <div class="cp-wizard-actions">
+    <div class="studio-actions studio-animate" style="--i: 3">
       <button
         mat-stroked-button
         type="button"
-        class="cp-btn-secondary"
+        class="cp-btn-secondary studio-actions__btn"
         [disabled]="currentStep === 0 || saving || studioState.isGenerating"
         (click)="prev()"
       >
+        <mat-icon svgIcon="heroicons_outline:arrow-left" />
         Anterior
       </button>
       @if (currentStep < 4) {
@@ -104,13 +197,19 @@
           mat-flat-button
           color="primary"
           type="button"
+          class="studio-actions__btn studio-actions__btn--primary"
           [disabled]="saving || studioState.isGenerating"
           (click)="next()"
         >
-          @if (saving) { A guardar… } @else { Seguinte }
+          @if (saving) { A guardar… } @else {
+            Seguinte
+            <mat-icon svgIcon="heroicons_outline:arrow-right" />
+          }
         </button>
       }
-      <a mat-stroked-button class="cp-btn-secondary" routerLink="/conta/dashboard">Voltar ao dashboard</a>
+      <a mat-stroked-button class="cp-btn-secondary studio-actions__btn" routerLink="/conta/dashboard">
+        Dashboard
+      </a>
     </div>
   }
 </div>

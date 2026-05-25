@@ -7,13 +7,14 @@ import {
     Input,
     OnDestroy,
     OnInit,
+    ViewChild,
     ViewEncapsulation,
 } from '@angular/core';
+import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { UserService } from 'app/core/auth/services/user.service';
 import { User } from 'app/core/auth/models/user.interface';
 import { AuthService } from 'app/core/auth/services/auth.service';
@@ -24,6 +25,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
     selector: 'user',
     templateUrl: './user.component.html',
+    styleUrls: ['./user.component.scss'],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush,
     exportAs: 'user',
@@ -36,12 +38,15 @@ import { Subject, takeUntil } from 'rxjs';
         NgClass,
         MatDividerModule,
         AvatarComponent,
+        RouterLink,
     ],
 })
 export class UserComponent implements OnInit, OnDestroy {
     /* eslint-disable @typescript-eslint/naming-convention */
     static ngAcceptInputType_showAvatar: BooleanInput;
     /* eslint-enable @typescript-eslint/naming-convention */
+
+    @ViewChild('userMenuTrigger') userMenuTrigger?: MatMenuTrigger;
 
     @Input() showAvatar: boolean = true;
     user: User | null = null;
@@ -87,6 +92,24 @@ export class UserComponent implements OnInit, OnDestroy {
         return path ? this.getAvatarUrl(path) : null;
     }
 
+    get roleLabel(): string {
+        const role = String(this.user?.current_tenant_context?.role ?? '')
+            .toLowerCase()
+            .trim();
+        const labels: Record<string, string> = {
+            admin: 'Administrador',
+            project_manager: 'Gestor de projectos',
+            gestor: 'Gestor de projectos',
+            receptionist: 'Recepção',
+            technician: 'Técnico',
+            tecnico: 'Técnico',
+            designer: 'Desenhista',
+            desenhista: 'Desenhista',
+            customer: 'Cliente',
+        };
+        return labels[role] ?? (role ? role.replace(/_/g, ' ') : '');
+    }
+
     // -----------------------------------------------------------------------------------------------------
     // @ Lifecycle hooks
     // -----------------------------------------------------------------------------------------------------
@@ -122,7 +145,12 @@ export class UserComponent implements OnInit, OnDestroy {
     /**
      * Sign out
      */
+    closeMenu(): void {
+        this.userMenuTrigger?.closeMenu();
+    }
+
     signOut(): void {
+        this.closeMenu();
         this._authService.signOut().subscribe(() => {
             this._router.navigate(['/auth/sign-in']);
         });

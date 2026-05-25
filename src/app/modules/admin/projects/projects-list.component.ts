@@ -1,23 +1,13 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { ConfigService } from '../../../core/services/config.service';
 import { API_ENDPOINTS } from '../../../shared/constants/api-endpoints';
 import { UserService } from '../../../core/auth/services/user.service';
-import {
-  contractPhaseBadgeClass,
-  contractPhaseLabel,
-} from '../../../shared/construction/contract-phase.util';
+import { contractPhaseLabel } from '../../../shared/construction/contract-phase.util';
 
 interface ProjectRow {
   id: number;
@@ -36,52 +26,30 @@ interface ProjectRow {
   assignments?: { assigned_user?: { name?: string }; assignment_role?: string }[];
 }
 
+export type StaffProjectFilter = 'all' | 'active' | 'construction' | 'review' | 'completed';
+
 @Component({
   selector: 'app-projects-list',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    FormsModule,
-    MatCardModule,
-    MatTableModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatIconModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, RouterLink, MatButtonModule, MatIconModule],
   templateUrl: './projects-list.component.html',
   styleUrls: ['./projects-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectsListComponent implements OnInit {
   loading = true;
+  pageReady = false;
   isTechnicianView = false;
   rows: ProjectRow[] = [];
-  filteredRows: ProjectRow[] = [];
   searchText = '';
-  statusFilter = '';
-  contractPhaseFilter = '';
+  filter: StaffProjectFilter = 'all';
 
-  readonly displayedColumns = [
-    'name',
-    'client',
-    'status',
-    'phase',
-    'location',
-    'budget',
-    'team',
-    'updated',
-  ];
-
-  readonly contractPhaseOptions = [
-    { value: 'architecture', label: 'Arquitectura' },
-    { value: 'execution_quote', label: 'Aguarda orçamento de obra' },
-    { value: 'construction', label: 'Obra em andamento' },
-    { value: 'completed', label: 'Concluído' },
-    { value: 'closed', label: 'Encerrado' },
+  readonly filters: { id: StaffProjectFilter; label: string; icon: string }[] = [
+    { id: 'all', label: 'Todos', icon: 'heroicons_outline:squares-2x2' },
+    { id: 'active', label: 'Em curso', icon: 'heroicons_outline:arrow-path' },
+    { id: 'construction', label: 'Em obra', icon: 'heroicons_outline:wrench-screwdriver' },
+    { id: 'review', label: 'Revisão', icon: 'heroicons_outline:exclamation-circle' },
+    { id: 'completed', label: 'Concluídos', icon: 'heroicons_outline:check-badge' },
   ];
 
   readonly statusOptions = [
@@ -111,43 +79,93 @@ export class ProjectsListComponent implements OnInit {
 
     this.http.get<{ data: ProjectRow[] }>(url).subscribe({
       next: (res) => {
-        this.rows = (res as { data?: ProjectRow[] }).data ?? [];
-        this.applyFilter();
+        this.rows = ((res as { data?: ProjectRow[] }).data ?? []).sort((a, b) => {
+          const ua = a.updated_at ?? '';
+          const ub = b.updated_at ?? '';
+          return ub.localeCompare(ua);
+        });
         this.loading = false;
+        this.pageReady = true;
         this.cdr.markForCheck();
       },
       error: () => {
         this.rows = [];
-        this.filteredRows = [];
         this.loading = false;
+        this.pageReady = true;
         this.cdr.markForCheck();
       },
     });
   }
 
-  applyFilter(): void {
+  get filteredRows(): ProjectRow[] {
+    let list = this.rows.filter((p) => this.matchesFilter(p, this.filter));
     const q = this.searchText.trim().toLowerCase();
-    this.filteredRows = this.rows.filter((p) => {
-      if (this.statusFilter && p.status !== this.statusFilter) return false;
-      if (this.contractPhaseFilter && p.contract_phase !== this.contractPhaseFilter) return false;
-      if (!q) return true;
-      const hay = [
-        p.name,
-        p.client?.name,
-        p.location,
-        p.status,
-        p.current_phase,
-        p.contract_phase,
-        p.contract_phase_label,
-        this.phaseLabel(p),
-        String(p.id),
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      return hay.includes(q);
-    });
+    if (q) {
+      list = list.filter((p) => {
+        const hay = [
+          p.name,
+          p.client?.name,
+          p.location,
+          p.status,
+          this.phaseLabel(p),
+          String(p.id),
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(q);
+      });
+    }
+    return list;
+  }
+
+  get constructionCount(): number {
+    return this.rows.filter((p) => p.contract_phase === 'construction').length;
+  }
+
+  get completedCount(): number {
+    return this.rows.filter((p) => this.matchesFilter(p, 'completed')).length;
+  }
+
+  get reviewCount(): number {
+    return this.rows.filter((p) => (p.pending_review_count ?? 0) > 0).length;
+  }
+
+  setFilter(id: StaffProjectFilter): void {
+    this.filter = id;
     this.cdr.markForCheck();
+  }
+
+  filterCount(id: StaffProjectFilter): number {
+    return this.rows.filter((p) => this.matchesFilter(p, id)).length;
+  }
+
+  onSearchInput(event: Event): void {
+    this.searchText = (event.target as HTMLInputElement).value;
+    this.cdr.markForCheck();
+  }
+
+  clearSearch(): void {
+    this.searchText = '';
+    this.cdr.markForCheck();
+  }
+
+  private matchesFilter(p: ProjectRow, f: StaffProjectFilter): boolean {
+    const phase = p.contract_phase ?? '';
+    switch (f) {
+      case 'all':
+        return true;
+      case 'active':
+        return phase !== 'completed' && phase !== 'closed';
+      case 'construction':
+        return phase === 'construction';
+      case 'review':
+        return (p.pending_review_count ?? 0) > 0;
+      case 'completed':
+        return phase === 'completed' || phase === 'closed';
+      default:
+        return true;
+    }
   }
 
   labelStatus(status?: string): string {
@@ -159,7 +177,59 @@ export class ProjectsListComponent implements OnInit {
   }
 
   phaseBadgeClass(p: ProjectRow): string {
-    return contractPhaseBadgeClass(p.contract_phase);
+    switch (p.contract_phase) {
+      case 'execution_quote':
+        return 'stf-prj-badge--warning';
+      case 'construction':
+        return 'stf-prj-badge--build';
+      case 'completed':
+        return 'stf-prj-badge--success';
+      case 'closed':
+        return 'stf-prj-badge--muted';
+      case 'architecture':
+        return 'stf-prj-badge--info';
+      default:
+        return 'stf-prj-badge--default';
+    }
+  }
+
+  phaseAccentClass(p: ProjectRow): string {
+    switch (p.contract_phase) {
+      case 'execution_quote':
+        return 'stf-prj-card--accent-warn';
+      case 'construction':
+        return 'stf-prj-card--accent-build';
+      case 'completed':
+        return 'stf-prj-card--accent-success';
+      case 'closed':
+        return 'stf-prj-card--accent-muted';
+      default:
+        return 'stf-prj-card--accent-primary';
+    }
+  }
+
+  phaseIcon(p: ProjectRow): string {
+    switch (p.contract_phase) {
+      case 'execution_quote':
+        return 'heroicons_outline:clipboard-document-list';
+      case 'construction':
+        return 'heroicons_outline:wrench-screwdriver';
+      case 'completed':
+        return 'heroicons_outline:check-badge';
+      case 'closed':
+        return 'heroicons_outline:archive-box';
+      default:
+        return 'heroicons_outline:pencil-square';
+    }
+  }
+
+  needsAttention(p: ProjectRow): boolean {
+    return (
+      (p.pending_review_count ?? 0) > 0 ||
+      p.contract_phase === 'execution_quote' ||
+      p.contract_phase === 'construction' ||
+      p.status === 'awaiting_payment'
+    );
   }
 
   teamLabel(p: ProjectRow): string {
@@ -178,6 +248,6 @@ export class ProjectsListComponent implements OnInit {
 
   formatDate(v?: string): string {
     if (!v) return '—';
-    return new Date(v).toLocaleDateString('pt-MZ');
+    return new Date(v).toLocaleDateString('pt-MZ', { day: '2-digit', month: 'short', year: 'numeric' });
   }
 }

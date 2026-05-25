@@ -1,120 +1,138 @@
-<div class="finances-page w-full">
-  <app-page-header
-    title="Finanças"
-    subtitle="Orçamentos enviados, pagamentos e resumo financeiro"
-    [showSearch]="false"
-    [loading]="loading" />
-
-  <div class="container mx-auto max-w-6xl px-4 pb-10">
-    @if (loading) {
-      <div class="flex justify-center py-16">
-        <mat-spinner diameter="40" />
+<div class="stf-fin" [class.stf-fin--ready]="pageReady">
+  @if (loading) {
+    <div class="stf-fin__skeleton" aria-busy="true" aria-label="A carregar finanças">
+      <div class="stf-fin__skel-hero"></div>
+      <div class="stf-fin__skel-kpis">
+        <div></div><div></div><div></div><div></div>
       </div>
-    } @else if (overview) {
-      <div class="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <mat-card class="kpi-card">
-          <mat-card-content>
-            <p class="kpi-label">Pagamentos recebidos</p>
-            <p class="kpi-value">{{ formatMoney(overview.payments_total_mt) }}</p>
-            <p class="kpi-sub">{{ overview.payments_count }} transacção(ões)</p>
-          </mat-card-content>
-        </mat-card>
-        <mat-card class="kpi-card">
-          <mat-card-content>
-            <p class="kpi-label">Orçamentos (enviados + aceites)</p>
-            <p class="kpi-value">{{ formatMoney(overview.quotes_total_sent_mt) }}</p>
-            <p class="kpi-sub">{{ overview.quotes_sent_count }} pendentes · {{ overview.quotes_accepted_count }} aceites</p>
-          </mat-card-content>
-        </mat-card>
-        <mat-card class="kpi-card kpi-card--link">
-          <mat-card-content>
-            <p class="kpi-label">Pedidos</p>
-            <a mat-stroked-button routerLink="/admin/pedidos" class="!mt-2">Registar pedido</a>
-          </mat-card-content>
-        </mat-card>
-        <mat-card class="kpi-card kpi-card--link">
-          <mat-card-content>
-            <p class="kpi-label">Projectos</p>
-            <a mat-stroked-button routerLink="/admin/projectos" class="!mt-2">Ver projectos</a>
-          </mat-card-content>
-        </mat-card>
+      <div class="stf-fin__skel-panels">
+        <div></div><div></div>
       </div>
+    </div>
+  } @else if (overview) {
+    <header class="stf-fin-hero stf-fin-animate" style="--i: 0">
+      <div class="stf-fin-hero__copy">
+        <span class="stf-fin-hero__eyebrow">Tesouraria</span>
+        <h1 class="stf-fin-hero__title">Finanças</h1>
+        <p class="stf-fin-hero__sub">Orçamentos enviados, pagamentos confirmados e resumo da operação comercial.</p>
+      </div>
+    </header>
 
-      <div class="grid gap-6 lg:grid-cols-2">
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Orçamentos recentes</mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="!p-0">
-            @if (!overview.recent_quotes.length) {
-              <p class="p-6 text-sm text-slate-500">Ainda não há orçamentos registados.</p>
-            } @else {
-              <table mat-table [dataSource]="overview.recent_quotes" class="w-full">
-                <ng-container matColumnDef="ref">
-                  <th mat-header-cell *matHeaderCellDef>Ref.</th>
-                  <td mat-cell *matCellDef="let q">{{ q.reference_code || '—' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="client">
-                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
-                  <td mat-cell *matCellDef="let q">{{ q.client_name || '—' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="amount">
-                  <th mat-header-cell *matHeaderCellDef>Valor</th>
-                  <td mat-cell *matCellDef="let q">{{ formatMoney(q.total_amount_mt) }}</td>
-                </ng-container>
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef>Estado</th>
-                  <td mat-cell *matCellDef="let q">
-                    <span class="quote-chip" [attr.data-status]="q.status">{{ labelQuoteStatus(q.status) }}</span>
-                  </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="quoteColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: quoteColumns"></tr>
-              </table>
+    <div class="stf-fin-kpis stf-fin-animate" style="--i: 1">
+      <article class="stf-fin-kpi stf-fin-kpi--primary">
+        <div class="stf-fin-kpi__icon">
+          <mat-icon svgIcon="heroicons_outline:banknotes" />
+        </div>
+        <div class="stf-fin-kpi__data">
+          <span class="stf-fin-kpi__label">Pagamentos recebidos</span>
+          <span class="stf-fin-kpi__value">{{ formatMoney(overview.payments_total_mt) }}</span>
+          <span class="stf-fin-kpi__sub">{{ overview.payments_count }} transacção(ões)</span>
+        </div>
+      </article>
+      <article class="stf-fin-kpi">
+        <div class="stf-fin-kpi__icon stf-fin-kpi__icon--quote">
+          <mat-icon svgIcon="heroicons_outline:document-currency-dollar" />
+        </div>
+        <div class="stf-fin-kpi__data">
+          <span class="stf-fin-kpi__label">Orçamentos (enviados + aceites)</span>
+          <span class="stf-fin-kpi__value">{{ formatMoney(overview.quotes_total_sent_mt) }}</span>
+          <span class="stf-fin-kpi__sub">
+            {{ overview.quotes_sent_count }} pendentes · {{ overview.quotes_accepted_count }} aceites
+          </span>
+        </div>
+      </article>
+      <a routerLink="/admin/pedidos/lista" class="stf-fin-kpi stf-fin-kpi--link">
+        <div class="stf-fin-kpi__icon stf-fin-kpi__icon--muted">
+          <mat-icon svgIcon="heroicons_outline:document-text" />
+        </div>
+        <div class="stf-fin-kpi__data">
+          <span class="stf-fin-kpi__label">Pedidos</span>
+          <span class="stf-fin-kpi__link-text">Registar ou consultar pedidos</span>
+        </div>
+        <mat-icon class="stf-fin-kpi__chev" svgIcon="heroicons_outline:chevron-right" />
+      </a>
+      <a routerLink="/admin/projectos" class="stf-fin-kpi stf-fin-kpi--link">
+        <div class="stf-fin-kpi__icon stf-fin-kpi__icon--muted">
+          <mat-icon svgIcon="heroicons_outline:building-office-2" />
+        </div>
+        <div class="stf-fin-kpi__data">
+          <span class="stf-fin-kpi__label">Projectos</span>
+          <span class="stf-fin-kpi__link-text">Ver obras e pagamentos</span>
+        </div>
+        <mat-icon class="stf-fin-kpi__chev" svgIcon="heroicons_outline:chevron-right" />
+      </a>
+    </div>
+
+    <div class="stf-fin-grid stf-fin-animate" style="--i: 2">
+      <section class="stf-fin-panel">
+        <header class="stf-fin-panel__head">
+          <mat-icon svgIcon="heroicons_outline:document-text" />
+          <h2 class="stf-fin-panel__title">Orçamentos recentes</h2>
+        </header>
+        @if (!overview.recent_quotes.length) {
+          <div class="stf-fin-empty">
+            <mat-icon svgIcon="heroicons_outline:inbox" />
+            <p>Ainda não há orçamentos registados.</p>
+          </div>
+        } @else {
+          <ul class="stf-fin-list">
+            @for (q of overview.recent_quotes; track q.id; let idx = $index) {
+              <li class="stf-fin-row" [style.--fi]="idx">
+                <span class="stf-fin-row__accent" [attr.data-status]="q.status" aria-hidden="true"></span>
+                <div class="stf-fin-row__main">
+                  <div class="stf-fin-row__top">
+                    <code class="stf-fin-row__ref">{{ q.reference_code || '—' }}</code>
+                    <span class="stf-fin-chip" [attr.data-status]="q.status">{{ labelQuoteStatus(q.status) }}</span>
+                  </div>
+                  <p class="stf-fin-row__client">{{ q.client_name || 'Cliente' }}</p>
+                </div>
+                <span class="stf-fin-row__amount">{{ formatMoney(q.total_amount_mt) }}</span>
+              </li>
             }
-          </mat-card-content>
-        </mat-card>
+          </ul>
+        }
+      </section>
 
-        <mat-card>
-          <mat-card-header>
-            <mat-card-title>Pagamentos recentes</mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="!p-0">
-            @if (!overview.recent_payments.length) {
-              <p class="p-6 text-sm text-slate-500">Ainda não há pagamentos registados.</p>
-            } @else {
-              <table mat-table [dataSource]="overview.recent_payments" class="w-full">
-                <ng-container matColumnDef="project">
-                  <th mat-header-cell *matHeaderCellDef>Projecto</th>
-                  <td mat-cell *matCellDef="let p">{{ p.project_name || '—' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="client">
-                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
-                  <td mat-cell *matCellDef="let p">{{ p.client_name || '—' }}</td>
-                </ng-container>
-                <ng-container matColumnDef="amount">
-                  <th mat-header-cell *matHeaderCellDef>Valor</th>
-                  <td mat-cell *matCellDef="let p">{{ formatMoney(p.amount) }} {{ p.currency }}</td>
-                </ng-container>
-                <ng-container matColumnDef="status">
-                  <th mat-header-cell *matHeaderCellDef>Estado</th>
-                  <td mat-cell *matCellDef="let p">
-                    <span class="pay-chip" [attr.data-status]="p.status">{{ p.status }}</span>
-                  </td>
-                </ng-container>
-                <tr mat-header-row *matHeaderRowDef="paymentColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: paymentColumns"></tr>
-              </table>
+      <section class="stf-fin-panel">
+        <header class="stf-fin-panel__head">
+          <mat-icon svgIcon="heroicons_outline:credit-card" />
+          <h2 class="stf-fin-panel__title">Pagamentos recentes</h2>
+        </header>
+        @if (!overview.recent_payments.length) {
+          <div class="stf-fin-empty">
+            <mat-icon svgIcon="heroicons_outline:inbox" />
+            <p>Ainda não há pagamentos registados.</p>
+          </div>
+        } @else {
+          <ul class="stf-fin-list">
+            @for (p of overview.recent_payments; track p.id; let idx = $index) {
+              <li class="stf-fin-row" [style.--fi]="idx">
+                <span class="stf-fin-row__accent" [attr.data-status]="p.status" aria-hidden="true"></span>
+                <div class="stf-fin-row__main">
+                  <div class="stf-fin-row__top">
+                    <span class="stf-fin-row__project">{{ p.project_name || 'Projecto' }}</span>
+                    <span class="stf-fin-chip stf-fin-chip--pay" [attr.data-status]="p.status">
+                      {{ labelPaymentStatus(p.status) }}
+                    </span>
+                  </div>
+                  <p class="stf-fin-row__client">{{ p.client_name || '—' }}</p>
+                </div>
+                <span class="stf-fin-row__amount">
+                  {{ formatMoney(p.amount) }}
+                  @if (p.currency && p.currency !== 'MZN') {
+                    <small>{{ p.currency }}</small>
+                  }
+                </span>
+              </li>
             }
-          </mat-card-content>
-        </mat-card>
-      </div>
-    } @else {
-      <mat-card>
-        <mat-card-content class="!py-10 text-center text-slate-500">
-          Não foi possível carregar o resumo financeiro.
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
+          </ul>
+        }
+      </section>
+    </div>
+  } @else {
+    <div class="stf-fin-error stf-fin-animate" style="--i: 0">
+      <mat-icon svgIcon="heroicons_outline:exclamation-triangle" />
+      <p>Não foi possível carregar o resumo financeiro. Confirme que o servidor está a correr.</p>
+    </div>
+  }
 </div>

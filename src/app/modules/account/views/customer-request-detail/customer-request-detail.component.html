@@ -1,41 +1,50 @@
-<div class="customer-page request-detail">
+<div class="portal-page customer-page request-detail" [class.portal--ready]="!loading && !!request">
   @if (loading) {
-    <div class="cp-loading">
-      <mat-spinner diameter="36" />
+    <div class="portal-skeleton" aria-busy="true">
+      <div class="portal-skeleton__card" style="height: 5rem; grid-column: 1 / -1"></div>
+      <div class="portal-skeleton__card" style="height: 16rem"></div>
+      <div class="portal-skeleton__card" style="height: 16rem"></div>
     </div>
   } @else if (request) {
+    <a mat-stroked-button class="cp-btn-secondary portal-back portal-animate" style="--i: 0" routerLink="/conta/pedidos">
+      <mat-icon svgIcon="heroicons_outline:arrow-left" />
+      Voltar aos pedidos
+    </a>
+
     @if (showSubmitBanner) {
-      <div class="cp-banner" role="status">
-        <div>
-          <p class="cp-banner__title">Pedido submetido com sucesso</p>
-          <p class="cp-banner__text">A Construvasco vai analisar o seu pedido e entrará em contacto em breve.</p>
+      <div class="portal-banner portal-animate" style="--i: 0" role="status">
+        <mat-icon svgIcon="heroicons_outline:check-circle" />
+        <div class="flex-1">
+          <p class="portal-banner__title">Pedido submetido com sucesso</p>
+          <p class="portal-banner__text">A Construvasco vai analisar o seu pedido e entrará em contacto em breve.</p>
         </div>
         <button mat-icon-button type="button" aria-label="Fechar" (click)="dismissBanner()">
-          <mat-icon>close</mat-icon>
+          <mat-icon svgIcon="heroicons_outline:x-mark" />
         </button>
       </div>
     }
 
-    <header class="cp-page-header">
-      <p class="cp-list-card__ref mb-1">{{ request.reference_code }}</p>
-      <h1 class="cp-page-title">{{ request.title }}</h1>
-      <div class="flex flex-wrap items-center gap-2 mt-2">
+    <header class="portal-detail-hero portal-animate" style="--i: 1">
+      <p class="portal-detail-hero__ref">{{ request.reference_code }}</p>
+      <h1 class="portal-detail-hero__title">{{ request.title }}</h1>
+      <div class="portal-detail-hero__meta">
         <span class="cp-badge" [ngClass]="headerStatusClass()">{{ statusLabel }}</span>
         @if (request.submitted_at) {
-          <span class="text-sm text-stone-600">Submetido em {{ request.submitted_at | date: 'medium' }}</span>
+          <span>Submetido {{ request.submitted_at | date: 'medium' }}</span>
         }
       </div>
     </header>
 
-    <div class="cp-detail-grid">
+    <div class="cp-detail-grid portal-animate" style="--i: 2">
       <div class="cp-detail-main">
         @if (hasApprovedMockup) {
           <app-approved-mockup-card [imageUrl]="approvedMockupUrl!" />
         } @else {
-          <section class="cp-card">
-            <div class="cp-card__body text-sm text-stone-600 italic">
+          <section class="portal-panel request-detail__muted">
+            <p class="request-detail__note m-0">
+              <mat-icon svgIcon="heroicons_outline:information-circle" />
               Sem mockup aprovado — a Construvasco usará o briefing escrito como referência.
-            </div>
+            </p>
           </section>
         }
 
@@ -46,21 +55,20 @@
         }
 
         @if (referenceDocuments.length) {
-          <section class="cp-card">
-            <div class="cp-card__body">
-              <h2 class="cp-card__title">Documentos de referência</h2>
-              <div class="doc-grid">
-                @for (doc of referenceDocuments; track doc.id) {
-                  @if (documentUrl(doc); as url) {
-                    <figure class="doc-thumb">
-                      <img [src]="url" [alt]="doc.original_name || 'Referência'" loading="lazy" />
-                      <figcaption class="text-xs text-stone-500 truncate px-1">
-                        {{ doc.original_name || 'Imagem' }}
-                      </figcaption>
-                    </figure>
-                  }
+          <section class="portal-panel">
+            <h2 class="portal-panel__title">
+              <mat-icon svgIcon="heroicons_outline:photo" />
+              Documentos de referência
+            </h2>
+            <div class="doc-grid">
+              @for (doc of referenceDocuments; track doc.id) {
+                @if (documentUrl(doc); as url) {
+                  <figure class="doc-thumb">
+                    <img [src]="url" [alt]="doc.original_name || 'Referência'" loading="lazy" />
+                    <figcaption>{{ doc.original_name || 'Imagem' }}</figcaption>
+                  </figure>
                 }
-              </div>
+              }
             </div>
           </section>
         }
@@ -68,37 +76,37 @@
 
       <aside class="cp-detail-aside">
         @if (architectureQuotes.length) {
-          <section class="cp-card">
-            <div class="cp-card__body">
-              <h2 class="cp-card__title">Orçamentos recebidos</h2>
-              <div class="flex flex-col gap-4">
-                @for (q of architectureQuotes; track q.id) {
-                  <app-quote-offer-card
-                    [quote]="q"
-                    [typeLabel]="quoteTypeLabel()"
-                    [statusLabel]="quoteStatusLabel(q.status)"
-                    [statusClass]="quoteStatusClass(q.status)"
-                    [amountFormatted]="formatMt(q.total_amount_mt)"
-                    [canRespond]="canRespond(q)"
-                    [actionDisabled]="quoteActionId === q.id"
-                    (accept)="acceptQuote($event)"
-                    (reject)="rejectQuote($event)"
-                  />
-                }
-              </div>
+          <section class="portal-panel">
+            <h2 class="portal-panel__title">
+              <mat-icon svgIcon="heroicons_outline:currency-dollar" />
+              Orçamentos recebidos
+            </h2>
+            <div class="quote-stack">
+              @for (q of architectureQuotes; track q.id) {
+                <app-quote-offer-card
+                  [quote]="q"
+                  [typeLabel]="quoteTypeLabel()"
+                  [statusLabel]="quoteStatusLabel(q.status)"
+                  [statusClass]="quoteStatusClass(q.status)"
+                  [amountFormatted]="formatMt(q.total_amount_mt)"
+                  [canRespond]="canRespond(q)"
+                  [actionDisabled]="quoteActionId === q.id"
+                  (accept)="acceptQuote($event)"
+                  (reject)="rejectQuote($event)"
+                />
+              }
             </div>
           </section>
         }
 
-        <section class="cp-card">
-          <div class="cp-card__body">
-            <h2 class="cp-card__title">Próximos passos</h2>
-            <p class="text-sm text-stone-700 m-0">{{ nextStepsMessage }}</p>
-          </div>
+        <section class="portal-panel request-detail__steps">
+          <h2 class="portal-panel__title">
+            <mat-icon svgIcon="heroicons_outline:arrow-trending-up" />
+            Próximos passos
+          </h2>
+          <p class="request-detail__steps-text m-0">{{ nextStepsMessage }}</p>
         </section>
       </aside>
     </div>
-
-    <a mat-stroked-button class="cp-btn-secondary mt-6" routerLink="/conta/pedidos">Voltar aos pedidos</a>
   }
 </div>

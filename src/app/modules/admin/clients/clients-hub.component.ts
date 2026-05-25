@@ -4,15 +4,12 @@ import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PageHeaderComponent } from '../../../shared/components/layout/page-header/page-header.component';
 import { ConfigService } from '../../../core/services/config.service';
 import { API_ENDPOINTS } from '../../../shared/constants/api-endpoints';
 import { NotificationService } from '../../../shared/components/feedback/notification.service';
@@ -31,14 +28,11 @@ interface ClientRow {
     CommonModule,
     RouterLink,
     ReactiveFormsModule,
-    PageHeaderComponent,
-    MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatTableModule,
     MatProgressSpinnerModule,
   ],
   templateUrl: './clients-hub.component.html',
@@ -48,9 +42,9 @@ interface ClientRow {
 export class ClientsHubComponent implements OnInit, OnDestroy {
   saving = false;
   listLoading = false;
+  pageReady = false;
   clients: ClientRow[] = [];
   searchQuery = '';
-  readonly clientColumns = ['name', 'contact', 'type'];
 
   form = this.fb.group({
     name: ['', Validators.required],
@@ -60,6 +54,7 @@ export class ClientsHubComponent implements OnInit, OnDestroy {
 
   private search$ = new Subject<string>();
   private destroy$ = new Subject<void>();
+  private initialLoadDone = false;
 
   constructor(
     private fb: FormBuilder,
@@ -82,9 +77,23 @@ export class ClientsHubComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  get emailCount(): number {
+    return this.clients.filter((c) => c.type === 'email').length;
+  }
+
+  get phoneCount(): number {
+    return this.clients.filter((c) => c.type === 'phone' || c.type === 'whatsapp').length;
+  }
+
   onSearchInput(value: string): void {
     this.searchQuery = value;
     this.search$.next(value.trim());
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+    this.search$.next('');
+    this.cdr.markForCheck();
   }
 
   private fetchClients(q: string): void {
@@ -97,11 +106,19 @@ export class ClientsHubComponent implements OnInit, OnDestroy {
         next: (res) => {
           this.clients = res.data ?? [];
           this.listLoading = false;
+          if (!this.initialLoadDone) {
+            this.initialLoadDone = true;
+            this.pageReady = true;
+          }
           this.cdr.markForCheck();
         },
         error: () => {
           this.clients = [];
           this.listLoading = false;
+          if (!this.initialLoadDone) {
+            this.initialLoadDone = true;
+            this.pageReady = true;
+          }
           this.cdr.markForCheck();
         },
       });

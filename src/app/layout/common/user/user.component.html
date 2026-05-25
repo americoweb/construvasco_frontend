@@ -1,40 +1,60 @@
-<!-- Button -->
-<button mat-icon-button [matMenuTriggerFor]="userActions" *ngIf="user">
-    <span class="relative">
-        @if (showAvatar) {
-            <app-avatar
-                [name]="user.name"
-                [size]="28"
-                [src]="userAvatarUrl">
-            </app-avatar>
-        }
-        @if (!showAvatar) {
-            <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
-        }
+<button
+  type="button"
+  class="user-menu-trigger"
+  mat-icon-button
+  #userMenuTrigger="matMenuTrigger"
+  [matMenuTriggerFor]="userActions"
+  *ngIf="user"
+  aria-label="Menu da conta"
+>
+  @if (showAvatar && userAvatarUrl) {
+    <app-avatar [name]="user.name" [size]="32" [src]="userAvatarUrl" />
+  } @else {
+    <span class="user-menu-trigger__badge" aria-hidden="true">
+      <mat-icon svgIcon="heroicons_outline:user-circle" />
     </span>
+  }
 </button>
 
-<mat-menu [xPosition]="'before'" #userActions="matMenu">
-    <button mat-menu-item>
-        <span class="flex flex-col leading-none">
-            <span>Signed in as</span>
-            <span class="mt-1.5 text-md font-medium">{{ user?.identifier }}</span>
-        </span>
-    </button>
-    <mat-divider class="my-2"></mat-divider>
-    <button mat-menu-item>
-        <mat-icon [svgIcon]="'heroicons_outline:user-circle'"></mat-icon>
-        <span>Profile</span>
-    </button>
-    <button mat-menu-item>
-        <mat-icon [svgIcon]="'heroicons_outline:cog-8-tooth'"></mat-icon>
-        <span>Settings</span>
-    </button>
-    <mat-divider class="my-2"></mat-divider>
-    <button mat-menu-item (click)="signOut()">
-        <mat-icon
-            [svgIcon]="'heroicons_outline:arrow-right-on-rectangle'"
-        ></mat-icon>
-        <span>Sign out</span>
-    </button>
+<mat-menu
+  #userActions="matMenu"
+  class="user-menu-panel"
+  panelClass="user-menu-panel-overlay"
+  [xPosition]="'before'"
+>
+  <div class="user-menu-panel__hero" (click)="$event.stopPropagation()">
+    <div class="user-menu-panel__avatar" aria-hidden="true">
+      @if (userAvatarUrl) {
+        <img [src]="userAvatarUrl" [alt]="user?.name || 'Perfil'" />
+      } @else {
+        <mat-icon svgIcon="heroicons_outline:user-circle" />
+      }
+    </div>
+    <div class="user-menu-panel__meta">
+      <span class="user-menu-panel__eyebrow">Sessão activa</span>
+      <span class="user-menu-panel__name">{{ user?.name }}</span>
+      @if (roleLabel) {
+        <span class="user-menu-panel__role">{{ roleLabel }}</span>
+      }
+      <span class="user-menu-panel__id" [title]="user?.identifier">{{ user?.identifier }}</span>
+    </div>
+  </div>
+
+  <div class="user-menu-panel__nav">
+    <a mat-menu-item routerLink="/admin/settings" (click)="closeMenu()">
+      <mat-icon svgIcon="heroicons_outline:cog-6-tooth" />
+      <span>Definições</span>
+    </a>
+    <a mat-menu-item routerLink="/admin/settings" (click)="closeMenu()">
+      <mat-icon svgIcon="heroicons_outline:identification" />
+      <span>Perfil e conta</span>
+    </a>
+  </div>
+
+  <mat-divider />
+
+  <button mat-menu-item type="button" class="user-menu-panel__logout" (click)="signOut()">
+    <mat-icon svgIcon="heroicons_outline:arrow-right-on-rectangle" />
+    <span>Terminar sessão</span>
+  </button>
 </mat-menu>

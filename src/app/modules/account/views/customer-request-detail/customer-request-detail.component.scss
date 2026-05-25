@@ -1,17 +1,91 @@
+.portal-skeleton {
+  display: grid;
+  gap: 1rem;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 3fr 2fr;
+  }
+}
+
+.request-detail__muted {
+  background: color-mix(in srgb, var(--app-muted) 45%, var(--app-surface));
+}
+
+.request-detail__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-style: italic;
+  color: var(--app-foreground-secondary);
+
+  mat-icon {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--app-primary);
+  }
+}
+
+.request-detail__steps {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--app-primary-muted) 50%, var(--app-surface)) 0%,
+    var(--app-surface) 100%
+  );
+}
+
+.request-detail__steps-text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--app-foreground-secondary);
+}
+
+.quote-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .doc-grid {
   display: grid;
-  gap: 0.75rem;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.85rem;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
 }
 
 .doc-thumb {
   margin: 0;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  border: 1px solid var(--app-border);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--app-shadow-md);
+  }
 
   img {
     width: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-    border-radius: var(--app-radius-sm);
-    border: 1px solid var(--app-border);
+    display: block;
   }
+
+  figcaption {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.6875rem;
+    color: var(--app-muted-foreground);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background: var(--app-muted);
+  }
+}
+
+.cp-detail-main > :not(:last-child),
+.cp-detail-aside > :not(:last-child) {
+  margin-bottom: 1.25rem;
 }

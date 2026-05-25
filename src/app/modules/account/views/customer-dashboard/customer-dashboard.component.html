@@ -1,68 +1,165 @@
-<div class="customer-page customer-dashboard">
-  <header class="cp-page-header">
-    <h1 class="cp-greeting">Olá, <em>{{ firstName }}</em></h1>
-    <p class="cp-page-subtitle">Acompanhe os seus pedidos, orçamentos e projectos.</p>
-  </header>
-
+<div class="dash" [class.dash--ready]="!loading && stats">
   @if (loading) {
-    <div class="cp-loading">
-      <mat-spinner diameter="36" />
+    <div class="dash__skeleton" aria-busy="true" aria-label="A carregar dashboard">
+      <div class="dash__skel-hero"></div>
+      <div class="dash__skel-kpis">
+        <div></div><div></div><div></div>
+      </div>
+      <div class="dash__skel-cta"></div>
+      <div class="dash__skel-list">
+        <div></div><div></div><div></div>
+      </div>
     </div>
   } @else if (stats) {
-    <div class="cp-kpi-grid cp-section">
-      <article class="cp-kpi-card">
-        <mat-icon class="cp-kpi-card__icon" svgIcon="heroicons_outline:document-text" />
-        <p class="cp-kpi-card__value">{{ stats.project_requests_count }}</p>
-        <p class="cp-kpi-card__label">Pedidos</p>
+    <header class="dash-hero dash-animate" style="--i: 0">
+      <div class="dash-hero__copy">
+        <p class="dash-hero__eyebrow">{{ greetingLine }}</p>
+        <h1 class="dash-hero__title">
+          Olá, <span class="dash-hero__name">{{ firstName }}</span>
+        </h1>
+        <p class="dash-hero__sub">
+          Acompanhe pedidos, orçamentos e projectos num só lugar.
+        </p>
+      </div>
+      <div class="dash-hero__orb" aria-hidden="true"></div>
+    </header>
+
+    <div class="dash-kpis dash-animate" style="--i: 1">
+      <article class="dash-kpi dash-kpi--pedidos">
+        <div class="dash-kpi__icon-wrap">
+          <mat-icon svgIcon="heroicons_outline:document-text" />
+        </div>
+        <div class="dash-kpi__data">
+          <span class="dash-kpi__value">{{ stats.project_requests_count }}</span>
+          <span class="dash-kpi__label">Pedidos</span>
+        </div>
       </article>
-      <article class="cp-kpi-card">
-        <mat-icon class="cp-kpi-card__icon" svgIcon="heroicons_outline:currency-dollar" />
-        <p class="cp-kpi-card__value">{{ stats.pending_quotes }}</p>
-        <p class="cp-kpi-card__label">Orçamentos pendentes</p>
+
+      <article class="dash-kpi" [class.dash-kpi--pulse]="stats.pending_quotes > 0">
+        <div class="dash-kpi__icon-wrap dash-kpi__icon-wrap--warn">
+          <mat-icon svgIcon="heroicons_outline:currency-dollar" />
+        </div>
+        <div class="dash-kpi__data">
+          <span class="dash-kpi__value">{{ stats.pending_quotes }}</span>
+          <span class="dash-kpi__label">Orçamentos pendentes</span>
+        </div>
+        @if (stats.pending_quotes > 0) {
+          <span class="dash-kpi__hint">Requer a sua atenção</span>
+        }
       </article>
-      <article class="cp-kpi-card">
-        <mat-icon class="cp-kpi-card__icon" svgIcon="heroicons_outline:sparkles" />
-        <p class="cp-kpi-card__value">{{ stats.credits_balance ?? 0 }}</p>
-        <p class="cp-kpi-card__label">Créditos IA</p>
+
+      <article class="dash-kpi">
+        <div class="dash-kpi__icon-wrap dash-kpi__icon-wrap--ai">
+          <mat-icon svgIcon="heroicons_outline:sparkles" />
+        </div>
+        <div class="dash-kpi__data">
+          <span class="dash-kpi__value">{{ stats.credits_balance ?? 0 }}</span>
+          <span class="dash-kpi__label">Créditos IA</span>
+        </div>
       </article>
     </div>
 
-    <section class="cp-cta-card cp-section">
-      <h2 class="cp-cta-card__title">Começar novo projecto</h2>
-      <p class="cp-cta-card__text">
-        Briefing guiado e mockups de referência com IA — do conceito inicial ao pedido de arquitectura.
-      </p>
-      <a mat-flat-button color="primary" routerLink="/conta/estudio" [queryParams]="{ new: 1 }">
-        Abrir estúdio
-      </a>
-      <nav class="cp-shortcuts" aria-label="Atalhos rápidos">
-        <a routerLink="/conta/pedidos">Meus pedidos</a>
-        <a routerLink="/conta/projectos">Meus projectos</a>
-        <a routerLink="/conta/definicoes">Definições</a>
-      </nav>
-    </section>
+    <div class="dash-mid dash-animate" style="--i: 2">
+      <section class="dash-cta">
+        <div class="dash-cta__content">
+          <span class="dash-cta__badge">Estúdio de projecto</span>
+          <h2 class="dash-cta__title">Começar novo projecto</h2>
+          <p class="dash-cta__text">
+            Briefing guiado e mockups com IA — do conceito ao pedido de arquitectura.
+          </p>
+          <a
+            mat-flat-button
+            color="primary"
+            class="dash-cta__btn"
+            routerLink="/conta/estudio"
+            [queryParams]="{ new: 1 }"
+          >
+            <mat-icon svgIcon="heroicons_outline:plus-circle" />
+            Abrir estúdio
+          </a>
+        </div>
+        <div class="dash-cta__visual" aria-hidden="true">
+          <div class="dash-cta__rings"></div>
+          <mat-icon class="dash-cta__big-icon" svgIcon="heroicons_outline:home-modern" />
+        </div>
+      </section>
 
-    @if (recentRequests.length) {
-      <section class="cp-section">
-        <h2 class="cp-section-title">Pedidos recentes</h2>
-        <div class="grid gap-3">
-          @for (r of recentRequests; track r.id) {
-            <a class="cp-list-card" [routerLink]="['/conta/pedidos', r.id]">
-              <div class="cp-list-card__body">
-                <p class="cp-list-card__ref">{{ r.reference_code }}</p>
-                <p class="cp-list-card__title">{{ r.title }}</p>
-                <div class="cp-list-card__meta">
-                  <span>{{ typeLabel(r) }}</span>
+      <nav class="dash-quick" aria-label="Atalhos rápidos">
+        <a routerLink="/conta/pedidos" class="dash-quick__item">
+          <span class="dash-quick__icon">
+            <mat-icon svgIcon="heroicons_outline:clipboard-document-list" />
+          </span>
+          <span class="dash-quick__label">Meus pedidos</span>
+          <mat-icon class="dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+        </a>
+        <a routerLink="/conta/projectos" class="dash-quick__item">
+          <span class="dash-quick__icon">
+            <mat-icon svgIcon="heroicons_outline:building-office-2" />
+          </span>
+          <span class="dash-quick__label">Meus projectos</span>
+          <mat-icon class="dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+        </a>
+        <a routerLink="/conta/definicoes" class="dash-quick__item">
+          <span class="dash-quick__icon">
+            <mat-icon svgIcon="heroicons_outline:cog-6-tooth" />
+          </span>
+          <span class="dash-quick__label">Definições</span>
+          <mat-icon class="dash-quick__arrow" svgIcon="heroicons_outline:chevron-right" />
+        </a>
+      </nav>
+    </div>
+
+    <section class="dash-recent dash-animate" style="--i: 3">
+      <div class="dash-recent__head">
+        <h2 class="dash-recent__title">Pedidos recentes</h2>
+        @if (recentRequests.length) {
+          <a routerLink="/conta/pedidos" class="dash-recent__all">Ver todos</a>
+        }
+      </div>
+
+      @if (recentRequests.length) {
+        <div class="dash-recent__list">
+          @for (r of recentRequests; track r.id; let idx = $index) {
+            <a
+              class="dash-request"
+              [routerLink]="['/conta/pedidos', r.id]"
+              [style.--ri]="idx"
+            >
+              <div class="dash-request__main">
+                <span class="dash-request__ref">{{ r.reference_code }}</span>
+                <h3 class="dash-request__title">{{ r.title }}</h3>
+                <div class="dash-request__meta">
+                  <span class="dash-request__type">{{ typeLabel(r) }}</span>
                   <span class="cp-badge" [ngClass]="statusClass(r)">{{ statusLabel(r) }}</span>
                   @if (hasNewQuote(r)) {
                     <span class="cp-badge cp-badge--warning">Novo orçamento</span>
                   }
                 </div>
               </div>
+              <mat-icon class="dash-request__chev" svgIcon="heroicons_outline:chevron-right" />
             </a>
           }
         </div>
-      </section>
-    }
+      } @else {
+        <div class="dash-empty">
+          <div class="dash-empty__icon" aria-hidden="true">
+            <mat-icon svgIcon="heroicons_outline:document-plus" />
+          </div>
+          <p class="dash-empty__title">Ainda sem pedidos submetidos</p>
+          <p class="dash-empty__text">
+            Use o estúdio para criar o briefing e gerar mockups com IA.
+          </p>
+          <a
+            mat-stroked-button
+            color="primary"
+            class="dash-empty__btn"
+            routerLink="/conta/estudio"
+            [queryParams]="{ new: 1 }"
+          >
+            Criar primeiro projecto
+          </a>
+        </div>
+      }
+    </section>
   }
 </div>

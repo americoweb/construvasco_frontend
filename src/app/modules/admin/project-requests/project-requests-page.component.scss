@@ -1,3 +1,93 @@
+:host {
+  display: block;
+}
+
+.stf-req-form {
+  width: 100%;
+  padding-bottom: 2rem;
+}
+
+.stf-req-form__intro {
+  margin: 0 0 1.25rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--app-foreground-secondary);
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 20%, var(--app-border));
+  background: color-mix(in srgb, var(--app-primary-muted) 40%, var(--app-surface));
+}
+
+.stf-req-form__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.stf-req-form__client-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 30%, var(--app-border));
+  background: color-mix(in srgb, var(--app-primary-muted) 50%, var(--app-surface));
+}
+
+.stf-req-form__client-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--app-primary);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.stf-req-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+
+  button,
+  a {
+    border-radius: 0.75rem !important;
+  }
+}
+
+.stf-req-form__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--app-foreground) 45%, transparent);
+  padding: 1rem;
+}
+
+.stf-req-form__modal {
+  width: 100%;
+  max-width: 28rem;
+  border-radius: 1.1rem;
+  background: var(--app-surface);
+  padding: 1.5rem;
+  box-shadow: var(--app-shadow-lg);
+  border: 1px solid var(--app-border);
+}
+
+.stf-req-form__modal-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--app-foreground);
+}
+
 .client-search-wrap {
   position: relative;
   z-index: 1;
@@ -13,9 +103,9 @@
   max-height: 16rem;
   overflow-y: auto;
   border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
-  background: #fff;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow-lg);
 }
 
 .dropdown-item {
@@ -28,45 +118,34 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  font-family: inherit;
+  color: var(--app-foreground);
 
   &:hover {
-    background: #f8fafc;
+    background: var(--app-muted);
   }
 
   &--create {
     flex-direction: row;
     align-items: center;
     gap: 0.5rem;
-    color: #15803d;
-    border-top: 1px solid #f1f5f9;
+    color: var(--app-success);
+    border-top: 1px solid var(--app-border);
   }
 }
 
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(15, 23, 42, 0.45);
-  padding: 1rem;
+:host ::ng-deep .stf-req-form .mat-expansion-panel {
+  margin-bottom: 0.65rem !important;
+  border-radius: 0.9rem !important;
+  border: 1px solid var(--app-border) !important;
+  box-shadow: var(--app-shadow-sm) !important;
+  background: var(--app-surface) !important;
 }
 
-.modal-card {
-  width: 100%;
-  max-width: 28rem;
-  border-radius: 1rem;
-  background: #fff;
-  padding: 1.5rem;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+:host ::ng-deep .stf-req-form .mat-expansion-panel-header {
+  font-weight: 600;
 }
 
-:host ::ng-deep .mat-expansion-panel {
-  margin-bottom: 0.5rem !important;
-}
-
-/* Dropdown de clientes não pode ser cortado pelo painel seguinte */
 :host ::ng-deep .mat-accordion {
   overflow: visible;
 }

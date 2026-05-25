@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRe
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
@@ -33,6 +34,7 @@ const STEP_LABELS = ['Projecto', 'Briefing', 'Referências', 'Estúdio', 'Revis�
     CommonModule,
     RouterLink,
     MatButtonModule,
+    MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     CreditsBalanceCardComponent,

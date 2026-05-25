@@ -1,113 +1,172 @@
-<div class="clients-page w-full">
-  <app-page-header
-    title="Clientes"
-    subtitle="Registo e pesquisa — contactos de chamadas, email e WhatsApp"
-    [showSearch]="false"
-    [loading]="listLoading" />
+<div class="stf-cli" [class.stf-cli--ready]="pageReady">
+  @if (!pageReady) {
+    <div class="stf-cli__skeleton" aria-busy="true" aria-label="A carregar clientes">
+      <div class="stf-cli__skel-hero"></div>
+      <div class="stf-cli__skel-grid">
+        <div></div><div></div>
+      </div>
+    </div>
+  } @else {
+    <header class="stf-cli-hero stf-cli-animate" style="--i: 0">
+      <div class="stf-cli-hero__main">
+        <div class="stf-cli-hero__copy">
+          <span class="stf-cli-hero__eyebrow">CRM</span>
+          <h1 class="stf-cli-hero__title">Clientes</h1>
+          <p class="stf-cli-hero__sub">
+            Registo e pesquisa — contactos de chamadas, email e WhatsApp para pedidos e projectos.
+          </p>
+        </div>
+        <a mat-stroked-button class="stf-cli-hero__cta" routerLink="/admin/pedidos/novo">
+          <mat-icon svgIcon="heroicons_outline:document-text" />
+          Novo pedido
+        </a>
+      </div>
+      <div class="stf-cli-kpis">
+        <article class="stf-cli-kpi">
+          <div class="stf-cli-kpi__icon">
+            <mat-icon svgIcon="heroicons_outline:user-group" />
+          </div>
+          <div class="stf-cli-kpi__data">
+            <span class="stf-cli-kpi__value">{{ clients.length }}</span>
+            <span class="stf-cli-kpi__label">Na lista actual</span>
+          </div>
+        </article>
+        <article class="stf-cli-kpi">
+          <div class="stf-cli-kpi__icon stf-cli-kpi__icon--email">
+            <mat-icon svgIcon="heroicons_outline:envelope" />
+          </div>
+          <div class="stf-cli-kpi__data">
+            <span class="stf-cli-kpi__value">{{ emailCount }}</span>
+            <span class="stf-cli-kpi__label">Por email</span>
+          </div>
+        </article>
+        <article class="stf-cli-kpi">
+          <div class="stf-cli-kpi__icon stf-cli-kpi__icon--phone">
+            <mat-icon svgIcon="heroicons_outline:phone" />
+          </div>
+          <div class="stf-cli-kpi__data">
+            <span class="stf-cli-kpi__value">{{ phoneCount }}</span>
+            <span class="stf-cli-kpi__label">Telefone / WhatsApp</span>
+          </div>
+        </article>
+      </div>
+    </header>
 
-  <div class="container mx-auto max-w-6xl px-4 pb-10">
-    <div class="grid gap-6 lg:grid-cols-5">
-      <mat-card class="lg:col-span-2">
-        <mat-card-header>
-          <mat-card-title>Novo cliente</mat-card-title>
-          <mat-card-subtitle>Quando o contacto ainda não existe no sistema</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <form [formGroup]="form" (ngSubmit)="create()" class="grid gap-3 pt-2">
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-              <mat-label>Nome completo</mat-label>
-              <input matInput formControlName="name" autocomplete="name" />
-              @if (form.get('name')?.invalid && form.get('name')?.touched) {
-                <mat-error>Obrigatório</mat-error>
-              }
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-              <mat-label>Email ou telefone / WhatsApp</mat-label>
-              <input matInput formControlName="identifier" placeholder="+258... ou email" />
-              @if (form.get('identifier')?.invalid && form.get('identifier')?.touched) {
-                <mat-error>Obrigatório</mat-error>
-              }
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-              <mat-label>Tipo de contacto</mat-label>
-              <mat-select formControlName="type">
-                <mat-option value="email">Email</mat-option>
-                <mat-option value="phone">Telefone / WhatsApp</mat-option>
-              </mat-select>
-            </mat-form-field>
-            <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid || saving" class="!mt-1">
-              @if (saving) {
-                <mat-spinner diameter="18" class="!inline-block !mr-2" />
-              }
-              Criar cliente
-            </button>
-          </form>
-        </mat-card-content>
-      </mat-card>
-
-      <mat-card class="lg:col-span-3">
-        <mat-card-header>
-          <mat-card-title>Clientes registados</mat-card-title>
-          <mat-card-subtitle>Pesquise por nome ou contacto</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
+    <div class="stf-cli-grid stf-cli-animate" style="--i: 1">
+      <section class="stf-cli-panel stf-cli-panel--form">
+        <header class="stf-cli-panel__head">
+          <mat-icon svgIcon="heroicons_outline:user-plus" />
+          <div>
+            <h2 class="stf-cli-panel__title">Novo cliente</h2>
+            <p class="stf-cli-panel__sub">Quando o contacto ainda não existe no sistema</p>
+          </div>
+        </header>
+        <form [formGroup]="form" (ngSubmit)="create()" class="stf-cli-form">
           <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
-            <mat-label>Pesquisar</mat-label>
-            <input
-              matInput
-              [value]="searchQuery"
-              (input)="onSearchInput($any($event.target).value)"
-              placeholder="Nome, email ou telefone..." />
-            <mat-icon matSuffix>search</mat-icon>
+            <mat-label>Nome completo</mat-label>
+            <input matInput formControlName="name" autocomplete="name" />
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
           </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Email ou telefone / WhatsApp</mat-label>
+            <input matInput formControlName="identifier" placeholder="+258… ou email" />
+            @if (form.get('identifier')?.invalid && form.get('identifier')?.touched) {
+              <mat-error>Obrigatório</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="w-full" subscriptSizing="dynamic">
+            <mat-label>Tipo de contacto</mat-label>
+            <mat-select formControlName="type">
+              <mat-option value="email">Email</mat-option>
+              <mat-option value="phone">Telefone / WhatsApp</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-flat-button color="primary" type="submit" class="stf-cli-form__submit" [disabled]="form.invalid || saving">
+            @if (saving) {
+              <mat-spinner diameter="18" class="stf-cli-form__spin" />
+            } @else {
+              <mat-icon svgIcon="heroicons_outline:plus-circle" />
+            }
+            Criar cliente
+          </button>
+        </form>
+      </section>
 
-          @if (listLoading) {
-            <div class="flex justify-center py-8">
-              <mat-spinner diameter="32" />
+      <section class="stf-cli-panel stf-cli-panel--list">
+        <header class="stf-cli-panel__head">
+          <mat-icon svgIcon="heroicons_outline:users" />
+          <div>
+            <h2 class="stf-cli-panel__title">Clientes registados</h2>
+            <p class="stf-cli-panel__sub">Pesquise por nome ou contacto (mín. 2 caracteres)</p>
+          </div>
+        </header>
+
+        <div class="stf-cli-search" role="search">
+          <mat-icon svgIcon="heroicons_outline:magnifying-glass" />
+          <input
+            type="search"
+            [value]="searchQuery"
+            (input)="onSearchInput($any($event.target).value)"
+            placeholder="Nome, email ou telefone…"
+            aria-label="Pesquisar clientes"
+          />
+          @if (searchQuery) {
+            <button type="button" class="stf-cli-search__clear" (click)="clearSearch()" aria-label="Limpar pesquisa">
+              <mat-icon svgIcon="heroicons_outline:x-mark" />
+            </button>
+          }
+        </div>
+
+        @if (listLoading) {
+          <div class="stf-cli-list-loading" aria-busy="true">
+            <div class="stf-cli-list-loading__bar"></div>
+            <div class="stf-cli-list-loading__bar"></div>
+            <div class="stf-cli-list-loading__bar"></div>
+          </div>
+        } @else if (!clients.length) {
+          <div class="stf-cli-empty">
+            <div class="stf-cli-empty__icon">
+              <mat-icon svgIcon="heroicons_outline:user-group" />
             </div>
-          } @else if (!clients.length) {
-            <p class="py-6 text-center text-sm text-slate-500">
+            <p class="stf-cli-empty__title">
               @if (searchQuery.length >= 2) {
-                Nenhum cliente encontrado para «{{ searchQuery }}».
+                Nenhum cliente encontrado
               } @else {
-                Digite pelo menos 2 caracteres ou veja os últimos registos abaixo.
+                Sem resultados para mostrar
               }
             </p>
-          } @else {
-            <div class="max-h-[28rem] overflow-y-auto rounded-lg border border-slate-100">
-              <table mat-table [dataSource]="clients" class="w-full">
-                <ng-container matColumnDef="name">
-                  <th mat-header-cell *matHeaderCellDef>Nome</th>
-                  <td mat-cell *matCellDef="let c">
-                    <div class="flex items-center gap-2 py-1">
-                      <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-800">
-                        {{ c.name.charAt(0).toUpperCase() }}
-                      </div>
-                      <span class="font-medium">{{ c.name }}</span>
-                    </div>
-                  </td>
-                </ng-container>
-                <ng-container matColumnDef="contact">
-                  <th mat-header-cell *matHeaderCellDef>Contacto</th>
-                  <td mat-cell *matCellDef="let c">{{ c.identifier }}</td>
-                </ng-container>
-                <ng-container matColumnDef="type">
-                  <th mat-header-cell *matHeaderCellDef>Tipo</th>
-                  <td mat-cell *matCellDef="let c">
-                    <span class="type-chip">{{ labelType(c.type) }}</span>
-                  </td>
-                </ng-container>
+            <p class="stf-cli-empty__text">
+              @if (searchQuery.length >= 2) {
+                Não há correspondência para «{{ searchQuery }}». Crie um novo registo ao lado.
+              } @else {
+                Digite pelo menos 2 caracteres na pesquisa ou crie o primeiro cliente.
+              }
+            </p>
+          </div>
+        } @else {
+          <ul class="stf-cli-list">
+            @for (c of clients; track c.id; let idx = $index) {
+              <li class="stf-cli-card" [style.--ci]="idx">
+                <span class="stf-cli-card__avatar" aria-hidden="true">{{ c.name.charAt(0).toUpperCase() }}</span>
+                <div class="stf-cli-card__body">
+                  <p class="stf-cli-card__name">{{ c.name }}</p>
+                  <p class="stf-cli-card__contact">{{ c.identifier }}</p>
+                </div>
+                <span class="stf-cli-card__type" [attr.data-type]="c.type">{{ labelType(c.type) }}</span>
+              </li>
+            }
+          </ul>
+        }
 
-                <tr mat-header-row *matHeaderRowDef="clientColumns"></tr>
-                <tr mat-row *matRowDef="let row; columns: clientColumns"></tr>
-              </table>
-            </div>
-          }
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <a mat-button routerLink="/admin/pedidos">Registar pedido para cliente</a>
-        </mat-card-actions>
-      </mat-card>
+        <footer class="stf-cli-panel__foot">
+          <a mat-stroked-button routerLink="/admin/pedidos/novo">
+            <mat-icon svgIcon="heroicons_outline:arrow-right" />
+            Registar pedido para cliente
+          </a>
+        </footer>
+      </section>
     </div>
-  </div>
+  }
 </div>

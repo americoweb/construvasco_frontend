@@ -1,50 +1,155 @@
+.gallery-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  border-radius: 1rem;
+  border: 1px dashed color-mix(in srgb, var(--app-primary) 35%, var(--app-border));
+  background: color-mix(in srgb, var(--app-primary-muted) 35%, var(--app-surface));
+}
+
+.gallery-empty__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: 0.85rem;
+  border-radius: 1rem;
+  background: var(--app-primary-muted);
+  color: var(--app-primary);
+
+  mat-icon {
+    width: 1.65rem;
+    height: 1.65rem;
+  }
+}
+
+.gallery-empty__title {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--app-foreground);
+}
+
+.gallery-empty__text {
+  margin: 0;
+  max-width: 20rem;
+  font-size: 0.875rem;
+  color: var(--app-foreground-secondary);
+}
+
 .gallery-grid {
   display: grid;
   gap: 1.25rem;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
 .gallery-card {
   border: 1px solid var(--app-border);
-  border-radius: var(--app-radius-lg);
+  border-radius: 1rem;
   overflow: hidden;
   background: var(--app-surface);
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  animation: gallery-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--gi, 0) * 0.06s);
+  transition:
+    box-shadow 0.25s ease,
+    border-color 0.2s ease,
+    transform 0.25s ease;
 
-  &:hover:not(.superseded) {
-    border-color: color-mix(in srgb, var(--app-primary) 35%, var(--app-border));
+  &:hover:not(.gallery-card--superseded) {
+    border-color: color-mix(in srgb, var(--app-primary) 40%, var(--app-border));
     box-shadow: var(--app-shadow-md);
+    transform: translateY(-3px);
   }
 
-  &.approved {
-    border-color: color-mix(in srgb, var(--app-primary) 45%, var(--app-border));
+  &--approved {
+    border-color: color-mix(in srgb, var(--app-primary) 50%, var(--app-border));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--app-primary) 20%, transparent);
   }
 
-  &.superseded {
-    opacity: 0.72;
+  &--superseded {
+    opacity: 0.7;
+  }
+}
+
+@keyframes gallery-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gallery-card__media {
+  position: relative;
+  overflow: hidden;
+}
+
+.gallery-card img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gallery-card:hover:not(.gallery-card--superseded) img {
+  transform: scale(1.03);
+}
+
+.gallery-card__placeholder {
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--app-muted);
+  color: var(--app-muted-foreground);
+  font-size: 0.875rem;
+}
+
+.gallery-card__ribbon {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  background: var(--app-primary);
+  color: var(--app-primary-foreground);
+  box-shadow: var(--app-shadow-sm);
+
+  mat-icon {
+    width: 0.9rem;
+    height: 0.9rem;
+  }
+}
+
+.gallery-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  align-items: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-card {
+    animation: none;
   }
 
-  img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    display: block;
+  .gallery-card:hover:not(.gallery-card--superseded) {
+    transform: none;
   }
 
-  .placeholder {
-    aspect-ratio: 4 / 3;
-    display: grid;
-    place-items: center;
-    background: var(--app-muted);
-    color: var(--app-muted-foreground);
-    font-size: 0.875rem;
-  }
-
-  .card-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    padding: 1rem;
-    align-items: center;
+  .gallery-card:hover img {
+    transform: none;
   }
 }

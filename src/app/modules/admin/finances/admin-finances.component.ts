@@ -2,11 +2,8 @@ import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { MatCardModule } from '@angular/material/card';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { PageHeaderComponent } from '../../../shared/components/layout/page-header/page-header.component';
+import { MatIconModule } from '@angular/material/icon';
 import { ConfigService } from '../../../core/services/config.service';
 import { API_ENDPOINTS } from '../../../shared/constants/api-endpoints';
 
@@ -36,25 +33,15 @@ interface FinanceOverview {
 @Component({
   selector: 'app-admin-finances',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterLink,
-    PageHeaderComponent,
-    MatCardModule,
-    MatTableModule,
-    MatButtonModule,
-    MatProgressSpinnerModule,
-  ],
+  imports: [CommonModule, RouterLink, MatButtonModule, MatIconModule],
   templateUrl: './admin-finances.component.html',
   styleUrls: ['./admin-finances.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminFinancesComponent implements OnInit {
   loading = true;
+  pageReady = false;
   overview: FinanceOverview | null = null;
-
-  readonly quoteColumns = ['ref', 'client', 'amount', 'status'];
-  readonly paymentColumns = ['project', 'client', 'amount', 'status'];
 
   constructor(
     private http: HttpClient,
@@ -64,18 +51,18 @@ export class AdminFinancesComponent implements OnInit {
 
   ngOnInit(): void {
     this.http
-      .get<{ data: FinanceOverview }>(
-        this.config.getApiUrl(API_ENDPOINTS.MANAGER.FINANCES_OVERVIEW)
-      )
+      .get<{ data: FinanceOverview }>(this.config.getApiUrl(API_ENDPOINTS.MANAGER.FINANCES_OVERVIEW))
       .subscribe({
         next: (res) => {
           this.overview = res.data ?? null;
           this.loading = false;
+          this.pageReady = !!this.overview;
           this.cdr.markForCheck();
         },
         error: () => {
           this.overview = null;
           this.loading = false;
+          this.pageReady = true;
           this.cdr.markForCheck();
         },
       });
@@ -92,6 +79,17 @@ export class AdminFinancesComponent implements OnInit {
       accepted: 'Aceite',
       rejected: 'Recusado',
       draft: 'Rascunho',
+    };
+    return map[status] ?? status;
+  }
+
+  labelPaymentStatus(status: string): string {
+    const map: Record<string, string> = {
+      pending: 'Pendente',
+      submitted: 'Submetido',
+      confirmed: 'Confirmado',
+      paid: 'Pago',
+      rejected: 'Rejeitado',
     };
     return map[status] ?? status;
   }

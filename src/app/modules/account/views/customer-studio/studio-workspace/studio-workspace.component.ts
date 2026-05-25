@@ -12,6 +12,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDialogModule } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subject, takeUntil, timeout, catchError, throwError } from 'rxjs';
@@ -33,6 +34,7 @@ import { AiGenerationRecord } from '../../../../../shared/construction/construct
     MatInputModule,
     MatCheckboxModule,
     MatDialogModule,
+    MatIconModule,
     MatProgressSpinnerModule,
     GenerationGalleryComponent,
   ],

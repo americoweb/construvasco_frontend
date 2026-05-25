@@ -1,254 +1,279 @@
-<div class="project-detail w-full pb-10">
-  <a mat-button routerLink="/admin/projectos" class="!mb-4">
-    <mat-icon>arrow_back</mat-icon>
-    Voltar à lista
-  </a>
-
+<div class="stf-prj-d" [class.stf-prj-d--ready]="pageReady">
   @if (loading) {
-    <div class="flex justify-center py-16">
-      <mat-spinner diameter="40" />
+    <div class="stf-prj-d__skeleton" aria-busy="true">
+      <div class="stf-prj-d__skel-back"></div>
+      <div class="stf-prj-d__skel-hero"></div>
+      <div class="stf-prj-d__skel-panel"></div>
+      <div class="stf-prj-d__skel-panel"></div>
     </div>
   } @else if (project) {
-    <mat-card class="!mb-6">
-      <mat-card-header>
-        <mat-card-title>{{ referenceLabel }}</mat-card-title>
-        <mat-card-subtitle>
-          {{ clientDisplayName }} · {{ phaseLabel }}
-          @if (!isTechnicianView) {
-            · {{ project.location || '—' }}
+    <a class="stf-prj-d-back stf-prj-d-animate" style="--i: 0" routerLink="/admin/projectos">
+      <mat-icon svgIcon="heroicons_outline:arrow-left" />
+      Voltar à lista
+    </a>
+
+    <header class="stf-prj-d-hero stf-prj-d-animate" style="--i: 1">
+      <div class="stf-prj-d-hero__main">
+        <code class="stf-prj-d-hero__ref">CV-PRJ-{{ project.id }}</code>
+        <h1 class="stf-prj-d-hero__title">{{ referenceLabel }}</h1>
+        <div class="stf-prj-d-hero__meta">
+          <span class="stf-prj-d-badge" [ngClass]="phaseBadgeClass()">{{ phaseLabel }}</span>
+          <span class="stf-prj-d-hero__meta-item">
+            <mat-icon svgIcon="heroicons_outline:user" />
+            {{ clientDisplayName }}
+          </span>
+          @if (!isTechnicianView && project.location) {
+            <span class="stf-prj-d-hero__meta-item">
+              <mat-icon svgIcon="heroicons_outline:map-pin" />
+              {{ project.location }}
+            </span>
           }
-        </mat-card-subtitle>
-      </mat-card-header>
-      @if (architectureDeliveredLabel) {
-        <mat-card-content class="!pt-2">
-          <p class="text-sm font-medium text-emerald-700">{{ architectureDeliveredLabel }}</p>
-        </mat-card-content>
+        </div>
+        @if (architectureDeliveredLabel) {
+          <p class="stf-prj-d-hero__success">
+            <mat-icon svgIcon="heroicons_outline:check-badge" />
+            {{ architectureDeliveredLabel }}
+          </p>
+        }
+      </div>
+      @if (isTechnicianView) {
+        <button mat-flat-button color="primary" type="button" class="stf-prj-d-hero__cta" (click)="openSubmitDialog()">
+          <mat-icon svgIcon="heroicons_outline:arrow-up-tray" />
+          Submeter entregável
+        </button>
       }
-    </mat-card>
+    </header>
 
     @if (showMockup) {
-      <mat-card class="!mb-4">
-        <mat-card-content class="!pt-4">
-          <p class="text-sm font-semibold text-slate-700 mb-3">Mockup aprovado</p>
-          <img [src]="mockupUrl!" alt="Mockup aprovado" class="w-full max-w-2xl rounded-lg border border-slate-200" />
-        </mat-card-content>
-      </mat-card>
+      <section class="stf-prj-d-panel stf-prj-d-animate" style="--i: 2">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:photo" />
+          Mockup aprovado
+        </h2>
+        <img class="stf-prj-d-mockup" [src]="mockupUrl!" alt="Mockup aprovado" />
+      </section>
     } @else if (project.project_request) {
-      <p class="text-sm text-slate-500 mb-4 italic">Sem mockup aprovado — usar briefing como referência.</p>
+      <div class="stf-prj-d-note stf-prj-d-animate" style="--i: 2">
+        <mat-icon svgIcon="heroicons_outline:information-circle" />
+        Sem mockup aprovado — usar briefing como referência.
+      </div>
     }
 
     @if (briefingRows.length) {
-      <mat-card class="!mb-4">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Briefing do pedido</h2>
-          <dl class="grid gap-2 text-sm">
-            @for (row of briefingRows; track row.label) {
-              <div class="flex gap-2">
-                <dt class="text-slate-500 min-w-[10rem] shrink-0">{{ row.label }}</dt>
-                <dd class="text-slate-900">{{ row.value }}</dd>
-              </div>
-            }
-          </dl>
-        </mat-card-content>
-      </mat-card>
+      <section class="stf-prj-d-panel stf-prj-d-animate" style="--i: 3">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:clipboard-document-list" />
+          Briefing do pedido
+        </h2>
+        <dl class="stf-prj-d-dl">
+          @for (row of briefingRows; track row.label) {
+            <div class="stf-prj-d-dl__row">
+              <dt>{{ row.label }}</dt>
+              <dd>{{ row.value }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
     }
 
     @if (isManagerView && showConstructionPhase) {
-      <mat-card class="!mb-6">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Fase de Obra</h2>
-          @if (project.contract_phase === 'execution_quote') {
-            <p class="text-sm">Cliente solicitou orçamento de obra em {{ formatDate(project.construction_quote_requested_at) }}</p>
-            @if (project.suggested_visit_date) {
-              <p class="text-sm font-medium mt-2">Data sugerida para visita: {{ formatDate(project.suggested_visit_date) }}</p>
-            }
-            @if (project.construction_request_notes) {
-              <p class="text-sm mt-2">Notas: {{ project.construction_request_notes }}</p>
-            }
-            @if (canSendConstructionQuote) {
-              <button mat-flat-button color="primary" type="button" class="!mt-4" (click)="sendConstructionQuote()">
-                Enviar orçamento de obra
-              </button>
-            }
-            @if (project.construction_quote; as cq) {
-              <p class="text-sm mt-3">Orçamento obra: {{ formatMoney(cq.total_amount_mt) }} · {{ cq.status }}</p>
-            }
+      <section class="stf-prj-d-panel stf-prj-d-animate" style="--i: 4">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:wrench-screwdriver" />
+          Fase de obra
+        </h2>
+        @if (project.contract_phase === 'execution_quote') {
+          <p class="stf-prj-d-text">
+            Cliente solicitou orçamento de obra em {{ formatDate(project.construction_quote_requested_at) }}
+          </p>
+          @if (project.suggested_visit_date) {
+            <p class="stf-prj-d-text"><strong>Visita sugerida:</strong> {{ formatDate(project.suggested_visit_date) }}</p>
           }
-          @if (project.contract_phase === 'completed') {
-            <p class="text-sm text-emerald-800">Obra concluída em {{ formatDate(project.construction_completed_at) }}</p>
+          @if (project.construction_request_notes) {
+            <p class="stf-prj-d-text">{{ project.construction_request_notes }}</p>
           }
-        </mat-card-content>
-      </mat-card>
+          @if (canSendConstructionQuote) {
+            <button mat-flat-button color="primary" type="button" class="stf-prj-d-btn" (click)="sendConstructionQuote()">
+              Enviar orçamento de obra
+            </button>
+          }
+          @if (project.construction_quote; as cq) {
+            <p class="stf-prj-d-text">
+              Orçamento obra: <strong>{{ formatMoney(cq.total_amount_mt) }}</strong> · {{ cq.status }}
+            </p>
+          }
+        }
+        @if (project.contract_phase === 'completed') {
+          <p class="stf-prj-d-text stf-prj-d-text--ok">
+            Obra concluída em {{ formatDate(project.construction_completed_at) }}
+          </p>
+        }
+      </section>
     }
 
     @if (isManagerView && constructionPayment) {
-      <mat-card class="!mb-6">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Pagamento — Fase de Obra</h2>
-          @if (constructionPayment.status === 'proof_submitted') {
-            <div class="border border-orange-200 bg-orange-50 rounded-lg p-4">
-              <p class="text-sm font-medium">Comprovativo submetido em {{ formatDate(constructionPayment.proof_uploaded_at) }}</p>
-              <div class="flex flex-wrap gap-2 mt-4">
-                <button mat-stroked-button type="button" (click)="downloadConstructionProof()">Descarregar comprovativo</button>
-                <button mat-flat-button color="primary" type="button" [disabled]="actionConstructionPayment" (click)="confirmConstructionPayment()">Confirmar pagamento</button>
-                <button mat-stroked-button type="button" [disabled]="actionConstructionPayment" (click)="rejectConstructionPayment()">Rejeitar</button>
-              </div>
+      <section class="stf-prj-d-panel stf-prj-d-panel--alert stf-prj-d-animate" style="--i: 5">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:banknotes" />
+          Pagamento — fase de obra
+        </h2>
+        @if (constructionPayment.status === 'proof_submitted') {
+          <div class="stf-prj-d-alert">
+            <p>Comprovativo submetido em {{ formatDate(constructionPayment.proof_uploaded_at) }}</p>
+            <div class="stf-prj-d-actions">
+              <button mat-stroked-button type="button" (click)="downloadConstructionProof()">Descarregar comprovativo</button>
+              <button mat-flat-button color="primary" type="button" [disabled]="actionConstructionPayment" (click)="confirmConstructionPayment()">
+                Confirmar pagamento
+              </button>
+              <button mat-stroked-button type="button" [disabled]="actionConstructionPayment" (click)="rejectConstructionPayment()">
+                Rejeitar
+              </button>
             </div>
-          } @else if (constructionPayment.status === 'confirmed' && canMarkConstructionCompleted) {
-            <p class="text-sm text-emerald-800 mb-3">Pagamento de obra confirmado.</p>
-            <button mat-flat-button color="primary" type="button" [disabled]="markingConstruction" (click)="markConstructionCompleted()">
-              Marcar obra concluída
-            </button>
-          } @else {
-            <p class="text-sm">{{ paymentStatus(constructionPayment.status) }} · {{ formatMoney(constructionPayment.amount) }}</p>
-          }
-        </mat-card-content>
-      </mat-card>
+          </div>
+        } @else if (constructionPayment.status === 'confirmed' && canMarkConstructionCompleted) {
+          <p class="stf-prj-d-text stf-prj-d-text--ok">Pagamento de obra confirmado.</p>
+          <button mat-flat-button color="primary" type="button" class="stf-prj-d-btn" [disabled]="markingConstruction" (click)="markConstructionCompleted()">
+            Marcar obra concluída
+          </button>
+        } @else {
+          <p class="stf-prj-d-text">{{ paymentStatus(constructionPayment.status) }} · {{ formatMoney(constructionPayment.amount) }}</p>
+        }
+      </section>
     }
 
     @if (isManagerView && payment) {
-      <mat-card class="!mb-6">
-        <mat-card-content class="!pt-4">
-          <h2 class="text-sm font-semibold text-slate-700 mb-3">Pagamento — Fase de Arquitectura</h2>
-          @if (payment.status === 'pending') {
-            <p class="text-sm text-slate-600">
-              Cliente ainda não submeteu comprovativo. Valor: <strong>{{ formatMoney(payment.amount) }}</strong>
-            </p>
-          } @else if (payment.status === 'proof_submitted') {
-            <div class="border border-orange-200 bg-orange-50 rounded-lg p-4">
-              <p class="text-sm font-medium">Comprovativo submetido em {{ formatDate(payment.proof_uploaded_at) }}</p>
-              @if (payment.proof_file_name) {
-                <p class="text-xs text-slate-600 mt-2">{{ payment.proof_file_name }}</p>
-              }
-              @if (payment.notes) {
-                <p class="text-sm mt-2">{{ payment.notes }}</p>
-              }
-              <div class="flex flex-wrap gap-2 mt-4">
-                <button mat-stroked-button type="button" (click)="downloadProof()">Descarregar comprovativo</button>
-                <button mat-flat-button color="primary" type="button" [disabled]="actionPayment" (click)="confirmPayment()">
-                  Confirmar pagamento
-                </button>
-                <button mat-stroked-button type="button" [disabled]="actionPayment" (click)="rejectPayment()">
-                  Rejeitar comprovativo
-                </button>
-              </div>
+      <section class="stf-prj-d-panel stf-prj-d-panel--alert stf-prj-d-animate" style="--i: 6">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:currency-dollar" />
+          Pagamento — fase de arquitectura
+        </h2>
+        @if (payment.status === 'pending') {
+          <p class="stf-prj-d-text">
+            Cliente ainda não submeteu comprovativo. Valor: <strong>{{ formatMoney(payment.amount) }}</strong>
+          </p>
+        } @else if (payment.status === 'proof_submitted') {
+          <div class="stf-prj-d-alert">
+            <p>Comprovativo submetido em {{ formatDate(payment.proof_uploaded_at) }}</p>
+            @if (payment.proof_file_name) {
+              <p class="stf-prj-d-text--muted">{{ payment.proof_file_name }}</p>
+            }
+            @if (payment.notes) {
+              <p class="stf-prj-d-text">{{ payment.notes }}</p>
+            }
+            <div class="stf-prj-d-actions">
+              <button mat-stroked-button type="button" (click)="downloadProof()">Descarregar comprovativo</button>
+              <button mat-flat-button color="primary" type="button" [disabled]="actionPayment" (click)="confirmPayment()">
+                Confirmar pagamento
+              </button>
+              <button mat-stroked-button type="button" [disabled]="actionPayment" (click)="rejectPayment()">
+                Rejeitar comprovativo
+              </button>
             </div>
-          } @else if (payment.status === 'confirmed') {
-            <p class="text-sm text-emerald-800">
-              Pagamento confirmado em {{ formatDate(payment.confirmed_at) }}
-              @if (payment.confirmed_by?.name) {
-                por {{ payment.confirmed_by?.name }}
-              }
-            </p>
-          } @else if (payment.status === 'rejected') {
-            <p class="text-sm text-red-800">
-              Comprovativo rejeitado. Motivo: {{ payment.rejected_reason }}
-            </p>
-          } @else {
-            <p class="text-sm">{{ paymentStatus(payment.status) }} · {{ formatMoney(payment.amount) }}</p>
-          }
-        </mat-card-content>
-      </mat-card>
+          </div>
+        } @else if (payment.status === 'confirmed') {
+          <p class="stf-prj-d-text stf-prj-d-text--ok">
+            Pagamento confirmado em {{ formatDate(payment.confirmed_at) }}
+            @if (payment.confirmed_by?.name) {
+              por {{ payment.confirmed_by?.name }}
+            }
+          </p>
+        } @else if (payment.status === 'rejected') {
+          <p class="stf-prj-d-text stf-prj-d-text--err">
+            Comprovativo rejeitado. Motivo: {{ payment.rejected_reason }}
+          </p>
+        } @else {
+          <p class="stf-prj-d-text">{{ paymentStatus(payment.status) }} · {{ formatMoney(payment.amount) }}</p>
+        }
+      </section>
     }
 
-    <mat-card class="!mb-6">
-      <mat-card-header class="!items-center">
-        <mat-card-title>Entregáveis</mat-card-title>
+    <section class="stf-prj-d-panel stf-prj-d-animate" style="--i: 7">
+      <header class="stf-prj-d-panel__head">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:document-arrow-up" />
+          Entregáveis
+        </h2>
         @if (isTechnicianView) {
-          <button mat-flat-button color="primary" type="button" class="!ml-auto" (click)="openSubmitDialog()">
-            <mat-icon>upload_file</mat-icon>
-            Submeter entregável
+          <button mat-stroked-button type="button" (click)="openSubmitDialog()">
+            <mat-icon svgIcon="heroicons_outline:plus" />
+            Novo
           </button>
         }
-      </mat-card-header>
-      <mat-card-content class="!pt-4">
-        @if (deliverablesLoading) {
-          <div class="flex justify-center py-8">
-            <mat-spinner diameter="32" />
-          </div>
-        } @else if (!deliverables.length) {
-          <p class="text-sm text-slate-500">Ainda não há entregáveis submetidos.</p>
-        } @else {
-          <ul class="deliverable-list space-y-4">
-            @for (d of deliverables; track d.id) {
-              <li class="deliverable-item border rounded-lg p-4">
-                <div class="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p class="font-semibold text-slate-900">{{ d.title || 'Sem título' }}</p>
-                    @if (d.description) {
-                      <p class="text-sm text-slate-600 mt-1">{{ d.description }}</p>
-                    }
-                    <p class="text-xs text-slate-500 mt-2">
-                      {{ d.file_name }} · {{ fileSize(d) }}
-                      @if (d.uploaded_by?.name) {
-                        · {{ d.uploaded_by?.name }}
-                      }
-                      · {{ formatDate(d.uploaded_at) }}
-                    </p>
-                  </div>
-                  <span class="deliverable-status" [ngClass]="statusClass(d)">{{ statusLabel(d) }}</span>
-                </div>
+      </header>
 
-                @if (isRejected(d) && d.rejection_reason) {
-                  <p class="rejection-reason mt-3 text-sm">{{ d.rejection_reason }}</p>
-                }
-
-                <div class="flex flex-wrap gap-2 mt-4">
-                  <button mat-stroked-button type="button" (click)="download(d)">
-                    <mat-icon>download</mat-icon>
-                    Descarregar
-                  </button>
-                  @if (canApprove(d)) {
-                    <button
-                      mat-flat-button
-                      color="primary"
-                      type="button"
-                      [disabled]="actionDeliverableId === d.id"
-                      (click)="approve(d)"
-                    >
-                      Aprovar
-                    </button>
-                    <button
-                      mat-stroked-button
-                      color="warn"
-                      type="button"
-                      [disabled]="actionDeliverableId === d.id"
-                      (click)="reject(d)"
-                    >
-                      Rejeitar
-                    </button>
+      @if (deliverablesLoading) {
+        <div class="stf-prj-d-loading" aria-busy="true">
+          <div></div><div></div>
+        </div>
+      } @else if (!deliverables.length) {
+        <div class="stf-prj-d-empty">
+          <mat-icon svgIcon="heroicons_outline:inbox" />
+          <p>Ainda não há entregáveis submetidos.</p>
+        </div>
+      } @else {
+        <ul class="stf-prj-d-deliverables">
+          @for (d of deliverables; track d.id) {
+            <li class="stf-prj-d-del" [class.stf-prj-d-del--review]="canApprove(d)">
+              <div class="stf-prj-d-del__top">
+                <div>
+                  <p class="stf-prj-d-del__title">{{ d.title || 'Sem título' }}</p>
+                  @if (d.description) {
+                    <p class="stf-prj-d-del__desc">{{ d.description }}</p>
                   }
+                  <p class="stf-prj-d-del__meta">
+                    {{ d.file_name }} · {{ fileSize(d) }}
+                    @if (d.uploaded_by?.name) {
+                      · {{ d.uploaded_by?.name }}
+                    }
+                    · {{ formatDate(d.uploaded_at) }}
+                  </p>
                 </div>
-              </li>
-            }
-          </ul>
-        }
-      </mat-card-content>
-    </mat-card>
+                <span class="stf-prj-d-del__status" [ngClass]="statusClass(d)">{{ statusLabel(d) }}</span>
+              </div>
+              @if (isRejected(d) && d.rejection_reason) {
+                <p class="stf-prj-d-del__reject">{{ d.rejection_reason }}</p>
+              }
+              <div class="stf-prj-d-actions">
+                <button mat-stroked-button type="button" (click)="download(d)">
+                  <mat-icon svgIcon="heroicons_outline:arrow-down-tray" />
+                  Descarregar
+                </button>
+                @if (canApprove(d)) {
+                  <button mat-flat-button color="primary" type="button" [disabled]="actionDeliverableId === d.id" (click)="approve(d)">
+                    Aprovar
+                  </button>
+                  <button mat-stroked-button type="button" class="stf-prj-d-btn--warn" [disabled]="actionDeliverableId === d.id" (click)="reject(d)">
+                    Rejeitar
+                  </button>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
 
     @if (isManagerView) {
-      <mat-card class="!mb-6">
-        @if (canMarkArchitectureDelivered) {
-          <mat-card-content class="!pt-4">
-            <button
-              mat-flat-button
-              color="primary"
-              type="button"
-              [disabled]="markingArchitecture"
-              (click)="markArchitectureDelivered()"
-            >
-              Marcar arquitectura entregue
-            </button>
-          </mat-card-content>
-        }
-      </mat-card>
+      @if (canMarkArchitectureDelivered) {
+        <section class="stf-prj-d-panel stf-prj-d-panel--highlight stf-prj-d-animate" style="--i: 8">
+          <h2 class="stf-prj-d-panel__title">
+            <mat-icon svgIcon="heroicons_outline:check-badge" />
+            Conclusão de arquitectura
+          </h2>
+          <p class="stf-prj-d-text">Com entregável aprovado, pode notificar o cliente que a fase de arquitectura está concluída.</p>
+          <button mat-flat-button color="primary" type="button" class="stf-prj-d-btn" [disabled]="markingArchitecture" (click)="markArchitectureDelivered()">
+            Marcar arquitectura entregue
+          </button>
+        </section>
+      }
 
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Atribuir técnico</mat-card-title>
-        </mat-card-header>
-        <mat-card-content class="!flex flex-wrap items-end gap-4 !pt-4">
-          <mat-form-field appearance="outline" class="w-full sm:w-80">
+      <section class="stf-prj-d-panel stf-prj-d-animate" style="--i: 9">
+        <h2 class="stf-prj-d-panel__title">
+          <mat-icon svgIcon="heroicons_outline:user-plus" />
+          Atribuir técnico
+        </h2>
+        <div class="stf-prj-d-assign">
+          <mat-form-field appearance="outline" class="stf-prj-d-assign__field" subscriptSizing="dynamic">
             <mat-label>Técnico / gestor</mat-label>
             <mat-select [(value)]="selectedTechnicianId">
               @for (t of technicians; track t.id) {
@@ -259,8 +284,8 @@
           <button mat-flat-button color="primary" type="button" [disabled]="assigning" (click)="assign()">
             Guardar atribuição
           </button>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </section>
     }
   }
 </div>

@@ -1,3 +1,63 @@
 :host {
   display: block;
 }
+
+.stf-req-hub {
+  width: 100%;
+}
+
+.stf-req-hub__hero {
+  margin-bottom: 1.25rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--app-primary) 18%, var(--app-border));
+  background: linear-gradient(145deg, var(--app-surface) 0%, #f0f4e8 55%, var(--app-surface) 100%);
+  box-shadow: var(--app-shadow-sm);
+}
+
+.stf-req-hub__eyebrow {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--app-primary);
+}
+
+.stf-req-hub__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--app-foreground);
+}
+
+.stf-req-hub__sub {
+  margin: 0.4rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--app-foreground-secondary);
+}
+
+.stf-req-hub__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+
+  a {
+    border-radius: 0.75rem !important;
+
+    mat-icon {
+      margin-right: 0.35rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+}
+
+.stf-req-hub__tab--active {
+  background: var(--app-primary-muted) !important;
+  border-color: color-mix(in srgb, var(--app-primary) 40%, var(--app-border)) !important;
+  color: var(--app-primary) !important;
+}
